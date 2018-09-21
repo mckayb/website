@@ -147,13 +147,3 @@
                 <div .page-header>
                     <h1 #ticker-search>Ticker Search
                     <input .form-control type="search">
-
-        <div .row>
-            <div .col-lg-12>
-                <div .ticker-results>
-                    <small>
-                        Your ticker results will appear here.
-                    <ul ##{tickerSearchResultId}>
-                        $forall comment <- allComments
-                            <li>#{commentMessage $ entityVal comment}
-                        

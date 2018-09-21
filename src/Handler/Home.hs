@@ -28,11 +28,9 @@ getHomeR = do
     let submission = Nothing :: Maybe FileForm
         handlerName = "getHomeR" :: Text
     allComments <- runDB $ getAllComments
-    allTickerSearchResults <- pure []
 
     defaultLayout $ do
         let (commentFormId, commentTextareaId, commentListId) = commentIds
-        let (tickerSearchFormResultId, tickerSearchInputResultId, tickerSearchResultId) = tickerSearchResultIds
         aDomId <- newIdent
         setTitle "Welcome To Yesod!"
         $(widgetFile "homepage")
@@ -45,11 +43,9 @@ postHomeR = do
             FormSuccess res -> Just res
             _ -> Nothing
     allComments <- runDB $ getAllComments
-    allTickerSearchResults <- pure []
 
     defaultLayout $ do
         let (commentFormId, commentTextareaId, commentListId) = commentIds
-        let (tickerSearchFormResultId, tickerSearchInputResultId, tickerSearchResultId) = tickerSearchResultIds
         aDomId <- newIdent
         setTitle "Welcome To Yesod!"
         $(widgetFile "homepage")
@@ -72,9 +68,6 @@ sampleForm = renderBootstrap3 BootstrapBasicForm $ FileForm
 
 commentIds :: (Text, Text, Text)
 commentIds = ("js-commentForm", "js-createCommentTextarea", "js-commentList")
-
-tickerSearchResultIds :: (Text, Text, Text)
-tickerSearchResultIds = ("js-tickerSearchForm", "js-tickerSearchInput", "js-tickerSearchList")
 
 getAllComments :: DB [Entity Comment]
 getAllComments = selectList [] [Asc CommentId]

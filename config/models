@@ -20,6 +20,3 @@ Post json
     title Text
     timestamp UTCTime
     userId UserId Maybe
-PostDetails json
-    postId PostId
-    postText Text

@@ -11,7 +11,7 @@
 / HomeR GET POST
 /blog BlogR GET
 /profile ProfileR GET
-/login LoginR GET
+/login LoginR GET POST
 
 -- Json Routes
 /comments CommentR POST
