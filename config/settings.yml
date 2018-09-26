@@ -32,7 +32,7 @@ database:
   user:     "_env:YESOD_PGUSER:homestead"
   password: "_env:YESOD_PGPASS:secret"
   host:     "_env:YESOD_PGHOST:localhost"
-  port:     "_env:YESOD_PGPORT:5432"
+  port:     "_env:YESOD_PGPORT:54320"
   # See config/test-settings.yml for an override during tests
   database: "_env:YESOD_PGDATABASE:corporate_clarity"
   poolsize: "_env:YESOD_PGPOOLSIZE:10"

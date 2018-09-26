@@ -20,8 +20,13 @@ postLoginR = do
     liftIO $ print result
     case result of
         FormSuccess (_, _) -> do
+            -- Create a JWT and store it in the session
+            -- To validate that we're logged in, we'll just
+            -- grab that from the session, decode and verify it
+            -- and be on our merry way
+            -- let jwt = encodeSigned signer claims
+            -- setSession "jwt" jwt
             redirect HomeR
-            -- renderLogin formWidget ["Was a success"]
         _ -> do
             renderLogin formWidget ["Form failed validation"]
 

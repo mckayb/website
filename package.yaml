@@ -1,6 +1,10 @@
 name:    corporate-clarity
 version: "0.0.0"
 
+default-extensions:
+- GeneralizedNewtypeDeriving
+- OverloadedStrings
+
 dependencies:
 
 # Due to a bug in GHC 8.0.1, we block its usage
@@ -45,6 +49,8 @@ dependencies:
 - case-insensitive
 - wai
 - foreign-store
+- bcrypt
+- jwt
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.
