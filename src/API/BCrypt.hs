@@ -7,7 +7,7 @@
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
 
-module API.Types where
+module API.BCrypt where
 
 import Crypto.BCrypt as Import hiding (hashPassword)
 import qualified Data.Text as T
