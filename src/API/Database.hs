@@ -12,6 +12,9 @@ module API.Database where
 
 import Import
 
+getUsers :: Handler [Entity User]
+getUsers = runDB $ selectList [] []
+
 getUserByEmail :: Text -> Handler (Maybe (Entity User))
 getUserByEmail email = runDB $ selectFirst [UserEmail ==. email] []
 
