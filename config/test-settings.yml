@@ -6,6 +6,6 @@ database:
   # something like:
   #
   #   database: "_env:PGDATABASE:corporate-clarity_test"
-  database: corporate_clarity_test
+  database: website_test
 
 auth-dummy-login: true

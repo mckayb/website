@@ -148,6 +148,7 @@ instance Yesod App where
         -> Bool       -- ^ Whether or not this is a "write" request.
         -> Handler AuthResult
     -- Routes not requiring authentication.
+    isAuthorized RegisterR _ = return Authorized
     isAuthorized LoginR _ = return Authorized
     isAuthorized HomeR _ = return Authorized
     isAuthorized BlogR _ = return Authorized

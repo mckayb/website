@@ -3,8 +3,6 @@
 
 User json
     email Text
-    verkey Text Maybe
-    verified Bool
     UniqueUserEmail email
     deriving Typeable Eq Show
 Password

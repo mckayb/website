@@ -62,6 +62,9 @@ data AppSettings = AppSettings
 
     , appAuthDummyLogin         :: Bool
     -- ^ Indicate if auth dummy login should be enabled.
+    , appJWTSecret              :: Text
+    , appJWTIssuer              :: Text
+    , appJWTExpiration          :: Integer
     }
 
 instance FromJSON AppSettings where
@@ -91,6 +94,10 @@ instance FromJSON AppSettings where
         appAnalytics              <- o .:? "analytics"
 
         appAuthDummyLogin         <- o .:? "auth-dummy-login"      .!= dev
+
+        appJWTSecret              <- o .:  "jwt-secret"
+        appJWTIssuer              <- o .:  "jwt-issuer"
+        appJWTExpiration          <- o .:  "jwt-expiration"
 
         return AppSettings {..}
 

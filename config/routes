@@ -10,6 +10,7 @@
 / HomeR GET POST
 /blog BlogR GET
 /login LoginR GET POST
+/register RegisterR GET POST
 
 -- Json Routes
 /user UserR GET POST

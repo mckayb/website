@@ -34,8 +34,13 @@ database:
   host:     "_env:YESOD_PGHOST:localhost"
   port:     "_env:YESOD_PGPORT:54320"
   # See config/test-settings.yml for an override during tests
-  database: "_env:YESOD_PGDATABASE:corporate_clarity"
+  database: "_env:YESOD_PGDATABASE:website"
   poolsize: "_env:YESOD_PGPOOLSIZE:10"
 
 copyright: Insert copyright statement here
+
+
+jwt-secret: Insert secret here
+jwt-issuer: Insert issuer here
+jwt-expiration: 86400
 #analytics: UA-YOURCODE
