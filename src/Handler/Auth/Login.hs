@@ -38,7 +38,7 @@ postLoginR = do
                 False -> renderLogin formWidget ["Incorrect username or password"]
                 True -> do
                   token <- generateNewToken
-                  setSession userSessionKey token
+                  setSession tokenSessionKey token
                   redirect HomeR
             Nothing -> do
               renderLogin formWidget ["Incorrect username or password"]

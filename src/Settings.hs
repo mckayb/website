@@ -155,5 +155,5 @@ combineScripts = combineScripts'
     (appSkipCombining compileTimeAppSettings)
     combineSettings
 
-userSessionKey :: Text
-userSessionKey = "USER_TOKEN"
+tokenSessionKey :: Text
+tokenSessionKey = "TOKEN_SESSION"

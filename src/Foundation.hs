@@ -227,7 +227,7 @@ isAuthenticated :: Handler AuthResult
 isAuthenticated = do
     yesod <- getYesod
     let jwtSecret = secret $ appJWTSecret (appSettings yesod)
-    mUserToken <- lookupSession userSessionKey
+    mUserToken <- lookupSession tokenSessionKey
     return $ case mUserToken of
         Just token -> case decodeAndVerifySignature jwtSecret token of
             Just _ -> Authorized
