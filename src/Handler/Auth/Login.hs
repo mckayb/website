@@ -8,13 +8,10 @@
 module Handler.Auth.Login where
 
 import Import hiding (exp)
-import Web.JWT
 import API.Database
 import API.BCrypt
+import API.JWT
 import Handler.Auth.Forms
-import Data.Time.Clock.POSIX
-import Database.Persist.Sql (fromSqlKey)
-import qualified Data.Text as T (pack)
 
 getLoginR :: Handler Html
 getLoginR = do
@@ -40,20 +37,8 @@ postLoginR = do
               case matches of
                 False -> renderLogin formWidget ["Incorrect username or password"]
                 True -> do
-                  -- Grab the JWT Secret and use that to sign a jwt
-                  -- TODO: Move this somewhere else. Feels wrong to create it here
-                  yesod <- getYesod
-                  let settings = appSettings yesod
-                  let jwtSecret = secret $ appJWTSecret settings
-                  let jwtIssuer = appJWTIssuer settings
-                  let jwtExp = appJWTExpiration settings
-                  timeToExpiration <- liftIO $ ((+ jwtExp) . round . (* 1000)) <$> getPOSIXTime
-                  let jwtClaims = def { iss = stringOrURI jwtIssuer
-                                      , exp = numericDate (fromInteger timeToExpiration)
-                                      }
-                  let jwt = encodeSigned HS256 jwtSecret jwtClaims
-                  let userIdText = T.pack . show $ fromSqlKey $ entityKey user'
-                  setSession userIdText jwt
+                  token <- generateNewToken
+                  setSession userSessionKey token
                   redirect HomeR
             Nothing -> do
               renderLogin formWidget ["Incorrect username or password"]

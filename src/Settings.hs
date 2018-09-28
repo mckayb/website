@@ -154,3 +154,6 @@ combineScripts :: Name -> [Route Static] -> Q Exp
 combineScripts = combineScripts'
     (appSkipCombining compileTimeAppSettings)
     combineSettings
+
+userSessionKey :: Text
+userSessionKey = "USER_TOKEN"

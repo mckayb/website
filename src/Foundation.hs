@@ -15,6 +15,7 @@ import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
+import Web.JWT
 import Control.Monad.Logger (LogSource)
 
 -- Used only when in "auth-dummy-login" setting is enabled.
@@ -224,11 +225,14 @@ instance YesodPersistRunner App where
 -- | Access function to determine if a user is logged in.
 isAuthenticated :: Handler AuthResult
 isAuthenticated = do
-    return Authorized
-    -- muid <- maybeAuthId
-    -- return $ case muid of
-        -- Nothing -> Unauthorized "You must login to access this page"
-        -- Just _ -> Authorized
+    yesod <- getYesod
+    let jwtSecret = secret $ appJWTSecret (appSettings yesod)
+    mUserToken <- lookupSession userSessionKey
+    return $ case mUserToken of
+        Just token -> case decodeAndVerifySignature jwtSecret token of
+            Just _ -> Authorized
+            Nothing -> Unauthorized "You must login to access this page"
+        Nothing -> Unauthorized "You must login to access this page"
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.
