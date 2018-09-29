@@ -8,9 +8,9 @@
 module Handler.Auth.Register where
 
 import Import
-import Handler.Auth.Forms
-import API.Database
-import API.BCrypt
+import Helpers.Forms
+import Helpers.Database
+import Helpers.BCrypt
 
 getRegisterR :: Handler Html
 getRegisterR = do

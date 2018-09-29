@@ -44,6 +44,7 @@ import Handler.Common
 import Handler.Home
 import Handler.Blog
 import Handler.User
+import Handler.Post
 import Handler.Auth.Login
 import Handler.Auth.Register
 

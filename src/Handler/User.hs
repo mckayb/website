@@ -1,7 +1,7 @@
 module Handler.User where
 
 import Import
-import API.Database
+import Helpers.Database
 
 getUserR :: Handler Value
 getUserR = do

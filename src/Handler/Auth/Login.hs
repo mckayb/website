@@ -1,17 +1,15 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies #-}
 
 module Handler.Auth.Login where
 
 import Import hiding (exp)
-import API.Database
-import API.BCrypt
-import API.JWT
-import Handler.Auth.Forms
+import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
+import Helpers.Database
+import Helpers.BCrypt
+import Helpers.JWT
+import Helpers.Forms
 
 getLoginR :: Handler Html
 getLoginR = do
@@ -48,7 +46,7 @@ postLoginR = do
       renderLogin formWidget ["Form failed validation"]
 
 loginForm :: Form (Text, Text)
-loginForm = renderDivs $ (,)
+loginForm = renderBootstrap3 BootstrapBasicForm $ (,)
   <$> areq emailField emailSettings Nothing
   <*> areq passwordField passwordSettings Nothing
   where

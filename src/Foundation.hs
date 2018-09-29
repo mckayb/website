@@ -160,6 +160,7 @@ instance Yesod App where
     -- Routes requiring authentication delegate to
     -- the isAuthenticated function
     isAuthorized UserR _ = isAuthenticated
+    isAuthorized PostR _ = isAuthenticated
 
     -- This function creates static content files in the static folder
     -- and names them based on a hash of their content. This allows

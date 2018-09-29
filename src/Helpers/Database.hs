@@ -8,7 +8,7 @@
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
 
-module API.Database where
+module Helpers.Database where
 
 import Import
 
