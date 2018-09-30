@@ -13,20 +13,19 @@ import Helpers.Forms
 getPostR :: Handler Html
 getPostR = do
   (formWidget, _) <- generateFormPost postForm
-  renderArticle formWidget Nothing []
+  renderPost formWidget Nothing []
 
 postPostR :: Handler Html
 postPostR = do
   ((result, formWidget), _) <- runFormPost postForm
   action <- lookupPostParam "action"
-  liftIO $ print result
   case (result, action) of
     (FormSuccess (Textarea markdown), Just "Preview") -> do
-      renderArticle formWidget (Just $ previewWidget markdown) ["Gonna need to preview this shit"]
-    (FormSuccess _, Just "Publish") -> do
-      renderArticle formWidget Nothing ["Gonna need to publish this shit"]
+      renderPost formWidget (Just $ previewWidget markdown) []
+    (FormSuccess (Textarea _), Just "Publish") -> do
+      renderPost formWidget Nothing []
     _ -> do
-      renderArticle formWidget Nothing ["Something went wrong"]
+      renderPost formWidget Nothing ["Something went wrong"]
 
 postForm :: Form (Textarea)
 postForm = renderBootstrap3 BootstrapBasicForm $
@@ -40,28 +39,56 @@ postForm = renderBootstrap3 BootstrapBasicForm $
       , fsAttrs = [("class", "form-control"), ("placeholder", "Content")]
       }
 
-previewWidget :: Text -> Text
-previewWidget txt = commonmarkToHtml [optSafe] [] txt
+previewWidget :: Text -> Widget
+previewWidget txt = do
+  let html = commonmarkToHtml [optSafe] [] txt
+   in [whamlet|
+        <div>
+          #{preEscapedToMarkup html}
+      |]
 
-renderArticle :: Widget -> Maybe Text -> [Text] -> Handler Html
-renderArticle widget mPrev errors =
+renderPost :: Widget -> Maybe Widget -> [Text] -> Handler Html
+renderPost widget mPrev errors =
   defaultLayout $ do
     setTitle "Publish New Post"
-    renderPanel $ [whamlet|
-      <div>
-        ^{formErrorWidget errors}
-      <div>
-        $maybe prev <- mPrev
+    renderPanel $ do
+      toWidget [lucius|
+        section.post h4 {
+          margin-bottom: 20px;
+        }
+
+        section.post .post__preview {
+          border: 2px solid lightgray;
+          padding: 20px;
+          border-radius: 5px;
+        }
+
+        section.post .post__label {
+          font-weight: bold;
+          margin-bottom: 5px;
+          max-width: 100%;
+          display: inline-block;
+        }
+      |]
+      [whamlet|
+        <section .post>
+          <h4>Create Post
+
+          $if not (null errors)
+            <div>
+              ^{formErrorWidget errors}
+            <br>
+
+          $maybe prev <- mPrev
+            <div .post__label>Preview
+            <div .post__preview>
+              ^{prev}
+            <br>
+
           <div>
-            <h3>Preview
-            <div .preview style="border: 2px solid lightgray; padding: 20px">
-                #{preEscapedToMarkup prev}
-
-        <br>
-
-        <form method="POST" action="@{PostR}">
-          ^{widget}
-          <input .btn.btn-default type="submit" name="action" value="Preview">
-          <input .btn.btn-primary type="submit" name="action" value="Publish">
-    |]
+            <form method="POST" action="@{PostR}">
+              ^{widget}
+              <input .btn.btn-default type="submit" name="action" value="Preview">
+              <input .btn.btn-primary type="submit" name="action" value="Publish">
+      |]
 
