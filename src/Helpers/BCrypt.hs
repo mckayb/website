@@ -16,10 +16,10 @@ import           Database.Persist.Sql
 import           Safe (fromJustNote)
 
 policy :: HashingPolicy
-policy = 
-  HashingPolicy { preferredHashCost = 12
-                , preferredHashAlgorithm = "$2a$"
-                }
+policy = HashingPolicy
+  { preferredHashCost = 12
+  , preferredHashAlgorithm = "$2a$"
+  }
 
 newtype BCrypt =
   BCrypt { unBCrypt ::  T.Text }
