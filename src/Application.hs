@@ -86,6 +86,7 @@ makeFoundation appSettings = do
 
   -- Perform database migration using our application's logging settings.
   runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
+  -- runLoggingT (runSqlPool (runMigrationUnsafe migrateAll) pool) logFunc
 
   -- Return the foundation
   return $ mkFoundation pool

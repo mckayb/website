@@ -26,3 +26,6 @@ insertUser user = runDB $ insert user
 
 insertPassword :: Password -> Handler (Key Password)
 insertPassword password = runDB $ insert password
+
+insertPost :: Post -> Handler (Key Post)
+insertPost post = runDB $ insert post

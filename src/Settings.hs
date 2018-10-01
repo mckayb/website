@@ -157,3 +157,6 @@ combineScripts = combineScripts'
 
 tokenSessionKey :: Text
 tokenSessionKey = "TOKEN_SESSION"
+
+userSessionKey :: Text
+userSessionKey = "USER_SESSION"
