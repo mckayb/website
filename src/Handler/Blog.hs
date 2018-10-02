@@ -24,13 +24,30 @@ getBlogR = do
         position:absolute;
         left:0;
         top:0;
-        background:linear-gradient(transparent 75%, white);
+        background:linear-gradient(transparent 130px, white);
       }
 
       .post {
         max-height: 200px;
         overflow: hidden;
+        margin-bottom: 21px;
+        cursor: pointer;
       }
+
+      .row--border {
+        border-bottom: 1px solid lightgray;
+        margin-left: 0;
+        margin-right: 0;
+        margin-bottom: 21px;
+        border-radius: 5px;
+      }
+    |]
+    toWidget [julius|
+      $(function() {
+        $(".post").click(function() {
+          document.location = "@{HomeR}?id=" + $(this).data("post")
+        })
+      })
     |]
     [whamlet|
       $if (null htmlPosts)
@@ -38,6 +55,8 @@ getBlogR = do
 
       $else
         $forall htmlPost <- htmlPosts
-          <article .post value=#{snd htmlPost}>
-            #{preEscapedToMarkup (fst htmlPost)}
+          <div .row .row--border>
+            <div .col-md-12>
+              <article .post data-post=#{snd htmlPost}>
+                #{preEscapedToMarkup (fst htmlPost)}
     |]
