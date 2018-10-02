@@ -21,6 +21,9 @@ getUserByEmail email = runDB $ selectFirst [UserEmail ==. email] []
 getPasswordByUser :: Entity User -> Handler (Maybe (Entity Password))
 getPasswordByUser user = runDB $ getBy $ UniquePasswordUser $ entityKey user
 
+getPosts :: Handler [Entity Post]
+getPosts = runDB $ selectList [] []
+
 insertUser :: User -> Handler (Key User)
 insertUser user = runDB $ insert user
 
