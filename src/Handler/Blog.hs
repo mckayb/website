@@ -12,8 +12,9 @@ import Database.Persist.Sql
 getBlogR :: Handler Html
 getBlogR = do
   posts <- getPosts
-  let markdownToHtml = (commonmarkToHtml [optSafe] []) . postContent . entityVal
-  let htmlPosts = fmap (\x -> (markdownToHtml x, (fromSqlKey . entityKey) x)) posts
+  let getHtml = (commonmarkToHtml [optSafe] []) . postContent . entityVal
+  let getId = fromSqlKey . entityKey
+  let getTimestamp = formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal
   defaultLayout $ do
     setTitle "Blog"
     toWidget [lucius|
@@ -34,7 +35,13 @@ getBlogR = do
         cursor: pointer;
       }
 
-      .row--border {
+      .post__time {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+      }
+
+      .row-bottom-border {
         border-bottom: 1px solid lightgray;
         margin-left: 0;
         margin-right: 0;
@@ -49,13 +56,14 @@ getBlogR = do
       })
     |]
     [whamlet|
-      $if (null htmlPosts)
+      $if (null posts)
         <div>Coming soon!
 
       $else
-        $forall htmlPost <- htmlPosts
-          <div .row .row--border>
+        $forall post <- posts
+          <div .row .row-bottom-border>
             <div .col-md-12>
-              <article .post data-post=#{snd htmlPost}>
-                #{preEscapedToMarkup (fst htmlPost)}
+              <article .post data-post=#{getId post}>
+                <span .post__time .text-muted>#{getTimestamp post}
+                #{preEscapedToMarkup (getHtml post)}
     |]
