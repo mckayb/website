@@ -35,10 +35,10 @@
                             <tt>config/routes
 
                         <li .list-group-item>
-                            We can link to other handlers, like the <a href="@{ProfileR}">Profile</a>.
+                            <!--We can link to other handlers, like the <a href="@{ProfileR}">Profile</a>. -->
                             Try it out as an anonymous user and see the access denied.
-                            Then, try to <a href="@{LoginR}">login</a> with the dummy authentication added
-                            while in development.
+                            <!-- Then, try to <a href="@{LoginR}">login</a> with the dummy authentication added
+                            while in development. -->
 
                         <li .list-group-item>
                             The HTML you are seeing now is actually composed by a number of <em>widgets</em>, #
