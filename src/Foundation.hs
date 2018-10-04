@@ -212,6 +212,7 @@ instance YesodBreadcrumbs App where
   breadcrumb LoginR = return ("Login", Just HomeR)
   breadcrumb RegisterR = return ("Register", Just HomeR)
 
+  breadcrumb (BlogPostR _) = return ("Post", Just BlogR)
   breadcrumb BlogR = return ("Blog", Just HomeR)
   breadcrumb _ = return ("home", Nothing)
 

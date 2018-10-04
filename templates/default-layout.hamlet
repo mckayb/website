@@ -29,7 +29,7 @@
         <li>
           <a href="@{fst bc}">#{snd bc}
 
-        <li .active>#{title}
+      <li .active>#{title}
 
   $maybe msg <- mmsg
     <div .alert.alert-info #message>#{msg}
