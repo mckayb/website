@@ -8,15 +8,18 @@ import Import
 import Helpers.Database
 import CMarkGFM
 import Database.Persist.Sql
+import qualified Data.Text as T
 
 getPostContent :: Entity Post -> Text
 getPostContent = (commonmarkToHtml [optSafe] []) . postContent . entityVal
+
+getTimestamp :: Entity Post -> Text
+getTimestamp = T.pack . formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal
 
 getBlogR :: Handler Html
 getBlogR = do
   posts <- getPosts
   let getId = fromSqlKey . entityKey
-  let getTimestamp = formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal
   defaultLayout $ do
     setTitle "Blog"
     toWidget [lucius|
@@ -37,7 +40,7 @@ getBlogR = do
         cursor: pointer;
       }
 
-      .post__time {
+      .post .post__time {
         position: absolute;
         top: 20px;
         right: 20px;
@@ -75,7 +78,16 @@ getBlogPostR a = do
   post <- getPost a
   case post of
     Just post' -> defaultLayout $ do
+      toWidget [lucius|
+        .blog-post .blog-post__time {
+          position: absolute;
+          top: 0;
+          right: 0;
+        }
+      |]
       [whamlet|
-        #{preEscapedToMarkup (getPostContent post')}
+        <article .blog-post>
+          <span .blog-post__time .text-muted>#{getTimestamp post'}
+          #{preEscapedToMarkup (getPostContent post')}
       |]
     Nothing -> notFound
