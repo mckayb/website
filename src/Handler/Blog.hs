@@ -9,10 +9,12 @@ import Helpers.Database
 import CMarkGFM
 import Database.Persist.Sql
 
+getPostContent :: Entity Post -> Text
+getPostContent = (commonmarkToHtml [optSafe] []) . postContent . entityVal
+
 getBlogR :: Handler Html
 getBlogR = do
   posts <- getPosts
-  let getHtml = (commonmarkToHtml [optSafe] []) . postContent . entityVal
   let getId = fromSqlKey . entityKey
   let getTimestamp = formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal
   defaultLayout $ do
@@ -51,7 +53,7 @@ getBlogR = do
     toWidget [julius|
       $(function() {
         $(".post").click(function() {
-          document.location = "@{HomeR}?id=" + $(this).data("post")
+          document.location = "@{BlogR}/" + $(this).data("post")
         })
       })
     |]
@@ -65,5 +67,15 @@ getBlogR = do
             <div .col-md-12>
               <article .post data-post=#{getId post}>
                 <span .post__time .text-muted>#{getTimestamp post}
-                #{preEscapedToMarkup (getHtml post)}
+                #{preEscapedToMarkup (getPostContent post)}
     |]
+
+getBlogPostR :: Int64 -> Handler Html
+getBlogPostR a = do
+  post <- getPost a
+  case post of
+    Just post' -> defaultLayout $ do
+      [whamlet|
+        #{preEscapedToMarkup (getPostContent post')}
+      |]
+    Nothing -> notFound

@@ -22,7 +22,6 @@ postPostR :: Handler Html
 postPostR = do
   ((result, formWidget), _) <- runFormPost postForm
   action <- lookupPostParam "action"
-  liftIO $ print result
   case (result, action) of
     (FormSuccess (Textarea markdown), Just "Preview") -> do
       renderPost formWidget (Just $ previewWidget markdown) []

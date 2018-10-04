@@ -11,6 +11,7 @@
 module Helpers.Database where
 
 import Import
+import Database.Persist.Sql
 
 getUsers :: Handler [Entity User]
 getUsers = runDB $ selectList [] []
@@ -23,6 +24,9 @@ getPasswordByUser user = runDB $ getBy $ UniquePasswordUser $ entityKey user
 
 getPosts :: Handler [Entity Post]
 getPosts = runDB $ selectList [] []
+
+getPost :: Int64 -> Handler (Maybe (Entity Post))
+getPost postId = runDB $ selectFirst [PostId ==. (toSqlKey postId)] []
 
 insertUser :: User -> Handler (Key User)
 insertUser user = runDB $ insert user

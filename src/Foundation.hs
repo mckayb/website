@@ -153,6 +153,7 @@ instance Yesod App where
   isAuthorized LoginR _ = return Authorized
   isAuthorized HomeR _ = return Authorized
   isAuthorized BlogR _ = return Authorized
+  isAuthorized (BlogPostR _) _ = return Authorized
   isAuthorized FaviconR _ = return Authorized
   isAuthorized RobotsR _ = return Authorized
   isAuthorized (StaticR _) _ = return Authorized
@@ -207,7 +208,10 @@ instance YesodBreadcrumbs App where
     :: Route App  -- ^ The route the user is visiting currently.
     -> Handler (Text, Maybe (Route App))
   breadcrumb HomeR = return ("Home", Nothing)
-  -- breadcrumb (AuthR _) = return ("Login", Just HomeR)
+
+  breadcrumb LoginR = return ("Login", Just HomeR)
+  breadcrumb RegisterR = return ("Register", Just HomeR)
+
   breadcrumb BlogR = return ("Blog", Just HomeR)
   breadcrumb _ = return ("home", Nothing)
 
