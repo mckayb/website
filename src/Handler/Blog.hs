@@ -9,6 +9,6 @@ import Import
 
 getBlogR :: Handler Html
 getBlogR = do
-    defaultLayout $ do
-        setTitle "Blog"
-        $(widgetFile "blog")
+  defaultLayout $ do
+    setTitle "Blog"
+    $(widgetFile "blog")

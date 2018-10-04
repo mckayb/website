@@ -7,7 +7,7 @@
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
 
-module API.BCrypt where
+module Helpers.BCrypt where
 
 import Crypto.BCrypt as Import hiding (hashPassword)
 import qualified Data.Text as T
@@ -16,10 +16,10 @@ import           Database.Persist.Sql
 import           Safe (fromJustNote)
 
 policy :: HashingPolicy
-policy = 
-  HashingPolicy { preferredHashCost = 12
-                , preferredHashAlgorithm = "$2a$"
-                }
+policy = HashingPolicy
+  { preferredHashCost = 12
+  , preferredHashAlgorithm = "$2a$"
+  }
 
 newtype BCrypt =
   BCrypt { unBCrypt ::  T.Text }

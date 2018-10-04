@@ -5,7 +5,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module Handler.Auth.Forms where
+module Helpers.Forms where
 
 import Import  
 

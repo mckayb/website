@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module API.JWT where
+module Helpers.JWT where
 
 import Import hiding (exp)
 import Data.Time.Clock.POSIX

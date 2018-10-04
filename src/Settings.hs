@@ -68,38 +68,38 @@ data AppSettings = AppSettings
     }
 
 instance FromJSON AppSettings where
-    parseJSON = withObject "AppSettings" $ \o -> do
-        let defaultDev =
+  parseJSON = withObject "AppSettings" $ \o -> do
+    let defaultDev =
 #ifdef DEVELOPMENT
-                True
+          True
 #else
-                False
+          False
 #endif
-        appStaticDir              <- o .: "static-dir"
-        appDatabaseConf           <- o .: "database"
-        appRoot                   <- o .:? "approot"
-        appHost                   <- fromString <$> o .: "host"
-        appPort                   <- o .: "port"
-        appIpFromHeader           <- o .: "ip-from-header"
+    appStaticDir              <- o .: "static-dir"
+    appDatabaseConf           <- o .: "database"
+    appRoot                   <- o .:? "approot"
+    appHost                   <- fromString <$> o .: "host"
+    appPort                   <- o .: "port"
+    appIpFromHeader           <- o .: "ip-from-header"
 
-        dev                       <- o .:? "development"      .!= defaultDev
+    dev                       <- o .:? "development"      .!= defaultDev
 
-        appDetailedRequestLogging <- o .:? "detailed-logging" .!= dev
-        appShouldLogAll           <- o .:? "should-log-all"   .!= dev
-        appReloadTemplates        <- o .:? "reload-templates" .!= dev
-        appMutableStatic          <- o .:? "mutable-static"   .!= dev
-        appSkipCombining          <- o .:? "skip-combining"   .!= dev
+    appDetailedRequestLogging <- o .:? "detailed-logging" .!= dev
+    appShouldLogAll           <- o .:? "should-log-all"   .!= dev
+    appReloadTemplates        <- o .:? "reload-templates" .!= dev
+    appMutableStatic          <- o .:? "mutable-static"   .!= dev
+    appSkipCombining          <- o .:? "skip-combining"   .!= dev
 
-        appCopyright              <- o .:  "copyright"
-        appAnalytics              <- o .:? "analytics"
+    appCopyright              <- o .:  "copyright"
+    appAnalytics              <- o .:? "analytics"
 
-        appAuthDummyLogin         <- o .:? "auth-dummy-login"      .!= dev
+    appAuthDummyLogin         <- o .:? "auth-dummy-login"      .!= dev
 
-        appJWTSecret              <- o .:  "jwt-secret"
-        appJWTIssuer              <- o .:  "jwt-issuer"
-        appJWTExpiration          <- o .:  "jwt-expiration"
+    appJWTSecret              <- o .:  "jwt-secret"
+    appJWTIssuer              <- o .:  "jwt-issuer"
+    appJWTExpiration          <- o .:  "jwt-expiration"
 
-        return AppSettings {..}
+    return AppSettings {..}
 
 -- | Settings for 'widgetFile', such as which template languages to support and
 -- default Hamlet settings.
@@ -135,9 +135,9 @@ configSettingsYmlValue = either Exception.throw id
 -- | A version of @AppSettings@ parsed at compile time from @config/settings.yml@.
 compileTimeAppSettings :: AppSettings
 compileTimeAppSettings =
-    case fromJSON $ applyEnvValue False mempty configSettingsYmlValue of
-        Error e -> error e
-        Success settings -> settings
+  case fromJSON $ applyEnvValue False mempty configSettingsYmlValue of
+    Error e -> error e
+    Success settings -> settings
 
 -- The following two functions can be used to combine multiple CSS or JS files
 -- at compile time to decrease the number of http requests.
@@ -147,13 +147,13 @@ compileTimeAppSettings =
 
 combineStylesheets :: Name -> [Route Static] -> Q Exp
 combineStylesheets = combineStylesheets'
-    (appSkipCombining compileTimeAppSettings)
-    combineSettings
+  (appSkipCombining compileTimeAppSettings)
+  combineSettings
 
 combineScripts :: Name -> [Route Static] -> Q Exp
 combineScripts = combineScripts'
-    (appSkipCombining compileTimeAppSettings)
-    combineSettings
+  (appSkipCombining compileTimeAppSettings)
+  combineSettings
 
 tokenSessionKey :: Text
 tokenSessionKey = "TOKEN_SESSION"
