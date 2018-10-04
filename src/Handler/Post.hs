@@ -6,9 +6,12 @@ module Handler.Post where
 
 import Import
 import CMarkGFM
-import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
-
 import Helpers.Forms
+import Helpers.Database
+
+import Data.Aeson (decode)
+import Data.String.Conversions (cs)
+import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 
 getPostR :: Handler Html
 getPostR = do
@@ -22,8 +25,16 @@ postPostR = do
   case (result, action) of
     (FormSuccess (Textarea markdown), Just "Preview") -> do
       renderPost formWidget (Just $ previewWidget markdown) []
-    (FormSuccess (Textarea _), Just "Publish") -> do
-      renderPost formWidget Nothing []
+    (FormSuccess (Textarea markdown), Just "Publish") -> do
+      mUserJson <- lookupSession userSessionKey
+      let mUser = decode =<< cs <$> mUserJson :: Maybe (Entity User)
+      case mUser of
+        Just u -> do
+          time <- liftIO getCurrentTime
+          _ <- insertPost $ Post markdown time (entityKey u)
+          renderPost formWidget Nothing []
+        Nothing -> do
+          renderPost formWidget Nothing ["Something went wrong."]
     _ -> do
       renderPost formWidget Nothing ["Something went wrong"]
 

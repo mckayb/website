@@ -6,6 +6,8 @@ module Handler.Auth.Login where
 
 import Import hiding (exp)
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
+import Data.Aeson (encode)
+import Data.String.Conversions (cs)
 import Helpers.Database
 import Helpers.BCrypt
 import Helpers.JWT
@@ -37,6 +39,7 @@ postLoginR = do
                 True -> do
                   token <- generateNewToken
                   setSession tokenSessionKey token
+                  setSession userSessionKey $ (cs . encode) user'
                   redirect HomeR
             Nothing -> do
               renderLogin formWidget ["Incorrect username or password"]

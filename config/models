@@ -19,6 +19,6 @@ Comment json -- Adding "json" causes ToJSON and FromJSON instances to be derived
     deriving Eq
     deriving Show
 Post json
-    title Text
+    content Text
     timestamp UTCTime
-    userId UserId Maybe
+    userId UserId
