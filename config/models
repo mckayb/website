@@ -16,9 +16,9 @@ EmailVerification
 Comment json -- Adding "json" causes ToJSON and FromJSON instances to be derived.
     message Text
     userId UserId Maybe
-    deriving Eq
-    deriving Show
+    deriving Eq Show
 Post json
     content Text
     timestamp UTCTime
     userId UserId
+    deriving Eq Show
