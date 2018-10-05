@@ -20,10 +20,9 @@ getRegisterR = do
 postRegisterR :: Handler Html
 postRegisterR = do
   ((result, formWidget), _) <- runFormPost registerForm
-  liftIO $ print result
   case result of
     FormSuccess (email, password) -> do
-      uid <- insertUser (User email)
+      uid <- insertUser (User email Nothing)
       password' <- liftIO $ Password uid <$> hashPassword password
       _ <- insertPassword password'
       redirect LoginR

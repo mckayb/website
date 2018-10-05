@@ -55,8 +55,6 @@ data AppSettings = AppSettings
     -- ^ Perform no stylesheet/script combining
 
     -- Example app-specific configuration values.
-    , appCopyright              :: Text
-    -- ^ Copyright text to appear in the footer of the page
     , appAnalytics              :: Maybe Text
     -- ^ Google Analytics code
 
@@ -90,7 +88,6 @@ instance FromJSON AppSettings where
     appMutableStatic          <- o .:? "mutable-static"   .!= dev
     appSkipCombining          <- o .:? "skip-combining"   .!= dev
 
-    appCopyright              <- o .:  "copyright"
     appAnalytics              <- o .:? "analytics"
 
     appAuthDummyLogin         <- o .:? "auth-dummy-login"      .!= dev
