@@ -7,7 +7,6 @@ module Handler.Post where
 import Import
 import CMarkGFM
 import Helpers.Forms
-import Helpers.Database
 
 import Data.Aeson (decode)
 import Data.String.Conversions (cs)
@@ -31,12 +30,12 @@ postPostR = do
       case mUser of
         Just u -> do
           time <- liftIO getCurrentTime
-          _ <- insertPost $ Post markdown time (entityKey u)
+          _ <- runDB $ insertEntity $ Post markdown time (entityKey u)
           renderPost formWidget Nothing []
         Nothing -> do
-          renderPost formWidget Nothing ["Something went wrong."]
+          renderPost formWidget Nothing [(Danger, "Something went wrong.")]
     _ -> do
-      renderPost formWidget Nothing ["Something went wrong"]
+      renderPost formWidget Nothing [(Danger, "Something went wrong")]
 
 postForm :: Form (Textarea)
 postForm = renderBootstrap3 BootstrapBasicForm $
@@ -58,8 +57,8 @@ previewWidget txt = do
           #{preEscapedToMarkup html}
       |]
 
-renderPost :: Widget -> Maybe Widget -> [Text] -> Handler Html
-renderPost widget mPrev errors =
+renderPost :: Widget -> Maybe Widget -> [FormReaction] -> Handler Html
+renderPost widget mPrev reactions =
   defaultLayout $ do
     setTitle "Publish New Post"
     renderPanel $ do
@@ -85,9 +84,9 @@ renderPost widget mPrev errors =
         <section .post>
           <h4>Create Post
 
-          $if not (null errors)
+          $if not (null reactions)
             <div>
-              ^{formErrorWidget errors}
+              ^{formReactionWidget reactions}
             <br>
 
           $maybe prev <- mPrev

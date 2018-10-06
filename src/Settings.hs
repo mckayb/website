@@ -157,3 +157,6 @@ tokenSessionKey = "TOKEN_SESSION"
 
 userSessionKey :: Text
 userSessionKey = "USER_SESSION"
+
+roleSessionKey :: Text
+roleSessionKey = "ROLE_SESSION"

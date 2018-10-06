@@ -10,7 +10,6 @@ import Data.Aeson (encode)
 import Data.String.Conversions (cs)
 import Helpers.Database
 import Helpers.BCrypt
-import Helpers.JWT
 import Helpers.Forms
 
 getLoginR :: Handler Html
@@ -35,18 +34,22 @@ postLoginR = do
               -- Validate that the password we have matches the password they gave
               let matches = passwordMatches (passwordHash password') password
               case matches of
-                False -> renderLogin formWidget ["Incorrect username or password"]
+                False -> renderLogin formWidget [(Danger, "Incorrect username or password")]
                 True -> do
-                  token <- generateNewToken
-                  setSession tokenSessionKey token
-                  setSession userSessionKey $ (cs . encode) user'
-                  redirect HomeR
+                  -- Grab the user's role so that we can do admin checks later
+                  mRole <- getRoleByUser user'
+                  case mRole of
+                    Just role -> do
+                      setSession userSessionKey $ (cs . encode) user'
+                      setSession roleSessionKey $ (cs . encode) role
+                      redirect HomeR
+                    Nothing -> renderLogin formWidget [(Danger, "Something went wrong...")]
             Nothing -> do
-              renderLogin formWidget ["Incorrect username or password"]
+              renderLogin formWidget [(Danger, "Incorrect username or password")]
         Nothing -> do
-          renderLogin formWidget ["Incorrect username or password"]
+          renderLogin formWidget [(Danger, "Incorrect username or password")]
     _ -> do
-      renderLogin formWidget ["Form failed validation"]
+      renderLogin formWidget [(Danger, "Form failed validation")]
 
 loginForm :: Form (Text, Text)
 loginForm = renderBootstrap3 BootstrapBasicForm $ (,)
@@ -68,13 +71,13 @@ loginForm = renderBootstrap3 BootstrapBasicForm $ (,)
       , fsAttrs = [("class", "form-control"), ("placeholder", "Password")]
       }
 
-renderLogin :: Widget -> [Text] -> Handler Html
-renderLogin widget errors =
+renderLogin :: Widget -> [FormReaction] -> Handler Html
+renderLogin widget reactions =
   defaultLayout $ do
     setTitle "Login"
     renderPanel $ [whamlet|
       <div>
-        ^{formErrorWidget errors}
+        ^{formReactionWidget reactions}
       <div>
         <form method="POST" action="@{LoginR}">
           ^{widget}

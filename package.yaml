@@ -50,7 +50,6 @@ dependencies:
 - wai
 - foreign-store
 - bcrypt
-- jwt
 - cmark-gfm
 - string-conversions
 

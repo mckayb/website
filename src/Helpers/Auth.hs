@@ -18,8 +18,14 @@ isAuthenticatedBasic = do
 isAuthenticatedAdmin :: HandlerFor site AuthResult
 isAuthenticatedAdmin = do
   mUserJson <- lookupSession userSessionKey
+  mRoleJson <- lookupSession roleSessionKey
   let mUser = decode =<< cs <$> mUserJson :: Maybe (Entity User)
-  return $ case mUser of
-    Just user -> do
-      Authorized
+  let mRole = decode =<< cs <$> mRoleJson :: Maybe Role
+  return $ case validateAdmin <$> mUser <*> mRole of
+    Just u -> u
     Nothing -> Unauthorized "You are not allowed to access this page"
+  where
+    validateAdmin _ role =
+      if roleName role == "Admin"
+        then Authorized
+        else Unauthorized "You are not allowed to access this page"

@@ -3,9 +3,11 @@
 
 Role json
   name Text
+  UniqueRoleName name
+  deriving Eq Show
 User json
   email Text
-  role RoleId Maybe
+  roleId RoleId
   UniqueUserEmail email
   deriving Typeable Eq Show
 Password

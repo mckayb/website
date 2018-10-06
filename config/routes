@@ -16,6 +16,7 @@
 /register     RegisterR GET POST
 
 /post         PostR     GET POST
+/role         RoleR     GET POST
 
 -- Json Routes
 /user         UserR     GET POST
