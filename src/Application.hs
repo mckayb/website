@@ -22,7 +22,9 @@ module Application
 
 import Control.Monad.Logger                 (liftLoc, runLoggingT)
 import Database.Persist.Postgresql          (createPostgresqlPool, pgConnStr,
-                                             pgPoolSize, runSqlPool)
+                                             pgPoolSize, runSqlPool
+                                             -- , runMigrationUnsafe
+                                            )
 import Import
 import Language.Haskell.TH.Syntax           (qLocation)
 import Network.HTTP.Client.TLS              (getGlobalManager)
@@ -45,6 +47,7 @@ import Handler.Home
 import Handler.Blog
 import Handler.User
 import Handler.Post
+import Handler.Role
 import Handler.Auth.Login
 import Handler.Auth.Register
 

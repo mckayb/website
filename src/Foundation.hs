@@ -15,7 +15,6 @@ import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
-import Web.JWT
 import Control.Monad.Logger (LogSource)
 
 -- Used only when in "auth-dummy-login" setting is enabled.
@@ -24,6 +23,7 @@ import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
+import Helpers.Auth
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -160,8 +160,9 @@ instance Yesod App where
 
   -- Routes requiring authentication delegate to
   -- the isAuthenticated function
-  isAuthorized UserR _ = isAuthenticated
-  isAuthorized PostR _ = isAuthenticated
+  isAuthorized UserR _ = isAuthenticatedAdmin
+  isAuthorized PostR _ = isAuthenticatedAdmin
+  isAuthorized RoleR _ = isAuthenticatedAdmin
 
   -- This function creates static content files in the static folder
   -- and names them based on a hash of their content. This allows
@@ -227,18 +228,6 @@ instance YesodPersist App where
 instance YesodPersistRunner App where
   getDBRunner :: Handler (DBRunner App, Handler ())
   getDBRunner = defaultGetDBRunner appConnPool
-
--- | Access function to determine if a user is logged in.
-isAuthenticated :: Handler AuthResult
-isAuthenticated = do
-  yesod <- getYesod
-  let jwtSecret = secret $ appJWTSecret (appSettings yesod)
-  mUserToken <- lookupSession tokenSessionKey
-  return $ case mUserToken of
-    Just token -> case decodeAndVerifySignature jwtSecret token of
-      Just _ -> Authorized
-      Nothing -> Unauthorized "You must login to access this page"
-    Nothing -> Unauthorized "You must login to access this page"
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.

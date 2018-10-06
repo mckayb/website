@@ -11,6 +11,7 @@ import Import
 import Helpers.Forms
 import Helpers.Database
 import Helpers.BCrypt
+import Database.Persist.Sql
 
 getRegisterR :: Handler Html
 getRegisterR = do
@@ -20,15 +21,14 @@ getRegisterR = do
 postRegisterR :: Handler Html
 postRegisterR = do
   ((result, formWidget), _) <- runFormPost registerForm
-  liftIO $ print result
   case result of
     FormSuccess (email, password) -> do
-      uid <- insertUser (User email)
+      uid <- insertUser (User email (toSqlKey 2))
       password' <- liftIO $ Password uid <$> hashPassword password
       _ <- insertPassword password'
       redirect LoginR
     _ -> do
-      renderRegister formWidget ["Form failed validation"]
+      renderRegister formWidget [(Danger, "Form failed validation")]
 
 registerForm :: Form (Text, Text)
 registerForm = renderDivs $ (,)
@@ -50,13 +50,13 @@ registerForm = renderDivs $ (,)
       , fsAttrs = [("class", "form-control"), ("placeholder", "Password")]
       }
 
-renderRegister :: Widget -> [Text] -> Handler Html
-renderRegister widget errors =
+renderRegister :: Widget -> [FormReaction] -> Handler Html
+renderRegister widget reactions =
   defaultLayout $ do
     setTitle "Login"
     renderPanel $ [whamlet|
       <div>
-        ^{formErrorWidget errors}
+        ^{formReactionWidget reactions}
       <div>
         <form method="POST" action="@{RegisterR}">
           ^{widget}
