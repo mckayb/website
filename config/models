@@ -18,9 +18,11 @@ EmailVerification
   userId UserId
   verkey Text Maybe
   UniqueEmailVerificationUser userId
-Comment json -- Adding "json" causes ToJSON and FromJSON instances to be derived.
+Comment json
   message Text
-  userId UserId Maybe
+  userId UserId
+  postId PostId 
+  parentId CommentId Maybe
   deriving Eq Show
 Post json
   content Text

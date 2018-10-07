@@ -77,17 +77,26 @@ getBlogPostR :: Int64 -> Handler Html
 getBlogPostR a = do
   post <- getPost a
   case post of
-    Just post' -> defaultLayout $ do
-      toWidget [lucius|
-        .blog-post .blog-post__time {
-          position: absolute;
-          top: 0;
-          right: 0;
-        }
-      |]
-      [whamlet|
-        <article .blog-post>
-          <span .blog-post__time .text-muted>#{getTimestamp post'}
-          #{preEscapedToMarkup (getPostContent post')}
-      |]
+    Just post' -> do
+      commentRoots <- getCommentsForPost post'
+      liftIO $ print commentRoots
+      defaultLayout $ do
+        toWidget [lucius|
+          .blog-post .blog-post__time {
+            position: absolute;
+            top: 0;
+            right: 0;
+          }
+        |]
+        [whamlet|
+          <article .blog-post>
+            <span .blog-post__time .text-muted>#{getTimestamp post'}
+            #{preEscapedToMarkup (getPostContent post')}
+
+            <hr>
+
+            <div .blog-post__comments>
+              $forall commentRoot <- commentRoots
+                #{(commentMessage . entityVal) commentRoot}
+        |]
     Nothing -> notFound

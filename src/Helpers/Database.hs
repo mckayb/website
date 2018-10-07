@@ -1,12 +1,4 @@
-{-# LANGUAGE FlexibleContexts           #-}
-{-# LANGUAGE FlexibleInstances          #-}
-{-# LANGUAGE GADTs                      #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses      #-}
-{-# LANGUAGE NoImplicitPrelude          #-}
-{-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE TemplateHaskell            #-}
-{-# LANGUAGE TypeFamilies               #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module Helpers.Database where
 
@@ -27,6 +19,9 @@ getPosts = runDB $ selectList [] []
 
 getPost :: Int64 -> Handler (Maybe (Entity Post))
 getPost postId = runDB $ selectFirst [PostId ==. (toSqlKey postId)] []
+
+getCommentsForPost :: Entity Post -> Handler [Entity Comment]
+getCommentsForPost post = runDB $ selectList [CommentPostId ==. entityKey post] []
 
 getRoleByUser :: Entity User -> Handler (Maybe Role)
 getRoleByUser u = runDB $ get $ (userRoleId . entityVal) u
