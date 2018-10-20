@@ -4,17 +4,17 @@
 
 module Handler.Blog where
 
-import Import
+import Import hiding (insert, unionWithKey, singleton)
 import Helpers.Database
-import CMarkGFM
-import Database.Persist.Sql
-import qualified Data.Text as T
+import CMarkGFM (commonmarkToHtml, optSafe)
+import Database.Persist.Sql (fromSqlKey)
+import qualified Data.Text as Text
 
 getPostContent :: Entity Post -> Text
 getPostContent = (commonmarkToHtml [optSafe] []) . postContent . entityVal
 
 getTimestamp :: Entity Post -> Text
-getTimestamp = T.pack . formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal
+getTimestamp = Text.pack . formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal
 
 getBlogR :: Handler Html
 getBlogR = do
@@ -73,13 +73,52 @@ getBlogR = do
                 #{preEscapedToMarkup (getPostContent post)}
     |]
 
+data Tree a = Nil | Node { treeLabel :: a, treeChildren :: [Tree a]}
+  deriving (Eq, Show)
+
+commentsToTree :: [Entity Comment] -> [Tree (Entity Comment)]
+commentsToTree = foldl' accTree []
+  where
+    recurseChildren :: [Tree (Entity Comment)] -> Key Comment -> Entity Comment -> [Tree (Entity Comment)]
+    recurseChildren children parentKey comment = fmap (\t ->
+      if (entityKey . treeLabel) t == parentKey
+        then Node (treeLabel t) (treeChildren t ++ [Node comment []])
+        else Node (treeLabel t) (recurseChildren (treeChildren t) parentKey comment)) children
+
+    accTree :: [Tree (Entity Comment)] -> Entity Comment -> [Tree (Entity Comment)]
+    accTree acc comment =
+      case (commentParentId . entityVal) comment of
+        Just parentKey -> recurseChildren acc parentKey comment
+        Nothing -> acc ++ [Node comment []]
+
+commentTreeWidget :: [Tree (Entity Comment)] -> Widget
+commentTreeWidget comments = do
+  toWidget [lucius|
+    .blog-post ul.blog-post__comment {
+      border-left: 1px solid gray;
+      list-style: none;
+      margin-bottom: 25px;
+      margin-top: 25px;
+    }
+  |]
+  [whamlet|
+    $forall Node comment commentChildren <- comments
+      <ul .blog-post__comment>
+        <li>
+          #{entityCommentMessage comment}
+          ^{commentTreeWidget commentChildren}
+          <div>
+            <button>Reply
+  |]
+  where
+    entityCommentMessage = commentMessage . entityVal
+
 getBlogPostR :: Int64 -> Handler Html
 getBlogPostR a = do
   post <- getPost a
   case post of
     Just post' -> do
-      commentRoots <- getCommentsForPost post'
-      liftIO $ print commentRoots
+      comments <- commentsToTree <$> getCommentsForPost post'
       defaultLayout $ do
         toWidget [lucius|
           .blog-post .blog-post__time {
@@ -96,7 +135,6 @@ getBlogPostR a = do
             <hr>
 
             <div .blog-post__comments>
-              $forall commentRoot <- commentRoots
-                #{(commentMessage . entityVal) commentRoot}
+              ^{commentTreeWidget comments}
         |]
     Nothing -> notFound
