@@ -153,16 +153,19 @@ instance Yesod App where
   isAuthorized LoginR _ = return Authorized
   isAuthorized HomeR _ = return Authorized
   isAuthorized BlogR _ = return Authorized
-  isAuthorized (BlogPostR _) _ = return Authorized
+  isAuthorized (BlogPostR _) False = return Authorized
   isAuthorized FaviconR _ = return Authorized
   isAuthorized RobotsR _ = return Authorized
   isAuthorized (StaticR _) _ = return Authorized
+  isAuthorized (BlogPostCommentR _ _) False = return Authorized
 
   -- Routes requiring authentication delegate to
   -- the isAuthenticated function
   isAuthorized UserR _ = isAuthenticatedAdmin
   isAuthorized PostR _ = isAuthenticatedAdmin
   isAuthorized RoleR _ = isAuthenticatedAdmin
+  isAuthorized (BlogPostR _) True = isAuthenticatedBasic
+  isAuthorized (BlogPostCommentR _ _) True = isAuthenticatedBasic
 
   -- This function creates static content files in the static folder
   -- and names them based on a hash of their content. This allows

@@ -4,10 +4,14 @@
 
 module Handler.Blog where
 
-import Import hiding (insert, unionWithKey, singleton)
+import Import
 import Helpers.Database
+import Helpers.Forms
 import CMarkGFM (commonmarkToHtml, optSafe)
 import Database.Persist.Sql (fromSqlKey)
+import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
+import Data.String.Conversions
+import Data.Aeson
 import qualified Data.Text as Text
 
 getPostContent :: Entity Post -> Text
@@ -46,7 +50,7 @@ getBlogR = do
         right: 20px;
       }
 
-      .row-bottom-border {
+      .row--bottom-border {
         border-bottom: 1px solid lightgray;
         margin-left: 0;
         margin-right: 0;
@@ -66,7 +70,7 @@ getBlogR = do
 
       $else
         $forall post <- posts
-          <div .row .row-bottom-border>
+          <div .row .row--bottom-border>
             <div .col-md-12>
               <article .post data-post=#{getId post}>
                 <span .post__time .text-muted>#{getTimestamp post}
@@ -77,7 +81,7 @@ data Tree a = Nil | Node { treeLabel :: a, treeChildren :: [Tree a]}
   deriving (Eq, Show)
 
 commentsToTree :: [Entity Comment] -> [Tree (Entity Comment)]
-commentsToTree = foldl' accTree []
+commentsToTree = foldl' accTree mempty
   where
     recurseChildren :: [Tree (Entity Comment)] -> Key Comment -> Entity Comment -> [Tree (Entity Comment)]
     recurseChildren children parentKey comment = fmap (\t ->
@@ -91,40 +95,54 @@ commentsToTree = foldl' accTree []
         Just parentKey -> recurseChildren acc parentKey comment
         Nothing -> acc ++ [Node comment []]
 
-commentTreeWidget :: [Tree (Entity Comment)] -> Widget
-commentTreeWidget comments = do
-  toWidget [lucius|
-    .blog-post ul.blog-post__comment {
-      border-left: 1px solid gray;
-      list-style: none;
-      margin-bottom: 25px;
-      margin-top: 25px;
-    }
-  |]
+commentTreeWidget :: Key Post -> [Tree (Entity Comment)] -> Widget
+commentTreeWidget postId comments =
   [whamlet|
     $forall Node comment commentChildren <- comments
-      <ul .blog-post__comment>
+      <ul .comment>
         <li>
           #{entityCommentMessage comment}
-          ^{commentTreeWidget commentChildren}
-          <div>
-            <button>Reply
+          ^{commentTreeWidget postId commentChildren}
+          <input .btn.btn-link.btn-xs.comment__action type="submit" name="action" value="Reply">
   |]
   where
     entityCommentMessage = commentMessage . entityVal
 
-getBlogPostR :: Int64 -> Handler Html
-getBlogPostR a = do
+rootCommentForm :: Form Textarea
+rootCommentForm = renderBootstrap3 BootstrapBasicForm $
+  areq textareaField messageSettings Nothing
+  where 
+    messageSettings = FieldSettings
+      { fsLabel = "Comment"
+      , fsId = Nothing
+      , fsTooltip = Nothing
+      , fsName = Nothing
+      , fsAttrs = [("class", "form-control"), ("placeholder", "Comment Message")]
+      }
+
+getBlogPostR :: Key Post -> Handler Html
+getBlogPostR = renderBlogPostR []
+
+renderBlogPostR :: [FormReaction] -> Key Post -> Handler Html
+renderBlogPostR reactions a = do
   post <- getPost a
   case post of
     Just post' -> do
       comments <- commentsToTree <$> getCommentsForPost post'
+      (rootCommentFormWidget, _) <- generateFormPost rootCommentForm
       defaultLayout $ do
         toWidget [lucius|
           .blog-post .blog-post__time {
             position: absolute;
             top: 0;
-            right: 0;
+            right: 15px;
+          }
+
+          .comment {
+            border-left: 1px solid lightgray;
+            list-style: none;
+            margin-bottom: 25px;
+            margin-top: 25px;
           }
         |]
         [whamlet|
@@ -132,9 +150,47 @@ getBlogPostR a = do
             <span .blog-post__time .text-muted>#{getTimestamp post'}
             #{preEscapedToMarkup (getPostContent post')}
 
-            <hr>
+          <hr>
 
-            <div .blog-post__comments>
-              ^{commentTreeWidget comments}
+          <div>
+            ^{formReactionWidget reactions}
+          <div>
+          $if not (null comments)
+            <form method="POST" action="@{BlogPostR a}">
+              <div .comments>
+                ^{commentTreeWidget a comments}
+
+          <form method="POST" action="@{BlogPostR a}">
+            ^{rootCommentFormWidget}
+            <input .btn.btn-primary type="submit" name="action" value="Submit">
         |]
     Nothing -> notFound
+
+postBlogPostR :: Key Post -> Handler Html
+postBlogPostR a = do
+  user <- requireUser
+  ((result, _), _) <- runFormPost rootCommentForm
+  action <- lookupPostParam "action"
+  liftIO $ putStrLn "\n\n\n\n"
+  liftIO $ print result
+  liftIO $ print action
+  liftIO $ putStrLn "\n\n\n\n"
+  case (result, action) of
+    (FormSuccess (Textarea comment), Just "Submit") -> do
+      time <- liftIO getCurrentTime
+      _ <- runDB $ insertEntity $ Comment comment time (entityKey user) a Nothing
+      renderBlogPostR [] a
+    _ -> renderBlogPostR [(Danger, "Something went wrong!")] a
+
+postBlogPostCommentR :: Key Post -> Key Comment -> Handler Html
+postBlogPostCommentR a b = do
+  user <- requireUser
+  renderBlogPostR [] a
+
+requireUser :: Handler (Entity User)
+requireUser = do
+  mUserJson <- lookupSession userSessionKey
+  let mUser = decode =<< cs <$> mUserJson :: Maybe (Entity User)
+  case mUser of
+    Just u -> return u
+    Nothing -> redirect LoginR

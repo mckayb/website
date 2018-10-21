@@ -20,6 +20,7 @@ EmailVerification
   UniqueEmailVerificationUser userId
 Comment json
   message Text
+  timestamp UTCTime
   userId UserId
   postId PostId 
   parentId CommentId Maybe

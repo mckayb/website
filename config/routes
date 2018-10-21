@@ -1,21 +1,22 @@
 -- By default this file is used by `parseRoutesFile` in Foundation.hs
 -- Syntax for this file here: https://www.yesodweb.com/book/routing-and-handlers
 
-/static       StaticR   Static appStatic
+/static StaticR Static appStatic
 
-/favicon.ico  FaviconR  GET
-/robots.txt   RobotsR   GET
+/favicon.ico                     FaviconR         GET
+/robots.txt                      RobotsR          GET
 
 -- Html Routes
-/             HomeR     GET POST
+/                                HomeR            GET POST
 
-/blog         BlogR     GET
-/blog/#Int64  BlogPostR GET
+/blog                            BlogR            GET
+/blog/#PostId                    BlogPostR        GET POST
+/blog/#PostId/comment/#CommentId BlogPostCommentR POST
 
-/login        LoginR    GET POST
-/register     RegisterR GET POST
+/login                           LoginR           GET POST
+/register                        RegisterR        GET POST
 
-/post         PostR     GET POST
-/role         RoleR     GET POST
+/post                            PostR            GET POST
+/role                            RoleR            GET POST
 -- Json Routes
-/user         UserR     GET POST
+/user                            UserR            GET POST
