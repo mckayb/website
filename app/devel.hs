@@ -1,5 +1,5 @@
 {-# LANGUAGE PackageImports #-}
-import "corporate-clarity" Application (develMain)
+import "website" Application (develMain)
 import Prelude (IO)
 
 main :: IO ()

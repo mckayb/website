@@ -28,6 +28,9 @@ getPosts = runDB $ selectList [] []
 getPost :: Int64 -> Handler (Maybe (Entity Post))
 getPost postId = runDB $ selectFirst [PostId ==. (toSqlKey postId)] []
 
+getRoles :: Handler [Entity Role]
+getRoles = runDB $ selectList [] []
+
 getRoleByUser :: Entity User -> Handler (Maybe Role)
 getRoleByUser u = runDB $ get $ (userRoleId . entityVal) u
 

@@ -15,8 +15,8 @@ stanzas:
     #
     # The path given is for Stack projects. If you're still using cabal, change
     # to
-    # exec: ../dist/build/corporate-clarity/corporate-clarity
-    exec: ../dist/bin/corporate-clarity
+    # exec: ../dist/build/website/website
+    exec: ../dist/bin/website
 
     # Command line options passed to your application.
     args: []
@@ -25,7 +25,7 @@ stanzas:
       # You can specify one or more hostnames for your application to respond
       # to. The primary hostname will be used for generating your application
       # root.
-      - www.corporate-clarity.com
+      - www.website.com
 
     # Enable to force Keter to redirect to https
     # Can be added to any stanza
@@ -34,7 +34,7 @@ stanzas:
   # Static files.
   - type: static-files
     hosts:
-      - static.corporate-clarity.com
+      - static.website.com
     root: ../static
 
     # Uncomment to turn on directory listings.
@@ -44,9 +44,9 @@ stanzas:
   - type: redirect
 
     hosts:
-      - corporate-clarity.com
+      - website.com
     actions:
-      - host: www.corporate-clarity.com
+      - host: www.website.com
         # secure: false
         # port: 80
 
