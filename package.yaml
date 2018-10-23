@@ -1,4 +1,4 @@
-name:    corporate-clarity
+name:    website
 version: "0.0.0"
 
 default-extensions:
@@ -73,7 +73,7 @@ library:
 
 # Runnable executable for our application
 executables:
-  corporate-clarity:
+  website:
     main: main.hs
     source-dirs: app
     ghc-options:
@@ -81,19 +81,19 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - corporate-clarity
+    - website
     when:
     - condition: flag(library-only)
       buildable: false
 
 # Test suite
 tests:
-  corporate-clarity-test:
+  website-test:
     main: Spec.hs
     source-dirs: test
     ghc-options: -Wall
     dependencies:
-    - corporate-clarity
+    - website
     - hspec >=2.0.0
     - yesod-test
 

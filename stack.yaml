@@ -63,3 +63,17 @@ extra-deps: []
 #
 # Allow a newer minor version of GHC than the snapshot specifies
 # compiler-check: newer-minor
+
+image:
+  container:
+    name: mckayb/website:1.0
+    base: website:base
+    add:
+      config: /config
+      static: /static
+
+    entrypoints:
+      - website
+
+docker:
+  enable: true
