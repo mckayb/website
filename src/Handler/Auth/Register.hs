@@ -8,6 +8,7 @@
 module Handler.Auth.Register where
 
 import Import
+import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Helpers.Forms
 import Helpers.Database
 import Helpers.BCrypt
@@ -31,7 +32,7 @@ postRegisterR = do
       renderRegister formWidget [(Danger, "Form failed validation")]
 
 registerForm :: Form (Text, Text)
-registerForm = renderDivs $ (,)
+registerForm = renderBootstrap3 BootstrapBasicForm $ (,)
   <$> areq emailField emailSettings Nothing
   <*> areq passwordField passwordSettings Nothing
   where
@@ -53,12 +54,12 @@ registerForm = renderDivs $ (,)
 renderRegister :: Widget -> [FormReaction] -> Handler Html
 renderRegister widget reactions =
   defaultLayout $ do
-    setTitle "Login"
+    setTitle "Register"
     renderPanel $ [whamlet|
       <div>
         ^{formReactionWidget reactions}
       <div>
         <form method="POST" action="@{RegisterR}">
           ^{widget}
-          <input .btn.btn-primary type="submit" value="Login">
+          <input .btn.btn-primary type="submit" value="Register">
     |]

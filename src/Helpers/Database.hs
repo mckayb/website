@@ -22,6 +22,9 @@ getPost postId = runDB $ selectFirst [PostId ==. postId] []
 getCommentsForPost :: Entity Post -> Handler [Entity Comment]
 getCommentsForPost post = runDB $ selectList [CommentPostId ==. entityKey post] []
 
+getRoles :: Handler [Entity Role]
+getRoles = runDB $ selectList [] []
+
 getRoleByUser :: Entity User -> Handler (Maybe Role)
 getRoleByUser u = runDB $ get $ (userRoleId . entityVal) u
 

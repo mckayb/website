@@ -158,6 +158,8 @@ instance Yesod App where
   isAuthorized RobotsR _ = return Authorized
   isAuthorized (StaticR _) _ = return Authorized
   isAuthorized (BlogPostCommentR _ _) False = return Authorized
+  isAuthorized LivenessR _ = return Authorized
+  isAuthorized ReadinessR _ = return Authorized
 
   -- Routes requiring authentication delegate to
   -- the isAuthenticated function
