@@ -23,6 +23,17 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: YESOD_PGHOST
+              value: "{{ .Release.Name }}-postgresql"
+            - name: YESOD_PGUSER
+              value: "{{ .Values.postgresql.postgresUser }}"
+            - name: YESOD_PGPASS
+              value: "{{ .Values.postgresql.postgresPassword }}"
+            - name: YESOD_PGDATABASE
+              value: "{{ .Values.postgresql.postgresDatabase }}"
+            - name: YESOD_PGPORT
+              value: "{{ .Values.postgresql.service.port }}"
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

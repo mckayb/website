@@ -69,7 +69,8 @@ image:
     name: mckayb/website:1.0
     base: website:base
     add:
-      static: /app/static
+      config: /config
+      static: /static
 
     entrypoints:
       - website
