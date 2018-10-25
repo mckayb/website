@@ -15,7 +15,7 @@ import Model                 as X
 import Test.Hspec            as X
 import Text.Shakespeare.Text (st)
 import Yesod.Default.Config2 (useEnv, loadYamlSettings)
-import Yesod.Auth            as X
+import Yesod.Auth            as X hiding (LoginR)
 import Yesod.Test            as X
 import Yesod.Core.Unsafe     (fakeHandlerGetLogger)
 
@@ -66,27 +66,27 @@ getTables = do
 
   return $ map unSingle tables
 
+createRole :: Text -> YesodExample App (Entity Role)
+createRole name = runDB $ do
+  role <- insertEntity $ Role name
+  return role
+
+createUser :: (Entity Role) -> Text -> YesodExample App (Entity User)
+createUser role email = runDB $ do
+  user <- insertEntity $ User email (entityKey role)
+  return user
+
+createPost :: (Entity User) -> Text -> UTCTime -> YesodExample App (Entity Post)
+createPost user content timestamp = runDB $ do
+  postEntity <- insertEntity $ Post content timestamp (entityKey user)
+  return postEntity
+
 -- | Authenticate as a user. This relies on the `auth-dummy-login: true` flag
 -- being set in test-settings.yaml, which enables dummy authentication in
 -- Foundation.hs
-authenticateAs :: Entity User -> YesodExample App ()
-authenticateAs (Entity _ u) = do
-  request $ do
-    setMethod "POST"
-    addPostParam "ident" $ userIdent u
-    setUrl $ AuthR $ PluginR "dummy" []
-
--- | Create a user.  The dummy email entry helps to confirm that foreign-key
--- checking is switched off in wipeDB for those database backends which need it.
-createUser :: Text -> YesodExample App (Entity User)
-createUser ident = runDB $ do
-  user <- insertEntity User
-    { userIdent = ident
-    , userPassword = Nothing
-    }
-  _ <- insert Email
-    { emailEmail = ident
-    , emailUserId = Just $ entityKey user
-    , emailVerkey = Nothing
-    }
-  return user
+-- authenticateAs :: Entity User -> YesodExample App ()
+-- authenticateAs (Entity _ u) = do
+  -- request $ do
+    -- setMethod "POST"
+    -- addPostParam "ident" $ userIdent u
+    -- setUrl $ AuthR $ PluginR "dummy" []
