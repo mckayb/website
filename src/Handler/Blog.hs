@@ -68,7 +68,7 @@ getBlogR = do
         $forall post <- posts
           <div .row .row-bottom-border>
             <div .col-md-12>
-              <article .post data-post=#{getId post}>
+              <article #post_#{getId post} .post data-post=#{getId post}>
                 <span .post__time .text-muted>#{getTimestamp post}
                 #{preEscapedToMarkup (getPostContent post)}
     |]

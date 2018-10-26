@@ -51,10 +51,15 @@ wipeDB :: App -> IO ()
 wipeDB app = runDBWithApp app $ do
   tables <- getTables
   sqlBackend <- ask
+  let esc = connEscapeName sqlBackend . DBName
 
-  let escapedTables = map (connEscapeName sqlBackend . DBName) tables
+  let escapedTables = map esc tables
       query = "TRUNCATE TABLE " ++ intercalate ", " escapedTables
+
+  let resetIncQueries = map (\t -> "ALTER SEQUENCE " <> esc (t <> "_id_seq") <> " RESTART WITH 1") tables
+
   rawExecute query []
+  traverse_ (flip rawExecute $ []) resetIncQueries
 
 getTables :: DB [Text]
 getTables = do
@@ -67,18 +72,18 @@ getTables = do
   return $ map unSingle tables
 
 createRole :: Text -> YesodExample App (Entity Role)
-createRole name = runDB $ do
-  role <- insertEntity $ Role name
+createRole name = do
+  role <- runDB $ insertEntity $ Role name
   return role
 
 createUser :: (Entity Role) -> Text -> YesodExample App (Entity User)
-createUser role email = runDB $ do
-  user <- insertEntity $ User email (entityKey role)
+createUser role email = do
+  user <- runDB $ insertEntity $ User email (entityKey role)
   return user
 
 createPost :: (Entity User) -> Text -> UTCTime -> YesodExample App (Entity Post)
-createPost user content timestamp = runDB $ do
-  postEntity <- insertEntity $ Post content timestamp (entityKey user)
+createPost user content timestamp = do
+  postEntity <- runDB $ insertEntity $ Post content timestamp (entityKey user)
   return postEntity
 
 -- | Authenticate as a user. This relies on the `auth-dummy-login: true` flag
