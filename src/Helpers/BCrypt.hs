@@ -3,12 +3,12 @@
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
-{-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
 
 module Helpers.BCrypt where
 
+import Prelude
 import Crypto.BCrypt as Import hiding (hashPassword)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE

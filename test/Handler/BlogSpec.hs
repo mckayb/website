@@ -1,5 +1,3 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-
 module Handler.BlogSpec (spec) where
 
 import TestImport

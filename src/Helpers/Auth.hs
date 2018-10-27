@@ -1,5 +1,6 @@
 module Helpers.Auth where
 
+import Prelude
 import Yesod.Core.Handler
 import Yesod.Core.Types
 import Settings
