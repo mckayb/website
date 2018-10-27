@@ -77,7 +77,7 @@ getBlogR = do
                   #{preEscapedToMarkup (getPostTeaser post)}
     |]
 
-getBlogPostR :: Int64 -> Handler Html
+getBlogPostR :: Key Post -> Handler Html
 getBlogPostR a = do
   post <- getPost a
   case post of
