@@ -3,7 +3,9 @@
 module Handler.BlogSpec (spec) where
 
 import TestImport
-import Faker.Internet
+import Database.Persist.Sql (toSqlKey)
+import qualified Faker.Internet as Faker
+import qualified Data.Text as Text
 
 spec :: Spec
 spec = withApp $ do
@@ -17,7 +19,7 @@ spec = withApp $ do
 
     it "Works if there is a single post" $ do
       role <- createRole "Admin"
-      em <- liftIO $ pack <$> email
+      em <- liftIO $ pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPost user "This is the title" "## Test" time
@@ -36,7 +38,7 @@ spec = withApp $ do
 
     it "Works if there are multiple posts" $ do
       role <- createRole "Admin"
-      em <- liftIO $ pack <$> email
+      em <- liftIO $ pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPost user "The First Post" "First, I was afraid" time
@@ -53,7 +55,7 @@ spec = withApp $ do
 
     it "Only grabs the first paragraph from the post content" $ do
       role <- createRole "Admin"
-      em <- liftIO $ pack <$> email
+      em <- liftIO $ pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPost user "The Post" "First\n\nSecond\n\nThird" time
@@ -64,3 +66,20 @@ spec = withApp $ do
       bodyContains "First"
       bodyNotContains "Second"
 
+  describe "getBlogPostR" $ do
+    it "Renders the post correctly if the post exists" $ do
+      role <- createRole "Admin"
+      em <- liftIO $ pack <$> Faker.email
+      time <- liftIO getCurrentTime
+      user <- createUser role em
+      post' <- createPost user "The Post" "First\nSecond\nThird" time
+
+      get $ BlogPostR (entityKey post')
+      statusIs 200
+      htmlCount "article.blog-post" 1
+      htmlAllContain "h1" $ (Text.unpack . postTitle . entityVal) post'
+      bodyContains $ (Text.unpack . postContent . entityVal) post'
+
+    it "Renders not found if the post doesn't exist" $ do
+      get $ BlogPostR (toSqlKey 1)
+      statusIs 404
