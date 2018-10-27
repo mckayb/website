@@ -81,9 +81,9 @@ createUser role email = do
   user <- runDB $ insertEntity $ User email (entityKey role)
   return user
 
-createPost :: (Entity User) -> Text -> UTCTime -> YesodExample App (Entity Post)
-createPost user content timestamp = do
-  postEntity <- runDB $ insertEntity $ Post content timestamp (entityKey user)
+createPost :: (Entity User) -> Text -> Text -> UTCTime -> YesodExample App (Entity Post)
+createPost user title content timestamp = do
+  postEntity <- runDB $ insertEntity $ Post title content timestamp (entityKey user)
   return postEntity
 
 -- | Authenticate as a user. This relies on the `auth-dummy-login: true` flag

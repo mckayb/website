@@ -22,25 +22,33 @@ postPostR = do
   ((result, formWidget), _) <- runFormPost postForm
   action <- lookupPostParam "action"
   case (result, action) of
-    (FormSuccess (Textarea markdown), Just "Preview") -> do
-      renderPost formWidget (Just $ previewWidget markdown) []
-    (FormSuccess (Textarea markdown), Just "Publish") -> do
+    (FormSuccess (title, Textarea markdown), Just "Preview") -> do
+      renderPost formWidget (Just $ previewWidget title markdown) []
+    (FormSuccess (title, Textarea markdown), Just "Publish") -> do
       mUserJson <- lookupSession userSessionKey
       let mUser = decode =<< cs <$> mUserJson :: Maybe (Entity User)
       case mUser of
         Just u -> do
           time <- liftIO getCurrentTime
-          _ <- runDB $ insertEntity $ Post markdown time (entityKey u)
+          _ <- runDB $ insertEntity $ Post title markdown time (entityKey u)
           renderPost formWidget Nothing []
         Nothing -> do
           renderPost formWidget Nothing [(Danger, "Something went wrong.")]
     _ -> do
       renderPost formWidget Nothing [(Danger, "Something went wrong")]
 
-postForm :: Form (Textarea)
-postForm = renderBootstrap3 BootstrapBasicForm $
-  areq textareaField contentSettings Nothing
+postForm :: Form (Text, Textarea)
+postForm = renderBootstrap3 BootstrapBasicForm $ (,)
+  <$> areq textField titleSettings Nothing
+  <*> areq textareaField contentSettings Nothing
   where
+    titleSettings = FieldSettings
+      { fsLabel = "Title"
+      , fsId = Nothing
+      , fsTooltip = Nothing
+      , fsName = Nothing
+      , fsAttrs = [("class", "form-control"), ("placeholder", "Title")]
+      }
     contentSettings = FieldSettings
       { fsLabel = "Content"
       , fsId = Nothing
@@ -49,11 +57,12 @@ postForm = renderBootstrap3 BootstrapBasicForm $
       , fsAttrs = [("class", "form-control"), ("placeholder", "Content")]
       }
 
-previewWidget :: Text -> Widget
-previewWidget txt = do
-  let html = commonmarkToHtml [optSafe] [] txt
+previewWidget :: Text -> Text -> Widget
+previewWidget title markdown = do
+  let html = commonmarkToHtml [optSafe] [] markdown
    in [whamlet|
         <div>
+          <h1>#{title}
           #{preEscapedToMarkup html}
       |]
 

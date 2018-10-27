@@ -16,6 +16,18 @@ getPostContent = (commonmarkToHtml [optSafe] []) . postContent . entityVal
 getTimestamp :: Entity Post -> Text
 getTimestamp = T.pack . formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal
 
+getPostTitle :: Entity Post -> Text
+getPostTitle = postTitle . entityVal
+
+takeWhileOneMore :: (a -> Bool) -> [a] -> [a]
+takeWhileOneMore p = foldr (\x ys -> if p x then x:ys else [x]) []
+
+takeUntilFirstParagraphInc :: [Text] -> [Text]
+takeUntilFirstParagraphInc = takeWhileOneMore (not . T.isPrefixOf "<p>")
+
+getPostTeaser :: Entity Post -> Text
+getPostTeaser = T.unlines . takeUntilFirstParagraphInc . T.lines . getPostContent
+
 getBlogR :: Handler Html
 getBlogR = do
   posts <- getPosts
@@ -23,27 +35,22 @@ getBlogR = do
   defaultLayout $ do
     setTitle "Blog"
     toWidget [lucius|
-      .post:before {
-        content:'';
-        width:100%;
-        height:100%;    
-        position:absolute;
-        left:0;
-        top:0;
-        background:linear-gradient(transparent 130px, white);
-      }
-
-      .post {
-        max-height: 200px;
-        overflow: hidden;
+      .post .post__content {
         margin-bottom: 21px;
-        cursor: pointer;
       }
 
-      .post .post__time {
-        position: absolute;
-        top: 20px;
-        right: 20px;
+      .post .post__date {
+        margin-bottom: 15px;
+      }
+
+      .post .post__title a {
+        color: black;
+      }
+
+      .post h1,
+      .post h2,
+      .post h3 {
+        margin-top: 0;
       }
 
       .row-bottom-border {
@@ -53,13 +60,6 @@ getBlogR = do
         margin-bottom: 21px;
       }
     |]
-    toWidget [julius|
-      $(function() {
-        $(".post").click(function() {
-          document.location = "@{BlogR}/" + $(this).data("post")
-        })
-      })
-    |]
     [whamlet|
       $if (null posts)
         <div>Coming soon!
@@ -68,9 +68,13 @@ getBlogR = do
         $forall post <- posts
           <div .row .row-bottom-border>
             <div .col-md-12>
-              <article #post_#{getId post} .post data-post=#{getId post}>
-                <span .post__time .text-muted>#{getTimestamp post}
-                #{preEscapedToMarkup (getPostContent post)}
+              <article .post>
+                <h1 .post__title>
+                  <a href="@{BlogR}/#{getId post}">#{getPostTitle post}
+                <div .post__date .text-muted>
+                  #{getTimestamp post}
+                <div .post__content>
+                  #{preEscapedToMarkup (getPostTeaser post)}
     |]
 
 getBlogPostR :: Int64 -> Handler Html
@@ -88,6 +92,7 @@ getBlogPostR a = do
       [whamlet|
         <article .blog-post>
           <span .blog-post__time .text-muted>#{getTimestamp post'}
+          <h1>#{getPostTitle post'}
           #{preEscapedToMarkup (getPostContent post')}
       |]
     Nothing -> notFound

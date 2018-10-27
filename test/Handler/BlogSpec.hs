@@ -4,7 +4,6 @@ module Handler.BlogSpec (spec) where
 
 import TestImport
 import Faker.Internet
-import Database.Persist.Sql (fromSqlKey)
 
 spec :: Spec
 spec = withApp $ do
@@ -21,34 +20,47 @@ spec = withApp $ do
       em <- liftIO $ pack <$> email
       time <- liftIO getCurrentTime
       user <- createUser role em
-      post' <- createPost user "# Test" time
-      let idSel = pack $ "#post_" <> (show . fromSqlKey $ entityKey post')
+      _ <- createPost user "This is the title" "## Test" time
 
       get BlogR
       statusIs 200
       htmlCount "article.post" 1
-      htmlCount "span.text-muted" 1
+      htmlCount "article.post div.post__date.text-muted" 1
+      htmlAnyContain "h1" "This is the title"
+      htmlAnyContain "h2" "Test"
 
-      htmlAnyContain "h1" "Test"
-      htmlCount idSel 1
-
-      -- clickOn idSel
-      -- statusIs 200
-      -- htmlCount "article.blog-post" 1
+      htmlCount "article.blog-post" 0
+      clickOn "article.post > h1.post__title > a"
+      statusIs 200
+      htmlCount "article.blog-post" 1
 
     it "Works if there are multiple posts" $ do
       role <- createRole "Admin"
       em <- liftIO $ pack <$> email
       time <- liftIO getCurrentTime
       user <- createUser role em
-      _ <- createPost user "# First" time
-      _ <- createPost user "# Second" time
-      _ <- createPost user "# Third" time
+      _ <- createPost user "The First Post" "First, I was afraid" time
+      _ <- createPost user "The Second Post" "I was petrified" time
+      _ <- createPost user "The Third Post" "Kept thinking I could never live without you by my side" time
 
       get BlogR
       statusIs 200
       htmlCount "article.post" 3
-      htmlCount "span.text-muted" 3
+      htmlCount "article.post div.post__date.text-muted" 3
       htmlAnyContain "h1" "First"
       htmlAnyContain "h1" "Second"
       htmlAnyContain "h1" "Third"
+
+    it "Only grabs the first paragraph from the post content" $ do
+      role <- createRole "Admin"
+      em <- liftIO $ pack <$> email
+      time <- liftIO getCurrentTime
+      user <- createUser role em
+      _ <- createPost user "The Post" "First\n\nSecond\n\nThird" time
+
+      get BlogR
+      statusIs 200
+      htmlAllContain "h1.post__title > a" "The Post"
+      bodyContains "First"
+      bodyNotContains "Second"
+
