@@ -5,33 +5,28 @@ module Handler.Post where
 import Import
 import CMarkGFM
 import Helpers.Forms
+import Helpers.Session
 
-import Data.Aeson (decode)
-import Data.String.Conversions (cs)
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 
 getPostR :: Handler Html
 getPostR = do
+  _ <- requireAdminUser
   (formWidget, _) <- generateFormPost postForm
   renderPost formWidget Nothing []
 
 postPostR :: Handler Html
 postPostR = do
+  user <- requireAdminUser
   ((result, formWidget), _) <- runFormPost postForm
   action <- lookupPostParam "action"
   case (result, action) of
     (FormSuccess (title, Textarea markdown), Just "Preview") -> do
       renderPost formWidget (Just $ previewWidget title markdown) []
     (FormSuccess (title, Textarea markdown), Just "Publish") -> do
-      mUserJson <- lookupSession userSessionKey
-      let mUser = decode =<< cs <$> mUserJson :: Maybe (Entity User)
-      case mUser of
-        Just u -> do
-          time <- liftIO getCurrentTime
-          _ <- runDB $ insertEntity $ Post title markdown time (entityKey u)
-          renderPost formWidget Nothing []
-        Nothing -> do
-          renderPost formWidget Nothing [(Danger, "Something went wrong.")]
+      time <- liftIO getCurrentTime
+      _ <- runDB $ insertEntity $ Post title markdown time (entityKey user)
+      renderPost formWidget Nothing []
     _ -> do
       renderPost formWidget Nothing [(Danger, "Something went wrong")]
 

@@ -30,3 +30,13 @@ isAuthenticatedAdmin = do
       if roleName role == "Admin"
         then Authorized
         else Unauthorized "You are not allowed to access this page"
+
+getCurrentUser :: HandlerFor site (Maybe (Entity User))
+getCurrentUser = do
+  mUserJson <- lookupSession userSessionKey
+  return $ decode =<< cs <$> mUserJson
+
+getCurrentRole :: HandlerFor site (Maybe Role)
+getCurrentRole = do
+  mRoleJson <- lookupSession roleSessionKey
+  return $ decode =<< cs <$> mRoleJson

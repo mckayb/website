@@ -16,7 +16,9 @@ import Text.Shakespeare.Text (st)
 import Yesod.Default.Config2 (useEnv, loadYamlSettings)
 import Yesod.Auth            as X hiding (LoginR)
 import Yesod.Test            as X
+import Yesod.Core            as X (SessionBackend, defaultClientSessionBackend, setSession)
 import Yesod.Core.Unsafe     (fakeHandlerGetLogger)
+import Helpers.BCrypt
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do
@@ -31,6 +33,15 @@ runHandler handler = do
   app <- getTestYesod
   fakeHandlerGetLogger appLogger app handler
 
+runYesodSpec :: YesodSpec App -> Spec
+runYesodSpec run = do
+  settings <- runIO $ loadYamlSettings
+    ["config/test-settings.yml", "config/settings.yml"]
+    []
+    useEnv
+  foundation <- runIO $ makeFoundation settings
+  runIO $ wipeDB foundation
+  yesodSpec foundation run
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
@@ -79,6 +90,12 @@ createUser :: (Entity Role) -> Text -> YesodExample App (Entity User)
 createUser role email = do
   user <- runDB $ insertEntity $ User email (entityKey role)
   return user
+
+createPassword :: (Entity User) -> Text -> YesodExample App (Entity Password)
+createPassword user pass = do
+  hash' <- liftIO $ hashPassword pass
+  password <- runDB $ insertEntity $ Password (entityKey user) hash'
+  return password
 
 createPost :: (Entity User) -> Text -> Text -> UTCTime -> YesodExample App (Entity Post)
 createPost user title content timestamp = do

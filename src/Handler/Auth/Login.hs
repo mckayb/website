@@ -4,11 +4,10 @@ module Handler.Auth.Login where
 
 import Import hiding (exp)
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
-import Data.Aeson (encode)
-import Data.String.Conversions (cs)
 import Helpers.Database
 import Helpers.BCrypt
 import Helpers.Forms
+import Helpers.Session
 
 getLoginR :: Handler Html
 getLoginR = do
@@ -38,8 +37,7 @@ postLoginR = do
                   mRole <- getRoleByUser user'
                   case mRole of
                     Just role -> do
-                      setSession userSessionKey $ (cs . encode) user'
-                      setSession roleSessionKey $ (cs . encode) role
+                      keepLoggedIn user' role
                       redirect HomeR
                     Nothing -> renderLogin formWidget [(Danger, "Something went wrong...")]
             Nothing -> do

@@ -3,11 +3,10 @@ module Handler.BlogSpec (spec) where
 import TestImport
 import Database.Persist.Sql (toSqlKey)
 import qualified Faker.Internet as Faker
-import qualified Data.Text as Text
 
 spec :: Spec
 spec = withApp $ do
-  describe "getBlogR" $ do
+  describe "BlogR" $ do
     it "Shows Coming Soon if there are not any posts" $ do
       get BlogR
 
@@ -64,7 +63,7 @@ spec = withApp $ do
       bodyContains "First"
       bodyNotContains "Second"
 
-  describe "getBlogPostR" $ do
+  describe "BlogPostR" $ do
     it "Renders the post correctly if the post exists" $ do
       role <- createRole "Admin"
       em <- liftIO $ pack <$> Faker.email
@@ -75,8 +74,8 @@ spec = withApp $ do
       get $ BlogPostR (entityKey post')
       statusIs 200
       htmlCount "article.blog-post" 1
-      htmlAllContain "h1" $ (Text.unpack . postTitle . entityVal) post'
-      bodyContains $ (Text.unpack . postContent . entityVal) post'
+      htmlAllContain "h1" $ (unpack . postTitle . entityVal) post'
+      bodyContains $ (unpack . postContent . entityVal) post'
 
     it "Renders not found if the post doesn't exist" $ do
       get $ BlogPostR (toSqlKey 1)
