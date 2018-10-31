@@ -23,19 +23,16 @@ postRegisterR = do
   ((result, formWidget), _) <- runFormPost registerForm
   case result of
     FormSuccess (email, password) -> do
-      case mkEmail email of
-        Nothing -> renderRegister formWidget [(Danger, "Invalid email address")]
-        Just em -> do
-          uid <- insertUser (User em (toSqlKey 2))
-          password' <- liftIO $ Password uid <$> hashPassword password
-          _ <- insertPassword password'
-          redirect LoginR
+      uid <- insertUser (User email (toSqlKey 2))
+      password' <- liftIO $ Password uid <$> hashPassword password
+      _ <- insertPassword password'
+      redirect LoginR
     _ -> do
       renderRegister formWidget [(Danger, "Form failed validation")]
 
-registerForm :: Form (Text, Text)
+registerForm :: Form (Email, Text)
 registerForm = renderBootstrap3 BootstrapBasicForm $ (,)
-  <$> areq emailField emailSettings Nothing
+  <$> areq emailField' emailSettings Nothing
   <*> areq passwordField passwordSettings Nothing
   where
     emailSettings = FieldSettings
