@@ -19,6 +19,7 @@ import Yesod.Test            as X
 import Yesod.Core            as X (SessionBackend, defaultClientSessionBackend, setSession)
 import Yesod.Core.Unsafe     (fakeHandlerGetLogger)
 import Helpers.BCrypt
+import Helpers.Email
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do
@@ -86,7 +87,7 @@ createRole name = do
   role <- runDB $ insertEntity $ Role name
   return role
 
-createUser :: (Entity Role) -> Text -> YesodExample App (Entity User)
+createUser :: (Entity Role) -> Email -> YesodExample App (Entity User)
 createUser role email = do
   user <- runDB $ insertEntity $ User email (entityKey role)
   return user

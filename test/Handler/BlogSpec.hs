@@ -3,6 +3,7 @@ module Handler.BlogSpec (spec) where
 import TestImport
 import Database.Persist.Sql (toSqlKey)
 import qualified Faker.Internet as Faker
+import Helpers.Email
 
 spec :: Spec
 spec = withApp $ do
@@ -16,8 +17,9 @@ spec = withApp $ do
 
     it "Works if there is a single post" $ do
       role <- createRole "Admin"
-      em <- liftIO $ pack <$> Faker.email
+      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
       time <- liftIO getCurrentTime
+
       user <- createUser role em
       _ <- createPost user "This is the title" "## Test" time
 
@@ -35,7 +37,7 @@ spec = withApp $ do
 
     it "Works if there are multiple posts" $ do
       role <- createRole "Admin"
-      em <- liftIO $ pack <$> Faker.email
+      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPost user "The First Post" "First, I was afraid" time
@@ -52,7 +54,7 @@ spec = withApp $ do
 
     it "Only grabs the first paragraph from the post content" $ do
       role <- createRole "Admin"
-      em <- liftIO $ pack <$> Faker.email
+      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPost user "The Post" "First\n\nSecond\n\nThird" time
@@ -66,7 +68,7 @@ spec = withApp $ do
   describe "BlogPostR" $ do
     it "Renders the post correctly if the post exists" $ do
       role <- createRole "Admin"
-      em <- liftIO $ pack <$> Faker.email
+      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       post' <- createPost user "The Post" "First\nSecond\nThird" time

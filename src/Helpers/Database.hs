@@ -9,11 +9,12 @@
 module Helpers.Database where
 
 import Import
+import Helpers.Email
 
 getUsers :: Handler [Entity User]
 getUsers = runDB $ selectList [] []
 
-getUserByEmail :: Text -> Handler (Maybe (Entity User))
+getUserByEmail :: Email -> Handler (Maybe (Entity User))
 getUserByEmail email = runDB $ selectFirst [UserEmail ==. email] []
 
 getPasswordByUser :: Entity User -> Handler (Maybe (Entity Password))

@@ -2,6 +2,7 @@ module Handler.Auth.LoginSpec (spec) where
 
 import TestImport
 import qualified Faker.Internet as Faker
+import Helpers.Email
 
 spec :: Spec
 spec = withApp $ do
@@ -41,6 +42,20 @@ spec = withApp $ do
       htmlCount ".alert.alert-danger" 1
       bodyContains "Form failed validation"
 
+    it "Should not let you log in if you have a malformed email address" $ do
+      get LoginR
+      statusIs 200
+
+      request $ do
+        addToken
+        byLabelExact "Email" "foobar"
+        byLabelExact "Password" "aPassword"
+        setMethod "POST"
+        setUrl LoginR
+
+      statusIs 200
+      bodyContains "Form failed validation"
+
     it "Should not let you log in if that email doesn't exist" $ do
       get LoginR
       statusIs 200
@@ -58,7 +73,7 @@ spec = withApp $ do
 
     it "Should not let you log in if a password doesn't exist for the user" $ do
       role <- createRole "Admin"
-      em <- liftIO $ pack <$> Faker.email
+      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
       _ <- createUser role em
 
       get LoginR
@@ -66,7 +81,7 @@ spec = withApp $ do
 
       request $ do
         addToken
-        byLabelExact "Email" em
+        byLabelExact "Email" $ unEmail em
         byLabelExact "Password" "wrongpassword"
         setMethod "POST"
         setUrl LoginR
@@ -77,7 +92,7 @@ spec = withApp $ do
 
     it "Should not let you log in if you have the wrong password" $ do
       role <- createRole "Admin"
-      em <- liftIO $ pack <$> Faker.email
+      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -86,7 +101,7 @@ spec = withApp $ do
 
       request $ do
         addToken
-        byLabelExact "Email" em
+        byLabelExact "Email" $ unEmail em
         byLabelExact "Password" "wrongpassword"
         setMethod "POST"
         setUrl LoginR
@@ -97,7 +112,7 @@ spec = withApp $ do
 
     it "Should let you log in successfully" $ do
       role <- createRole "Admin"
-      em <- liftIO $ pack <$> Faker.email
+      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -106,7 +121,7 @@ spec = withApp $ do
 
       request $ do
         addToken
-        byLabelExact "Email" em
+        byLabelExact "Email" $ unEmail em
         byLabelExact "Password" "mypassword"
         setMethod "POST"
         setUrl LoginR

@@ -10,6 +10,7 @@ import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Helpers.Forms
 import Helpers.Database
 import Helpers.BCrypt
+import Helpers.Email
 import Database.Persist.Sql
 
 getRegisterR :: Handler Html
@@ -22,10 +23,13 @@ postRegisterR = do
   ((result, formWidget), _) <- runFormPost registerForm
   case result of
     FormSuccess (email, password) -> do
-      uid <- insertUser (User email (toSqlKey 2))
-      password' <- liftIO $ Password uid <$> hashPassword password
-      _ <- insertPassword password'
-      redirect LoginR
+      case mkEmail email of
+        Nothing -> renderRegister formWidget [(Danger, "Invalid email address")]
+        Just em -> do
+          uid <- insertUser (User em (toSqlKey 2))
+          password' <- liftIO $ Password uid <$> hashPassword password
+          _ <- insertPassword password'
+          redirect LoginR
     _ -> do
       renderRegister formWidget [(Danger, "Form failed validation")]
 
