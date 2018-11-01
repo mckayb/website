@@ -32,6 +32,9 @@ getRoles = runDB $ selectList [] []
 getRoleByUser :: Entity User -> Handler (Maybe Role)
 getRoleByUser u = runDB $ get $ (userRoleId . entityVal) u
 
+getRoleByName :: Text -> Handler (Maybe (Entity Role))
+getRoleByName n = runDB $ selectFirst [RoleName ==. n] []
+
 insertUser :: User -> Handler (Key User)
 insertUser user = runDB $ insert user
 
