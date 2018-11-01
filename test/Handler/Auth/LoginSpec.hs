@@ -6,7 +6,7 @@ import Helpers.Email
 
 spec :: Spec
 spec = withApp $ do
-  describe "Login Form" $ do
+  describe "LoginR" $ do
     it "Should work correctly" $ do
       get LoginR
 

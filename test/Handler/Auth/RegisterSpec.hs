@@ -7,7 +7,7 @@ import Helpers.BCrypt
 
 spec :: Spec
 spec = withApp $ do
-  describe "Register Form" $ do
+  describe "RegisterR" $ do
     it "Should render the register form correctly" $ do
       get RegisterR
 
