@@ -111,6 +111,25 @@ spec = withApp $ do
       assertEq "password user matches" entityPasswordUser (entityKey user)
       assertEq "password hash matches" True (passwordMatches entityPasswordHash "my_password")
 
-    -- it "Shouldn't let you register with a duplicate email" $ do
+    it "Shouldn't let you register with a duplicate email" $ do
+      role <- createRole "Admin"
+      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
+      user <- createUser role em
+      _ <- createPassword user "my_password"
+
+      get RegisterR
+      statusIs 200
+
+      request $ do
+        addToken
+        byLabelExact "Email" $ unEmail em
+        byLabelExact "Password" "my_password"
+        setMethod "POST"
+        setUrl RegisterR
+
+      statusIs 200
+      htmlCount ".alert.alert-danger" 1
+      bodyContains "An account with that email already exists!"
+
 
 
