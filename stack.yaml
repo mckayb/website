@@ -75,5 +75,5 @@ image:
     entrypoints:
       - website
 
-# docker:
-  # enable: true
+docker:
+  enable: true
