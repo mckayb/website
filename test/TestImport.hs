@@ -1,6 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
+
 module TestImport
   ( module TestImport
   , module X
@@ -15,9 +14,12 @@ import Model                 as X
 import Test.Hspec            as X
 import Text.Shakespeare.Text (st)
 import Yesod.Default.Config2 (useEnv, loadYamlSettings)
-import Yesod.Auth            as X
+import Yesod.Auth            as X hiding (LoginR)
 import Yesod.Test            as X
+import Yesod.Core            as X (SessionBackend, defaultClientSessionBackend, setSession)
 import Yesod.Core.Unsafe     (fakeHandlerGetLogger)
+import Helpers.BCrypt
+import Helpers.Email
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do
@@ -32,6 +34,15 @@ runHandler handler = do
   app <- getTestYesod
   fakeHandlerGetLogger appLogger app handler
 
+runYesodSpec :: YesodSpec App -> Spec
+runYesodSpec run = do
+  settings <- runIO $ loadYamlSettings
+    ["config/test-settings.yml", "config/settings.yml"]
+    []
+    useEnv
+  foundation <- runIO $ makeFoundation settings
+  runIO $ wipeDB foundation
+  yesodSpec foundation run
 
 withApp :: SpecWith (TestApp App) -> Spec
 withApp = before $ do
@@ -51,10 +62,15 @@ wipeDB :: App -> IO ()
 wipeDB app = runDBWithApp app $ do
   tables <- getTables
   sqlBackend <- ask
+  let esc = connEscapeName sqlBackend . DBName
 
-  let escapedTables = map (connEscapeName sqlBackend . DBName) tables
+  let escapedTables = map esc tables
       query = "TRUNCATE TABLE " ++ intercalate ", " escapedTables
+
+  let resetIncQueries = map (\t -> "ALTER SEQUENCE " <> esc (t <> "_id_seq") <> " RESTART WITH 1") tables
+
   rawExecute query []
+  traverse_ (flip rawExecute $ []) resetIncQueries
 
 getTables :: DB [Text]
 getTables = do
@@ -66,27 +82,33 @@ getTables = do
 
   return $ map unSingle tables
 
+createRole :: Text -> YesodExample App (Entity Role)
+createRole name = do
+  role <- runDB $ insertEntity $ Role name
+  return role
+
+createUser :: (Entity Role) -> Email -> YesodExample App (Entity User)
+createUser role email = do
+  user <- runDB $ insertEntity $ User email (entityKey role)
+  return user
+
+createPassword :: (Entity User) -> Text -> YesodExample App (Entity Password)
+createPassword user pass = do
+  hash' <- liftIO $ hashPassword pass
+  password <- runDB $ insertEntity $ Password (entityKey user) hash'
+  return password
+
+createPost :: (Entity User) -> Text -> Text -> UTCTime -> YesodExample App (Entity Post)
+createPost user title content timestamp = do
+  postEntity <- runDB $ insertEntity $ Post title content timestamp (entityKey user)
+  return postEntity
+
 -- | Authenticate as a user. This relies on the `auth-dummy-login: true` flag
 -- being set in test-settings.yaml, which enables dummy authentication in
 -- Foundation.hs
-authenticateAs :: Entity User -> YesodExample App ()
-authenticateAs (Entity _ u) = do
-  request $ do
-    setMethod "POST"
-    addPostParam "ident" $ userIdent u
-    setUrl $ AuthR $ PluginR "dummy" []
-
--- | Create a user.  The dummy email entry helps to confirm that foreign-key
--- checking is switched off in wipeDB for those database backends which need it.
-createUser :: Text -> YesodExample App (Entity User)
-createUser ident = runDB $ do
-  user <- insertEntity User
-    { userIdent = ident
-    , userPassword = Nothing
-    }
-  _ <- insert Email
-    { emailEmail = ident
-    , emailUserId = Just $ entityKey user
-    , emailVerkey = Nothing
-    }
-  return user
+-- authenticateAs :: Entity User -> YesodExample App ()
+-- authenticateAs (Entity _ u) = do
+  -- request $ do
+    -- setMethod "POST"
+    -- addPostParam "ident" $ userIdent u
+    -- setUrl $ AuthR $ PluginR "dummy" []

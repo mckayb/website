@@ -10,7 +10,7 @@
 /                                HomeR            GET POST
 
 /blog                            BlogR            GET
-/blog/#PostId                    BlogPostR        GET POST
+/blog/#PostId                    BlogPostR        GET
 /blog/#PostId/comment/#CommentId BlogPostCommentR POST
 
 /login                           LoginR           GET POST

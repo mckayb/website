@@ -1,5 +1,3 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -12,6 +10,7 @@ import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Helpers.Forms
 import Helpers.Database
 import Helpers.BCrypt
+import Helpers.Email
 import Database.Persist.Sql
 
 getRegisterR :: Handler Html
@@ -24,16 +23,20 @@ postRegisterR = do
   ((result, formWidget), _) <- runFormPost registerForm
   case result of
     FormSuccess (email, password) -> do
-      uid <- insertUser (User email (toSqlKey 2))
-      password' <- liftIO $ Password uid <$> hashPassword password
-      _ <- insertPassword password'
-      redirect LoginR
+      existingUser <- getUserByEmail email
+      case existingUser of
+        Just _ -> renderRegister formWidget [(Danger, "An account with that email already exists!")]
+        Nothing -> do
+          uid <- insertUser (User email (toSqlKey 2))
+          password' <- liftIO $ Password uid <$> hashPassword password
+          _ <- insertPassword password'
+          redirect LoginR
     _ -> do
       renderRegister formWidget [(Danger, "Form failed validation")]
 
-registerForm :: Form (Text, Text)
+registerForm :: Form (Email, Text)
 registerForm = renderBootstrap3 BootstrapBasicForm $ (,)
-  <$> areq emailField emailSettings Nothing
+  <$> areq emailField' emailSettings Nothing
   <*> areq passwordField passwordSettings Nothing
   where
     emailSettings = FieldSettings

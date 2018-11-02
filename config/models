@@ -6,7 +6,7 @@ Role json
   UniqueRoleName name
   deriving Eq Show
 User json
-  email Text
+  email Email
   roleId RoleId
   UniqueUserEmail email
   deriving Typeable Eq Show
@@ -26,6 +26,7 @@ Comment json
   parentId CommentId Maybe
   deriving Eq Show
 Post json
+  title Text
   content Text
   timestamp UTCTime
   userId UserId

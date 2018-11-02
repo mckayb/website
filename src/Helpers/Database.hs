@@ -1,13 +1,20 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE FlexibleContexts           #-}
+{-# LANGUAGE FlexibleInstances          #-}
+{-# LANGUAGE GADTs                      #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
+{-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE TypeFamilies               #-}
 
 module Helpers.Database where
 
 import Import
+import Helpers.Email
 
 getUsers :: Handler [Entity User]
 getUsers = runDB $ selectList [] []
 
-getUserByEmail :: Text -> Handler (Maybe (Entity User))
+getUserByEmail :: Email -> Handler (Maybe (Entity User))
 getUserByEmail email = runDB $ selectFirst [UserEmail ==. email] []
 
 getPasswordByUser :: Entity User -> Handler (Maybe (Entity Password))
@@ -27,6 +34,9 @@ getRoles = runDB $ selectList [] []
 
 getRoleByUser :: Entity User -> Handler (Maybe Role)
 getRoleByUser u = runDB $ get $ (userRoleId . entityVal) u
+
+getRoleByName :: Text -> Handler (Maybe (Entity Role))
+getRoleByName n = runDB $ selectFirst [RoleName ==. n] []
 
 insertUser :: User -> Handler (Key User)
 insertUser user = runDB $ insert user

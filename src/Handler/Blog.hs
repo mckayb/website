@@ -1,24 +1,31 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 module Handler.Blog where
 
 import Import
 import Helpers.Database
-import Helpers.Forms
 import CMarkGFM (commonmarkToHtml, optSafe)
 import Database.Persist.Sql (fromSqlKey)
-import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
-import Data.String.Conversions
-import Data.Aeson
 import qualified Data.Text as Text
+import qualified Helpers.Session as Session
 
 getPostContent :: Entity Post -> Text
 getPostContent = (commonmarkToHtml [optSafe] []) . postContent . entityVal
 
 getTimestamp :: Entity Post -> Text
 getTimestamp = Text.pack . formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal
+
+getPostTitle :: Entity Post -> Text
+getPostTitle = postTitle . entityVal
+
+takeWhileOneMore :: (a -> Bool) -> [a] -> [a]
+takeWhileOneMore p = foldr (\x ys -> if p x then x:ys else [x]) []
+
+takeUntilFirstParagraphInc :: [Text] -> [Text]
+takeUntilFirstParagraphInc = takeWhileOneMore (not . Text.isPrefixOf "<p>")
+
+getPostTeaser :: Entity Post -> Text
+getPostTeaser = Text.unlines . takeUntilFirstParagraphInc . Text.lines . getPostContent
 
 getBlogR :: Handler Html
 getBlogR = do
@@ -27,27 +34,22 @@ getBlogR = do
   defaultLayout $ do
     setTitle "Blog"
     toWidget [lucius|
-      .post:before {
-        content:'';
-        width:100%;
-        height:100%;    
-        position:absolute;
-        left:0;
-        top:0;
-        background:linear-gradient(transparent 130px, white);
-      }
-
-      .post {
-        max-height: 200px;
-        overflow: hidden;
+      .post .post__content {
         margin-bottom: 21px;
-        cursor: pointer;
       }
 
-      .post .post__time {
-        position: absolute;
-        top: 20px;
-        right: 20px;
+      .post .post__date {
+        margin-bottom: 15px;
+      }
+
+      .post .post__title a {
+        color: black;
+      }
+
+      .post h1,
+      .post h2,
+      .post h3 {
+        margin-top: 0;
       }
 
       .row--bottom-border {
@@ -57,13 +59,6 @@ getBlogR = do
         margin-bottom: 21px;
       }
     |]
-    toWidget [julius|
-      $(function() {
-        $(".post").click(function() {
-          document.location = "@{BlogR}/" + $(this).data("post")
-        })
-      })
-    |]
     [whamlet|
       $if (null posts)
         <div>Coming soon!
@@ -72,11 +67,14 @@ getBlogR = do
         $forall post <- posts
           <div .row .row--bottom-border>
             <div .col-md-12>
-              <article .post data-post=#{getId post}>
-                <span .post__time .text-muted>#{getTimestamp post}
-                #{preEscapedToMarkup (getPostContent post)}
+              <article .post>
+                <h1 .post__title>
+                  <a href="@{BlogR}/#{getId post}">#{getPostTitle post}
+                <div .post__date .text-muted>
+                  #{getTimestamp post}
+                <div .post__content>
+                  #{preEscapedToMarkup (getPostTeaser post)}
     |]
-
 data Tree a = Nil | Node { treeLabel :: a, treeChildren :: [Tree a]}
   deriving (Eq, Show)
 
@@ -108,89 +106,33 @@ commentTreeWidget postId comments =
   where
     entityCommentMessage = commentMessage . entityVal
 
-rootCommentForm :: Form Textarea
-rootCommentForm = renderBootstrap3 BootstrapBasicForm $
-  areq textareaField messageSettings Nothing
-  where 
-    messageSettings = FieldSettings
-      { fsLabel = "Comment"
-      , fsId = Nothing
-      , fsTooltip = Nothing
-      , fsName = Nothing
-      , fsAttrs = [("class", "form-control"), ("placeholder", "Comment Message")]
-      }
+postBlogPostCommentR :: Key Post -> Key Comment -> Handler Value
+postBlogPostCommentR _ _ = do
+  _ <- Session.requireUser
+  returnJson ([] :: [Entity User])
 
 getBlogPostR :: Key Post -> Handler Html
-getBlogPostR = renderBlogPostR []
-
-renderBlogPostR :: [FormReaction] -> Key Post -> Handler Html
-renderBlogPostR reactions a = do
+getBlogPostR a = do
   post <- getPost a
   case post of
-    Just post' -> do
-      comments <- commentsToTree <$> getCommentsForPost post'
-      (rootCommentFormWidget, _) <- generateFormPost rootCommentForm
-      defaultLayout $ do
-        toWidget [lucius|
-          .blog-post .blog-post__time {
-            position: absolute;
-            top: 0;
-            right: 15px;
-          }
-
-          .comment {
-            border-left: 1px solid lightgray;
-            list-style: none;
-            margin-bottom: 25px;
-            margin-top: 25px;
-          }
-        |]
-        [whamlet|
-          <article .blog-post>
-            <span .blog-post__time .text-muted>#{getTimestamp post'}
-            #{preEscapedToMarkup (getPostContent post')}
-
-          <hr>
-
-          <div>
-            ^{formReactionWidget reactions}
-          <div>
-          $if not (null comments)
-            <form method="POST" action="@{BlogPostR a}">
-              <div .comments>
-                ^{commentTreeWidget a comments}
-
-          <form method="POST" action="@{BlogPostR a}">
-            ^{rootCommentFormWidget}
-            <input .btn.btn-primary type="submit" name="action" value="Submit">
-        |]
+    Just post' -> defaultLayout $ do
+      toWidget [lucius|
+        .blog-post .blog-post__time {
+          position: absolute;
+          top: 0;
+          right: 0;
+        }
+        .comment {
+          border-left: 1px solid lightgray;
+          list-style: none;
+          margin-bottom: 25px;
+          margin-top: 25px;
+        }
+      |]
+      [whamlet|
+        <article .blog-post>
+          <span .blog-post__time .text-muted>#{getTimestamp post'}
+          <h1>#{getPostTitle post'}
+          #{preEscapedToMarkup (getPostContent post')}
+      |]
     Nothing -> notFound
-
-postBlogPostR :: Key Post -> Handler Html
-postBlogPostR a = do
-  user <- requireUser
-  ((result, _), _) <- runFormPost rootCommentForm
-  action <- lookupPostParam "action"
-  liftIO $ putStrLn "\n\n\n\n"
-  liftIO $ print result
-  liftIO $ print action
-  liftIO $ putStrLn "\n\n\n\n"
-  case (result, action) of
-    (FormSuccess (Textarea comment), Just "Submit") -> do
-      time <- liftIO getCurrentTime
-      _ <- runDB $ insertEntity $ Comment comment time (entityKey user) a Nothing
-      renderBlogPostR [] a
-    _ -> renderBlogPostR [(Danger, "Something went wrong!")] a
-
-postBlogPostCommentR :: Key Post -> Key Comment -> Handler Html
-postBlogPostCommentR a b = do
-  user <- requireUser
-  renderBlogPostR [] a
-
-requireUser :: Handler (Entity User)
-requireUser = do
-  mUserJson <- lookupSession userSessionKey
-  let mUser = decode =<< cs <$> mUserJson :: Maybe (Entity User)
-  case mUser of
-    Just u -> return u
-    Nothing -> redirect LoginR
