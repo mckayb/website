@@ -1,5 +1,3 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 module Handler.Role where
@@ -7,6 +5,7 @@ module Handler.Role where
 import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Helpers.Forms
+import qualified Helpers.Database as Database
 
 getRoleR :: Handler Html
 getRoleR = do
@@ -18,8 +17,12 @@ postRoleR = do
   ((result, formWidget), _) <- runFormPost roleForm
   case result of
     FormSuccess (name) -> do
-      _ <- runDB $ insertEntity $ Role name
-      renderRole formWidget [(Success, "Successfully created new role" <> name <> ".")]
+      existingRole <- Database.getRoleByName name
+      case existingRole of
+        Just _ -> renderRole formWidget [(Danger, "A role already exists with that name.")]
+        Nothing -> do
+          _ <- runDB $ insertEntity $ Role name
+          renderRole formWidget [(Success, "Successfully created new role" <> name <> ".")]
     _ -> do
       renderRole formWidget [(Danger, "There was an error submitting your form.")]
 

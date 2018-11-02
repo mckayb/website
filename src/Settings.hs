@@ -1,8 +1,7 @@
 {-# LANGUAGE CPP               #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 {-# LANGUAGE TemplateHaskell   #-}
+
 -- | Settings are centralized, as much as possible, into this file. This
 -- includes database connection settings, static file locations, etc.
 -- In addition, you can configure a number of different aspects of Yesod
@@ -60,9 +59,6 @@ data AppSettings = AppSettings
 
     , appAuthDummyLogin         :: Bool
     -- ^ Indicate if auth dummy login should be enabled.
-    , appJWTSecret              :: Text
-    , appJWTIssuer              :: Text
-    , appJWTExpiration          :: Integer
     }
 
 instance FromJSON AppSettings where
@@ -91,10 +87,6 @@ instance FromJSON AppSettings where
     appAnalytics              <- o .:? "analytics"
 
     appAuthDummyLogin         <- o .:? "auth-dummy-login"      .!= dev
-
-    appJWTSecret              <- o .:  "jwt-secret"
-    appJWTIssuer              <- o .:  "jwt-issuer"
-    appJWTExpiration          <- o .:  "jwt-expiration"
 
     return AppSettings {..}
 
@@ -151,9 +143,6 @@ combineScripts :: Name -> [Route Static] -> Q Exp
 combineScripts = combineScripts'
   (appSkipCombining compileTimeAppSettings)
   combineSettings
-
-tokenSessionKey :: Text
-tokenSessionKey = "TOKEN_SESSION"
 
 userSessionKey :: Text
 userSessionKey = "USER_SESSION"

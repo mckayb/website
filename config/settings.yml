@@ -32,12 +32,9 @@ database:
   user:     "_env:YESOD_PGUSER:homestead"
   password: "_env:YESOD_PGPASS:secret"
   host:     "_env:YESOD_PGHOST:localhost"
-  port:     "_env:YESOD_PGPORT:54320"
+  port:     "_env:YESOD_PGPORT:5432"
   # See config/test-settings.yml for an override during tests
   database: "_env:YESOD_PGDATABASE:website"
   poolsize: "_env:YESOD_PGPOOLSIZE:10"
 
-jwt-secret: Insert secret here
-jwt-issuer: Insert issuer here
-jwt-expiration: 86400
-#analytics: UA-YOURCODE
+# analytics: UA-YOURCODE

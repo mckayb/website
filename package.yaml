@@ -4,6 +4,7 @@ version: "0.0.0"
 default-extensions:
 - GeneralizedNewtypeDeriving
 - OverloadedStrings
+- NoImplicitPrelude
 
 dependencies:
 
@@ -52,6 +53,7 @@ dependencies:
 - bcrypt
 - cmark-gfm
 - string-conversions
+- email-validate
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.
@@ -96,6 +98,7 @@ tests:
     - website
     - hspec >=2.0.0
     - yesod-test
+    - faker
 
 # Define flags used by "yesod devel" to make compilation faster
 flags:

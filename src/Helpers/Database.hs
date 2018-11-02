@@ -3,20 +3,18 @@
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
-{-# LANGUAGE NoImplicitPrelude          #-}
-{-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
 
 module Helpers.Database where
 
 import Import
-import Database.Persist.Sql
+import Helpers.Email
 
 getUsers :: Handler [Entity User]
 getUsers = runDB $ selectList [] []
 
-getUserByEmail :: Text -> Handler (Maybe (Entity User))
+getUserByEmail :: Email -> Handler (Maybe (Entity User))
 getUserByEmail email = runDB $ selectFirst [UserEmail ==. email] []
 
 getPasswordByUser :: Entity User -> Handler (Maybe (Entity Password))
@@ -25,14 +23,17 @@ getPasswordByUser user = runDB $ getBy $ UniquePasswordUser $ entityKey user
 getPosts :: Handler [Entity Post]
 getPosts = runDB $ selectList [] []
 
-getPost :: Int64 -> Handler (Maybe (Entity Post))
-getPost postId = runDB $ selectFirst [PostId ==. (toSqlKey postId)] []
+getPost :: Key Post -> Handler (Maybe (Entity Post))
+getPost postId = runDB $ selectFirst [PostId ==. postId] []
 
 getRoles :: Handler [Entity Role]
 getRoles = runDB $ selectList [] []
 
 getRoleByUser :: Entity User -> Handler (Maybe Role)
 getRoleByUser u = runDB $ get $ (userRoleId . entityVal) u
+
+getRoleByName :: Text -> Handler (Maybe (Entity Role))
+getRoleByName n = runDB $ selectFirst [RoleName ==. n] []
 
 insertUser :: User -> Handler (Key User)
 insertUser user = runDB $ insert user

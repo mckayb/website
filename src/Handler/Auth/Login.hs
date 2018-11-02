@@ -1,16 +1,14 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 module Handler.Auth.Login where
 
 import Import hiding (exp)
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
-import Data.Aeson (encode)
-import Data.String.Conversions (cs)
 import Helpers.Database
 import Helpers.BCrypt
 import Helpers.Forms
+import Helpers.Session
+import Helpers.Email
 
 getLoginR :: Handler Html
 getLoginR = do
@@ -20,8 +18,8 @@ getLoginR = do
 postLoginR :: Handler Html
 postLoginR = do
   ((result, formWidget), _) <- runFormPost loginForm
-  -- Validate the Form
   case result of
+  -- Validate the Form
     FormSuccess (email, password) -> do
       mUser <- getUserByEmail email
       -- Validate that there's a user with that email
@@ -40,8 +38,7 @@ postLoginR = do
                   mRole <- getRoleByUser user'
                   case mRole of
                     Just role -> do
-                      setSession userSessionKey $ (cs . encode) user'
-                      setSession roleSessionKey $ (cs . encode) role
+                      keepLoggedIn user' role
                       redirect HomeR
                     Nothing -> renderLogin formWidget [(Danger, "Something went wrong...")]
             Nothing -> do
@@ -51,9 +48,9 @@ postLoginR = do
     _ -> do
       renderLogin formWidget [(Danger, "Form failed validation")]
 
-loginForm :: Form (Text, Text)
+loginForm :: Form (Email, Text)
 loginForm = renderBootstrap3 BootstrapBasicForm $ (,)
-  <$> areq emailField emailSettings Nothing
+  <$> areq emailField' emailSettings Nothing
   <*> areq passwordField passwordSettings Nothing
   where
     emailSettings = FieldSettings
