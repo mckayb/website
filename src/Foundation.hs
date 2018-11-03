@@ -5,7 +5,6 @@
 {-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE FlexibleContexts #-}
 
 module Foundation where
 

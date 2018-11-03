@@ -3,21 +3,21 @@
 module Handler.Post where
 
 import Import
-import CMarkGFM
-import Helpers.Forms
-import Helpers.Session
-
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
+import Helpers.Forms (FormReaction, FormAlert(Danger))
+import qualified CMarkGFM
+import qualified Helpers.Forms as Forms
+import qualified Helpers.Session as Session
 
 getPostR :: Handler Html
 getPostR = do
-  _ <- requireAdminUser
+  _ <- Session.requireAdminUser
   (formWidget, _) <- generateFormPost postForm
   renderPost formWidget Nothing []
 
 postPostR :: Handler Html
 postPostR = do
-  user <- requireAdminUser
+  user <- Session.requireAdminUser
   ((result, formWidget), _) <- runFormPost postForm
   action <- lookupPostParam "action"
   case (result, action) of
@@ -52,7 +52,7 @@ postForm = renderBootstrap3 BootstrapBasicForm $ (,)
 
 previewWidget :: Text -> Text -> Widget
 previewWidget title markdown = do
-  let html = commonmarkToHtml [optSafe] [] markdown
+  let html = CMarkGFM.commonmarkToHtml [CMarkGFM.optSafe] [] markdown
    in [whamlet|
         <div>
           <h1>#{title}
@@ -63,7 +63,7 @@ renderPost :: Widget -> Maybe Widget -> [FormReaction] -> Handler Html
 renderPost widget mPrev reactions =
   defaultLayout $ do
     setTitle "Publish New Post"
-    renderPanel $ do
+    Forms.renderPanel $ do
       toWidget [lucius|
         section.post h4 {
           margin-bottom: 20px;
@@ -88,7 +88,7 @@ renderPost widget mPrev reactions =
 
           $if not (null reactions)
             <div>
-              ^{formReactionWidget reactions}
+              ^{Forms.formReactionWidget reactions}
             <br>
 
           $maybe prev <- mPrev
