@@ -60,7 +60,8 @@ getBlogR = do
     |]
     [whamlet|
       $if (null posts)
-        <div>Coming soon!
+        <div .row>
+          <div .col-md-12>Coming soon!
 
       $else
         $forall post <- posts
@@ -68,7 +69,7 @@ getBlogR = do
             <div .col-md-12>
               <article .post>
                 <h1 .post__title>
-                  <a href="@{BlogR}/#{getId post}">#{getPostTitle post}
+                  <a href="@{BlogR}post/#{getId post}">#{getPostTitle post}
                 <div .post__date .text-muted>
                   #{getTimestamp post}
                 <div .post__content>

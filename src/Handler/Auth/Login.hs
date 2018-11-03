@@ -39,7 +39,7 @@ postLoginR = do
                   case mRole of
                     Just role -> do
                       keepLoggedIn user' role
-                      redirect HomeR
+                      redirect BlogR
                     Nothing -> renderLogin formWidget [(Danger, "Something went wrong...")]
             Nothing -> do
               renderLogin formWidget [(Danger, "Incorrect username or password")]

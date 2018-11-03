@@ -25,9 +25,7 @@ spec = withApp $ do
         setMethod "POST"
         setUrl RegisterR
 
-      statusIs 200
-      htmlCount ".alert.alert-danger" 1
-      bodyContains "Form failed validation"
+      statusIs 403
 
     it "Shouldn't let you register with invalid information" $ do
       get RegisterR

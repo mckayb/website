@@ -23,7 +23,7 @@
 <!-- Page Contents -->
 
 <div .container>
-  $if not $ Just HomeR == mcurrentRoute
+  $if not $ Just BlogR == mcurrentRoute
     <ul .breadcrumb>
       $forall bc <- parents
         <li>
@@ -35,8 +35,9 @@
     <div .alert.alert-info #message>#{msg}
 
 
-$if (Just HomeR == mcurrentRoute)
-  ^{widget}
+$if (Just BlogR == mcurrentRoute)
+  <div .container>
+    ^{widget}
 $else
   <div .container>
     <div .row>

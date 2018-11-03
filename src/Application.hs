@@ -22,7 +22,7 @@ module Application
 import Control.Monad.Logger                 (liftLoc, runLoggingT)
 import Database.Persist.Postgresql          (createPostgresqlPool, pgConnStr,
                                              pgPoolSize, runSqlPool
-                                             -- , runMigrationUnsafe
+                                            , runMigrationUnsafe
                                             )
 import Import
 import Language.Haskell.TH.Syntax           (qLocation)
@@ -42,7 +42,6 @@ import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 import Handler.Common
-import Handler.Home
 import Handler.Blog
 import Handler.User
 import Handler.Post
@@ -88,8 +87,8 @@ makeFoundation appSettings = do
     (pgPoolSize $ appDatabaseConf appSettings)
 
   -- Perform database migration using our application's logging settings.
-  runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
-  -- runLoggingT (runSqlPool (runMigrationUnsafe migrateAll) pool) logFunc
+  -- runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
+  runLoggingT (runSqlPool (runMigrationUnsafe migrateAll) pool) logFunc
 
   -- Return the foundation
   return $ mkFoundation pool
