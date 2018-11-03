@@ -111,11 +111,6 @@ instance Yesod App where
             , menuItemRoute = BlogR
             , menuItemAccessCallback = True
             }
-          -- , NavbarRight $ MenuItem
-            -- { menuItemLabel = "Blog"
-            -- , menuItemRoute = BlogR
-            -- , menuItemAccessCallback = True
-            -- }
           ]
 
     let navbarLeftMenuItems = [x | NavbarLeft x <- menuItems]
@@ -148,7 +143,6 @@ instance Yesod App where
   -- Routes not requiring authentication.
   isAuthorized RegisterR _ = return Authorized
   isAuthorized LoginR _ = return Authorized
-  -- isAuthorized HomeR _ = return Authorized
   isAuthorized BlogR _ = return Authorized
   isAuthorized (BlogPostR _) _ = return Authorized
   isAuthorized FaviconR _ = return Authorized
@@ -209,7 +203,6 @@ instance YesodBreadcrumbs App where
     -> Handler (Text, Maybe (Route App))
   breadcrumb BlogR = return ("Blog", Nothing)
   breadcrumb (BlogPostR _) = return ("Post", Just BlogR)
-  -- breadcrumb HomeR = return ("Home", Nothing)
 
   breadcrumb LoginR = return ("Login", Just BlogR)
   breadcrumb RegisterR = return ("Register", Just BlogR)
