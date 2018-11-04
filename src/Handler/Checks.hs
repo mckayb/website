@@ -5,6 +5,7 @@ module Handler.Checks where
 import Import
 import Text.Shakespeare.Text (st)
 import Database.Persist.Sql (Single(unSingle), rawSql)
+import Helpers.Types
 
 getLivenessR :: Handler ()
 getLivenessR = return ()

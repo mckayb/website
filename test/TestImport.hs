@@ -8,18 +8,19 @@ module TestImport
 import Application           (makeFoundation, makeLogWare)
 import ClassyPrelude         as X hiding (delete, deleteBy, Handler)
 import Database.Persist      as X hiding (get)
-import Database.Persist.Sql  (SqlPersistM, runSqlPersistMPool, rawExecute, rawSql, unSingle, connEscapeName)
+import Database.Persist.Sql  (SqlPersistM, runSqlPersistMPool, rawSql, rawExecute, connEscapeName, unSingle)
 import Foundation            as X
 import Model                 as X
 import Test.Hspec            as X
-import Text.Shakespeare.Text (st)
 import Yesod.Default.Config2 (useEnv, loadYamlSettings)
 import Yesod.Auth            as X hiding (LoginR)
 import Yesod.Test            as X
 import Yesod.Core            as X (SessionBackend, defaultClientSessionBackend, setSession)
 import Yesod.Core.Unsafe     (fakeHandlerGetLogger)
+import Text.Shakespeare.Text (st)
 import Helpers.BCrypt
 import Helpers.Email
+import Helpers.Types
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do
@@ -55,23 +56,6 @@ withApp = before $ do
   logWare <- liftIO $ makeLogWare foundation
   return (foundation, logWare)
 
--- This function will truncate all of the tables in your database.
--- 'withApp' calls it before each test, creating a clean environment for each
--- spec to run in.
-wipeDB :: App -> IO ()
-wipeDB app = runDBWithApp app $ do
-  tables <- getTables
-  sqlBackend <- ask
-  let esc = connEscapeName sqlBackend . DBName
-
-  let escapedTables = map esc tables
-      query = "TRUNCATE TABLE " ++ intercalate ", " escapedTables
-
-  let resetIncQueries = map (\t -> "ALTER SEQUENCE " <> esc (t <> "_id_seq") <> " RESTART WITH 1") tables
-
-  rawExecute query []
-  traverse_ (flip rawExecute $ []) resetIncQueries
-
 getTables :: DB [Text]
 getTables = do
   tables <- rawSql [st|
@@ -81,6 +65,25 @@ getTables = do
   |] []
 
   return $ map unSingle tables
+
+truncateTables :: DB ()
+truncateTables = do
+  tables <- getTables
+  sqlBackend <- ask
+  let esc = connEscapeName sqlBackend . DBName
+
+  let escapedTables = map esc tables
+      query = [st|TRUNCATE TABLE #{intercalate ", " escapedTables} RESTART IDENTITY CASCADE|] 
+
+  case escapedTables of
+    [] -> error "Error: No tables to truncate!"
+    _ -> rawExecute query []
+
+-- This function will truncate all of the tables in your database.
+-- 'withApp' calls it before each test, creating a clean environment for each
+-- spec to run in.
+wipeDB :: App -> IO ()
+wipeDB app = runDBWithApp app $ truncateTables
 
 createRole :: Text -> YesodExample App (Entity Role)
 createRole name = do
