@@ -87,6 +87,31 @@ executables:
     when:
     - condition: flag(library-only)
       buildable: false
+  migration:
+    main: Main.hs
+    source-dirs: app/migration
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - website
+    when:
+    - condition: flag(library-only)
+      buildable: false
+  fixture:
+    main: Main.hs
+    source-dirs: app/fixture
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - website
+    when:
+    - condition: flag(library-only)
+      buildable: false
+  
 
 # Test suite
 tests:

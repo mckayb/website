@@ -72,8 +72,15 @@ image:
       config: /config
       static: /static
 
-    entrypoints:
+    executables:
+      - migration
+      - fixture
       - website
 
-docker:
-  enable: true
+    entrypoints:
+      - migration
+      - fixture
+      - website
+
+# docker:
+  # enable: true
