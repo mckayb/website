@@ -1,13 +1,13 @@
 module Helpers.Session where
 
 import Import
-import Helpers.Auth
-import Data.Aeson (encode)
-import Data.String.Conversions (cs)
+import qualified Helpers.Auth as Auth
+import qualified Data.String.Conversions as Conversions
+import qualified Data.Aeson as Aeson
 
 requireUser :: Handler (Entity User)
 requireUser = do
-  mUser <- getCurrentUser
+  mUser <- Auth.getCurrentUser
   case mUser of
     Just u -> return u
     Nothing -> permissionDenied "You must login to access this page"
@@ -15,7 +15,7 @@ requireUser = do
 requireAdminUser :: Handler (Entity User)
 requireAdminUser = do
   user <- requireUser
-  mRole <- getCurrentRole
+  mRole <- Auth.getCurrentRole
   case mRole of
     Nothing -> permissionDenied "You must be an admin to access this page"
     Just r ->
@@ -25,6 +25,6 @@ requireAdminUser = do
 
 keepLoggedIn :: Entity User -> Role -> Handler ()
 keepLoggedIn user role = do
-  setSession userSessionKey $ (cs . encode) user
-  setSession roleSessionKey $ (cs . encode) role
+  setSession userSessionKey $ (Conversions.cs . Aeson.encode) user
+  setSession roleSessionKey $ (Conversions.cs . Aeson.encode) role
   return ()

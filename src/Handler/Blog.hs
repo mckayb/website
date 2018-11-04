@@ -3,16 +3,16 @@
 module Handler.Blog where
 
 import Import
-import Helpers.Database
-import CMarkGFM
-import Database.Persist.Sql
-import qualified Data.Text as T
+import qualified CMarkGFM
+import qualified Database.Persist.Sql as Sql (fromSqlKey)
+import qualified Helpers.Database as Database
+import qualified Data.Text as Text
 
 getPostContent :: Entity Post -> Text
-getPostContent = (commonmarkToHtml [optSafe] []) . postContent . entityVal
+getPostContent = (CMarkGFM.commonmarkToHtml [CMarkGFM.optSafe] []) . postContent . entityVal
 
 getTimestamp :: Entity Post -> Text
-getTimestamp = T.pack . formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal
+getTimestamp = Text.pack . formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal
 
 getPostTitle :: Entity Post -> Text
 getPostTitle = postTitle . entityVal
@@ -21,15 +21,15 @@ takeWhileOneMore :: (a -> Bool) -> [a] -> [a]
 takeWhileOneMore p = foldr (\x ys -> if p x then x:ys else [x]) []
 
 takeUntilFirstParagraphInc :: [Text] -> [Text]
-takeUntilFirstParagraphInc = takeWhileOneMore (not . T.isPrefixOf "<p>")
+takeUntilFirstParagraphInc = takeWhileOneMore (not . Text.isPrefixOf "<p>")
 
 getPostTeaser :: Entity Post -> Text
-getPostTeaser = T.unlines . takeUntilFirstParagraphInc . T.lines . getPostContent
+getPostTeaser = Text.unlines . takeUntilFirstParagraphInc . Text.lines . getPostContent
 
 getBlogR :: Handler Html
 getBlogR = do
-  posts <- getPosts
-  let getId = fromSqlKey . entityKey
+  posts <- Database.getPosts
+  let getId = Sql.fromSqlKey . entityKey
   defaultLayout $ do
     setTitle "Blog"
     toWidget [lucius|
@@ -60,7 +60,8 @@ getBlogR = do
     |]
     [whamlet|
       $if (null posts)
-        <div>Coming soon!
+        <div .row>
+          <div .col-md-12>Coming soon!
 
       $else
         $forall post <- posts
@@ -68,7 +69,7 @@ getBlogR = do
             <div .col-md-12>
               <article .post>
                 <h1 .post__title>
-                  <a href="@{BlogR}/#{getId post}">#{getPostTitle post}
+                  <a href="@{BlogR}post/#{getId post}">#{getPostTitle post}
                 <div .post__date .text-muted>
                   #{getTimestamp post}
                 <div .post__content>
@@ -77,7 +78,7 @@ getBlogR = do
 
 getBlogPostR :: Key Post -> Handler Html
 getBlogPostR a = do
-  post <- getPost a
+  post <- Database.getPost a
   case post of
     Just post' -> defaultLayout $ do
       toWidget [lucius|

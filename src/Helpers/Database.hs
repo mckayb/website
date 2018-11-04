@@ -1,15 +1,7 @@
-{-# LANGUAGE FlexibleContexts           #-}
-{-# LANGUAGE FlexibleInstances          #-}
-{-# LANGUAGE GADTs                      #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses      #-}
-{-# LANGUAGE TemplateHaskell            #-}
-{-# LANGUAGE TypeFamilies               #-}
-
 module Helpers.Database where
 
 import Import
-import Helpers.Email
+import Helpers.Email (Email)
 
 getUsers :: Handler [Entity User]
 getUsers = runDB $ selectList [] []

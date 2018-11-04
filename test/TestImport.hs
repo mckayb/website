@@ -102,13 +102,3 @@ createPost :: (Entity User) -> Text -> Text -> UTCTime -> YesodExample App (Enti
 createPost user title content timestamp = do
   postEntity <- runDB $ insertEntity $ Post title content timestamp (entityKey user)
   return postEntity
-
--- | Authenticate as a user. This relies on the `auth-dummy-login: true` flag
--- being set in test-settings.yaml, which enables dummy authentication in
--- Foundation.hs
--- authenticateAs :: Entity User -> YesodExample App ()
--- authenticateAs (Entity _ u) = do
-  -- request $ do
-    -- setMethod "POST"
-    -- addPostParam "ident" $ userIdent u
-    -- setUrl $ AuthR $ PluginR "dummy" []

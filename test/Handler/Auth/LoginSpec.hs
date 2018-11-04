@@ -24,9 +24,7 @@ spec = withApp $ do
         setMethod "POST"
         setUrl LoginR
 
-      statusIs 200
-      htmlCount ".alert.alert-danger" 1
-      bodyContains "Form failed validation"
+      statusIs 403
 
     it "Should fail if no email or password is set" $ do
       get LoginR

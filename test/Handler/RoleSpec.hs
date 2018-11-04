@@ -35,11 +35,10 @@ spec = withApp $ do
 
       request $ do
         setMethod "POST"
+        byLabelExact "Role" "Commoner"
         setUrl RoleR
 
-      statusIs 200
-      htmlCount ".alert.alert-danger" 1
-      bodyContains "There was an error submitting your form."
+      statusIs 403
 
     it "Should fail if the params aren't set properly" $ do
       role <- createRole "Admin"
@@ -50,8 +49,9 @@ spec = withApp $ do
       goToRole em "mypassword"
 
       request $ do
+        addToken
         setMethod "POST"
-        byLabelExact "Role" "Commoner"
+        -- byLabelExact "Role" "Commoner"
         setUrl RoleR
 
       statusIs 200

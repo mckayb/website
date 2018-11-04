@@ -4,7 +4,8 @@ module Handler.Role where
 
 import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
-import Helpers.Forms
+import Helpers.Forms (FormReaction, FormAlert(Danger, Success))
+import qualified Helpers.Forms as Forms
 import qualified Helpers.Database as Database
 
 getRoleR :: Handler Html
@@ -41,9 +42,9 @@ renderRole :: Widget -> [FormReaction] -> Handler Html
 renderRole widget errors =
   defaultLayout $ do
     setTitle "Create Role"
-    renderPanel $ [whamlet|
+    Forms.renderPanel $ [whamlet|
       <div>
-        ^{formReactionWidget errors}
+        ^{Forms.formReactionWidget errors}
       <div>
         <form method="POST" action="@{RoleR}">
           ^{widget}

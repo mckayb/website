@@ -3,12 +3,14 @@
 module Handler.Auth.Login where
 
 import Import hiding (exp)
-import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
-import Helpers.Database
-import Helpers.BCrypt
-import Helpers.Forms
-import Helpers.Session
-import Helpers.Email
+import Yesod.Form.Bootstrap3 (BootstrapFormLayout(BootstrapBasicForm), renderBootstrap3)
+import Helpers.Forms (FormReaction, FormAlert(Danger))
+import Helpers.Email (Email)
+import qualified Helpers.Database as Database
+import qualified Helpers.BCrypt as BCrypt
+import qualified Helpers.Forms as Forms
+import qualified Helpers.Session as Session
+import qualified Helpers.Email as Email
 
 getLoginR :: Handler Html
 getLoginR = do
@@ -21,25 +23,25 @@ postLoginR = do
   case result of
   -- Validate the Form
     FormSuccess (email, password) -> do
-      mUser <- getUserByEmail email
+      mUser <- Database.getUserByEmail email
       -- Validate that there's a user with that email
       case mUser of
         Just user' -> do
           -- Validate that there's a password associated with that user
-          mPassword <- getPasswordByUser user'
+          mPassword <- Database.getPasswordByUser user'
           case mPassword of
             Just (Entity _ password') -> do
               -- Validate that the password we have matches the password they gave
-              let matches = passwordMatches (passwordHash password') password
+              let matches = BCrypt.passwordMatches (passwordHash password') password
               case matches of
                 False -> renderLogin formWidget [(Danger, "Incorrect username or password")]
                 True -> do
                   -- Grab the user's role so that we can do admin checks later
-                  mRole <- getRoleByUser user'
+                  mRole <- Database.getRoleByUser user'
                   case mRole of
                     Just role -> do
-                      keepLoggedIn user' role
-                      redirect HomeR
+                      Session.keepLoggedIn user' role
+                      redirect BlogR
                     Nothing -> renderLogin formWidget [(Danger, "Something went wrong...")]
             Nothing -> do
               renderLogin formWidget [(Danger, "Incorrect username or password")]
@@ -50,7 +52,7 @@ postLoginR = do
 
 loginForm :: Form (Email, Text)
 loginForm = renderBootstrap3 BootstrapBasicForm $ (,)
-  <$> areq emailField' emailSettings Nothing
+  <$> areq Email.emailField' emailSettings Nothing
   <*> areq passwordField passwordSettings Nothing
   where
     emailSettings = FieldSettings
@@ -72,9 +74,9 @@ renderLogin :: Widget -> [FormReaction] -> Handler Html
 renderLogin widget reactions =
   defaultLayout $ do
     setTitle "Login"
-    renderPanel $ [whamlet|
+    Forms.renderPanel $ [whamlet|
       <div>
-        ^{formReactionWidget reactions}
+        ^{Forms.formReactionWidget reactions}
       <div>
         <form method="POST" action="@{LoginR}">
           ^{widget}

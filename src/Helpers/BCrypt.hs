@@ -1,35 +1,28 @@
-{-# LANGUAGE EmptyDataDecls             #-}
-{-# LANGUAGE FlexibleInstances          #-}
-{-# LANGUAGE GADTs                      #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses      #-}
-{-# LANGUAGE TemplateHaskell            #-}
-{-# LANGUAGE TypeFamilies               #-}
-
 module Helpers.BCrypt where
 
 import Prelude
-import Crypto.BCrypt as Import hiding (hashPassword)
-import qualified Data.Text as T
+import Database.Persist.Sql (PersistField, PersistFieldSql)
+import Data.Text (Text)
+import Crypto.BCrypt (HashingPolicy(HashingPolicy))
+import qualified Safe (fromJustNote)
+import qualified Crypto.BCrypt as CB
 import qualified Data.Text.Encoding as TE
-import           Database.Persist.Sql
-import           Safe (fromJustNote)
+
+newtype BCrypt =
+  BCrypt { unBCrypt ::  Text }
+  deriving (Eq, PersistField, PersistFieldSql, Show)
 
 policy :: HashingPolicy
 policy = HashingPolicy
-  { preferredHashCost = 12
-  , preferredHashAlgorithm = "$2a$"
+  { CB.preferredHashCost = 12
+  , CB.preferredHashAlgorithm = "$2a$"
   }
 
-newtype BCrypt =
-  BCrypt { unBCrypt ::  T.Text }
-  deriving (Eq, PersistField, PersistFieldSql, Show)
-
-hashPassword :: T.Text -> IO BCrypt
+hashPassword :: Text -> IO BCrypt
 hashPassword rawPassword = do
-  mPassword <- hashPasswordUsingPolicy policy $ TE.encodeUtf8 rawPassword
-  return $ BCrypt $ TE.decodeUtf8 $ fromJustNote "Invalid hashing policy" mPassword
+  mPassword <- CB.hashPasswordUsingPolicy policy $ TE.encodeUtf8 rawPassword
+  return $ BCrypt $ TE.decodeUtf8 $ Safe.fromJustNote "Invalid hashing policy" mPassword
 
-passwordMatches :: BCrypt -> T.Text -> Bool
+passwordMatches :: BCrypt -> Text -> Bool
 passwordMatches hash' pass = 
-  validatePassword (TE.encodeUtf8 $ unBCrypt hash') (TE.encodeUtf8 pass)
+  CB.validatePassword (TE.encodeUtf8 $ unBCrypt hash') (TE.encodeUtf8 pass)
