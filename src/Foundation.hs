@@ -102,7 +102,7 @@ instance Yesod App where
     mcurrentRoute <- getCurrentRoute
 
     -- Get the breadcrumbs, as defined in the YesodBreadcrumbs instance.
-    (title, parents) <- breadcrumbs
+    -- (title, parents) <- breadcrumbs
 
     -- Define the menu items of the header.
     let menuItems =
@@ -204,8 +204,8 @@ instance YesodBreadcrumbs App where
   breadcrumb BlogR = return ("Blog", Nothing)
   breadcrumb (BlogPostR _) = return ("Post", Just BlogR)
 
-  breadcrumb LoginR = return ("Login", Just BlogR)
-  breadcrumb RegisterR = return ("Register", Just BlogR)
+  breadcrumb LoginR = return ("Login", Nothing)
+  breadcrumb RegisterR = return ("Register", Nothing)
 
   breadcrumb _ = return ("home", Nothing)
 

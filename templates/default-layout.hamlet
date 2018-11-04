@@ -23,6 +23,7 @@
 <!-- Page Contents -->
 
 <div .container>
+  <!--
   $if not $ Just BlogR == mcurrentRoute
     <ul .breadcrumb>
       $forall bc <- parents
@@ -30,6 +31,7 @@
           <a href="@{fst bc}">#{snd bc}
 
       <li .active>#{title}
+  -->
 
   $maybe msg <- mmsg
     <div .alert.alert-info #message>#{msg}
