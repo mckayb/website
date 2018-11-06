@@ -83,25 +83,21 @@ truncateTables = do
 -- 'withApp' calls it before each test, creating a clean environment for each
 -- spec to run in.
 wipeDB :: App -> IO ()
-wipeDB app = runDBWithApp app $ truncateTables
+wipeDB app = runDBWithApp app truncateTables
 
 createRole :: Text -> YesodExample App (Entity Role)
-createRole name = do
-  role <- runDB $ insertEntity $ Role name
-  return role
+createRole name =
+  runDB $ insertEntity $ Role name
 
-createUser :: (Entity Role) -> Email -> YesodExample App (Entity User)
-createUser role email = do
-  user <- runDB $ insertEntity $ User email (entityKey role)
-  return user
+createUser :: Entity Role -> Email -> YesodExample App (Entity User)
+createUser role email =
+  runDB $ insertEntity $ User email (entityKey role)
 
-createPassword :: (Entity User) -> Text -> YesodExample App (Entity Password)
+createPassword :: Entity User -> Text -> YesodExample App (Entity Password)
 createPassword user pass = do
   hash' <- liftIO $ hashPassword pass
-  password <- runDB $ insertEntity $ Password (entityKey user) hash'
-  return password
+  runDB $ insertEntity $ Password (entityKey user) hash'
 
-createPost :: (Entity User) -> Text -> Text -> UTCTime -> YesodExample App (Entity Post)
-createPost user title content timestamp = do
-  postEntity <- runDB $ insertEntity $ Post title content timestamp (entityKey user)
-  return postEntity
+createPost :: Entity User -> Text -> Text -> UTCTime -> YesodExample App (Entity Post)
+createPost user title content timestamp =
+  runDB $ insertEntity $ Post title content timestamp (entityKey user)

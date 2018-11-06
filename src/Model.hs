@@ -44,7 +44,7 @@ runAppSeedDB :: DB ()
 runAppSeedDB = do
   roles <- selectList ([] :: [Filter Role]) []
   -- If we've already seeded the initial data, we don't need to do it again
-  if (length roles) > 0
+  if not (null roles)
     then return ()
     else do
       adminRole <- insertEntity $ Role "Admin"

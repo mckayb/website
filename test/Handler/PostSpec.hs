@@ -15,7 +15,7 @@ spec = withApp $ do
 
     it "Should let you go to the page if you are logged in" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (Email.mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -25,7 +25,7 @@ spec = withApp $ do
 
     it "Shouldn't let you preview a post if you don't have the title or content set" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (Email.mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -42,7 +42,7 @@ spec = withApp $ do
 
     it "Shouldn't let you publish a post if you don't have the title or content set" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (Email.mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -59,7 +59,7 @@ spec = withApp $ do
 
     it "Should let you preview the post you're about to publish" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (Email.mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -86,7 +86,7 @@ spec = withApp $ do
 
     it "Should let you publish the post successfully" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (Email.mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 

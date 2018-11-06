@@ -10,6 +10,6 @@ getUserR = do
 
 postUserR :: Handler Value
 postUserR = do
-  user <- (requireJsonBody :: Handler User)
+  user <- requireJsonBody :: Handler User
   insertedUser <- runDB $ insertEntity user
   returnJson insertedUser
