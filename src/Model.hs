@@ -40,12 +40,17 @@ runAppDB a =
     withPostgresqlPool appDBConn 3
       $ \pool -> liftIO $ runSqlPersistMPool a pool
 
-seedInitialData :: DB ()
-seedInitialData = do
-  adminRole <- insertEntity $ Role "Admin"
-  _ <- insertEntity $ Role "Commoner"
-  let Just email = mkEmail "test@example.com"
-  pass' <- liftIO $ hashPassword "password123"
-  adminUser <- insertEntity $ User email (entityKey adminRole)
-  _ <- insertEntity $ Password (entityKey adminUser) pass'
-  return ()
+runAppSeedDB :: DB ()
+runAppSeedDB = do
+  roles <- selectList ([] :: [Filter Role]) []
+  -- If we've already seeded the initial data, we don't need to do it again
+  if (length roles) > 0
+    then return ()
+    else do
+      adminRole <- insertEntity $ Role "Admin"
+      _ <- insertEntity $ Role "Commoner"
+      let Just email = mkEmail "test@example.com"
+      pass' <- liftIO $ hashPassword "password123"
+      adminUser <- insertEntity $ User email (entityKey adminRole)
+      _ <- insertEntity $ Password (entityKey adminUser) pass'
+      return ()
