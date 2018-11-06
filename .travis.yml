@@ -29,6 +29,8 @@ before_install:
 install:
 # Build dependencies
 - stack --no-terminal --install-ghc test --only-dependencies
+- stack --no-terminal build --fast
+- stack --no-terminal exec -- migration
 
 before_script:
 - psql -c 'CREATE DATABASE website_test;' -U postgres
@@ -36,4 +38,5 @@ before_script:
 
 script:
 # Build the package, its tests, and its docs and run the tests
+# - stack --no-terminal test --haddock --no-haddock-deps
 - stack --no-terminal test
