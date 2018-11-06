@@ -17,7 +17,7 @@ spec = withApp $ do
 
     it "Works if there is a single post" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
 
       user <- createUser role em
@@ -37,7 +37,7 @@ spec = withApp $ do
 
     it "Works if there are multiple posts" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPost user "The First Post" "First, I was afraid" time
@@ -54,7 +54,7 @@ spec = withApp $ do
 
     it "Only grabs the first paragraph from the post content" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPost user "The Post" "First\n\nSecond\n\nThird" time
@@ -68,7 +68,7 @@ spec = withApp $ do
   describe "BlogPostR" $ do
     it "Renders the post correctly if the post exists" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       post' <- createPost user "The Post" "First\nSecond\nThird" time

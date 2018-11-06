@@ -21,14 +21,13 @@ postPostR = do
   ((result, formWidget), _) <- runFormPost postForm
   action <- lookupPostParam "action"
   case (result, action) of
-    (FormSuccess (title, Textarea markdown), Just "Preview") -> do
+    (FormSuccess (title, Textarea markdown), Just "Preview") ->
       renderPost formWidget (Just $ previewWidget title markdown) []
     (FormSuccess (title, Textarea markdown), Just "Publish") -> do
       time <- liftIO getCurrentTime
       _ <- runDB $ insertEntity $ Post title markdown time (entityKey user)
       renderPost formWidget Nothing []
-    _ -> do
-      renderPost formWidget Nothing [(Danger, "Something went wrong")]
+    _ -> renderPost formWidget Nothing [(Danger, "Something went wrong")]
 
 postForm :: Form (Text, Textarea)
 postForm = renderBootstrap3 BootstrapBasicForm $ (,)
@@ -51,7 +50,7 @@ postForm = renderBootstrap3 BootstrapBasicForm $ (,)
       }
 
 previewWidget :: Text -> Text -> Widget
-previewWidget title markdown = do
+previewWidget title markdown =
   let html = CMarkGFM.commonmarkToHtml [CMarkGFM.optSafe] [] markdown
    in [whamlet|
         <div>

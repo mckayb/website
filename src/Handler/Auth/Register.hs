@@ -30,8 +30,7 @@ postRegisterR = do
           password' <- liftIO $ Password uid <$> BCrypt.hashPassword password
           _ <- Database.insertPassword password'
           redirect LoginR
-    _ -> do
-      renderRegister formWidget [(Danger, "Form failed validation")]
+    _ -> renderRegister formWidget [(Danger, "Form failed validation")]
 
 registerForm :: Form (Email, Text)
 registerForm = renderBootstrap3 BootstrapBasicForm $ (,)
@@ -57,7 +56,7 @@ renderRegister :: Widget -> [FormReaction] -> Handler Html
 renderRegister widget reactions =
   defaultLayout $ do
     setTitle "Register"
-    Forms.renderPanel $ [whamlet|
+    Forms.renderPanel [whamlet|
       <div>
         ^{Forms.formReactionWidget reactions}
       <div>

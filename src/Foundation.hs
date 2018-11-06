@@ -68,9 +68,7 @@ instance Yesod App where
   -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
   approot :: Approot App
   approot = ApprootRequest $ \app req ->
-    case appRoot $ appSettings app of
-      Nothing -> getApprootText guessApproot app req
-      Just root -> root
+    fromMaybe (getApprootText guessApproot app req) (appRoot $ appSettings app)
 
   -- Store session data on the client in encrypted cookies,
   -- default session idle timeout is 120 minutes
@@ -130,7 +128,7 @@ instance Yesod App where
   authRoute
     :: App
     -> Maybe (Route App)
-  authRoute _ = Just $ LoginR
+  authRoute _ = Just LoginR
 
   isAuthorized
     :: Route App  -- ^ The route the user is visiting.

@@ -33,9 +33,8 @@ postLoginR = do
             Just (Entity _ password') -> do
               -- Validate that the password we have matches the password they gave
               let matches = BCrypt.passwordMatches (passwordHash password') password
-              case matches of
-                False -> renderLogin formWidget [(Danger, "Incorrect username or password")]
-                True -> do
+              if matches
+                then do
                   -- Grab the user's role so that we can do admin checks later
                   mRole <- Database.getRoleByUser user'
                   case mRole of
@@ -43,12 +42,10 @@ postLoginR = do
                       Session.keepLoggedIn user' role
                       redirect BlogR
                     Nothing -> renderLogin formWidget [(Danger, "Something went wrong...")]
-            Nothing -> do
-              renderLogin formWidget [(Danger, "Incorrect username or password")]
-        Nothing -> do
-          renderLogin formWidget [(Danger, "Incorrect username or password")]
-    _ -> do
-      renderLogin formWidget [(Danger, "Form failed validation")]
+                else renderLogin formWidget [(Danger, "Incorrect username or password")]
+            Nothing -> renderLogin formWidget [(Danger, "Incorrect username or password")]
+        Nothing -> renderLogin formWidget [(Danger, "Incorrect username or password")]
+    _ -> renderLogin formWidget [(Danger, "Form failed validation")]
 
 loginForm :: Form (Email, Text)
 loginForm = renderBootstrap3 BootstrapBasicForm $ (,)
@@ -74,7 +71,7 @@ renderLogin :: Widget -> [FormReaction] -> Handler Html
 renderLogin widget reactions =
   defaultLayout $ do
     setTitle "Login"
-    Forms.renderPanel $ [whamlet|
+    Forms.renderPanel [whamlet|
       <div>
         ^{Forms.formReactionWidget reactions}
       <div>

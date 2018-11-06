@@ -17,15 +17,14 @@ postRoleR :: Handler Html
 postRoleR = do
   ((result, formWidget), _) <- runFormPost roleForm
   case result of
-    FormSuccess (name) -> do
+    FormSuccess name -> do
       existingRole <- Database.getRoleByName name
       case existingRole of
         Just _ -> renderRole formWidget [(Danger, "A role already exists with that name.")]
         Nothing -> do
           _ <- runDB $ insertEntity $ Role name
           renderRole formWidget [(Success, "Successfully created new role" <> name <> ".")]
-    _ -> do
-      renderRole formWidget [(Danger, "There was an error submitting your form.")]
+    _ -> renderRole formWidget [(Danger, "There was an error submitting your form.")]
 
 roleForm :: Form Text
 roleForm = renderBootstrap3 BootstrapBasicForm $
@@ -42,7 +41,7 @@ renderRole :: Widget -> [FormReaction] -> Handler Html
 renderRole widget errors =
   defaultLayout $ do
     setTitle "Create Role"
-    Forms.renderPanel $ [whamlet|
+    Forms.renderPanel [whamlet|
       <div>
         ^{Forms.formReactionWidget errors}
       <div>
