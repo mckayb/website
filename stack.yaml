@@ -73,13 +73,9 @@ image:
       static: /static
 
     executables:
-      - migration
-      - fixture
       - website
 
     entrypoints:
-      - migration
-      - fixture
       - website
 
 # docker:

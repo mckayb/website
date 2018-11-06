@@ -19,7 +19,7 @@ module Application
 
 import Control.Monad.Logger                 (liftLoc, runLoggingT)
 import Database.Persist.Postgresql          (createPostgresqlPool, pgConnStr,
-                                             pgPoolSize)
+                                             pgPoolSize, runSqlPool)
 import Import
 import Language.Haskell.TH.Syntax           (qLocation)
 import Network.HTTP.Client.TLS              (getGlobalManager)
@@ -34,6 +34,7 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
                                              mkRequestLogger, outputFormat)
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
+import Model                                (runAppMigrationsUnsafe, runAppSeedDB)
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
@@ -81,6 +82,11 @@ makeFoundation appSettings = do
   pool <- flip runLoggingT logFunc $ createPostgresqlPool
     (pgConnStr  $ appDatabaseConf appSettings)
     (pgPoolSize $ appDatabaseConf appSettings)
+
+  -- Run Migrations
+  runLoggingT (runSqlPool runAppMigrationsUnsafe pool) logFunc
+  -- Run Initial Seed Data
+  runLoggingT (runSqlPool runAppSeedDB pool) logFunc
 
   -- Return the foundation
   return $ mkFoundation pool
