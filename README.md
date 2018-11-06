@@ -1,7 +1,7 @@
 # Structured Rants
 
 ## Status
-![Build Status](https://travis-ci.org/mckayb/website.svg?branch=master)
+[![Build Status](https://travis-ci.org/mckayb/website.svg?branch=master)](https://travis-ci.org/mckayb/website)
 
 ## Database Setup
 
