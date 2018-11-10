@@ -10,6 +10,8 @@ language: generic
 cache:
   directories:
   - $HOME/.stack
+  timeout: 1000
+
 
 services:
   - postgresql
