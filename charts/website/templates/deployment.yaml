@@ -27,13 +27,23 @@ spec:
             - name: YESOD_PGHOST
               value: "{{ .Release.Name }}-postgresql"
             - name: YESOD_PGUSER
-              value: "{{ .Values.postgresql.postgresUser }}"
+              value: "{{ .Values.postgresql.postgresqlUsername }}"
             - name: YESOD_PGPASS
-              value: "{{ .Values.postgresql.postgresPassword }}"
+              value: "{{ .Values.postgresql.postgresqlPassword }}"
             - name: YESOD_PGDATABASE
-              value: "{{ .Values.postgresql.postgresDatabase }}"
+              value: "{{ .Values.postgresql.postgresqlDatabase }}"
             - name: YESOD_PGPORT
               value: "{{ .Values.postgresql.service.port }}"
+            - name: ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "website.fullname" . }}
+                  key: admin-email
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "website.fullname" . }}
+                  key: admin-password
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

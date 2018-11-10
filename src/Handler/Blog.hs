@@ -9,7 +9,7 @@ import qualified Helpers.Database as Database
 import qualified Data.Text as Text
 
 getPostContent :: Entity Post -> Text
-getPostContent = CMarkGFM.commonmarkToHtml [CMarkGFM.optSafe] [] . postContent . entityVal
+getPostContent = CMarkGFM.commonmarkToHtml [] [] . postContent . entityVal
 
 getTimestamp :: Entity Post -> Text
 getTimestamp = Text.pack . formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal

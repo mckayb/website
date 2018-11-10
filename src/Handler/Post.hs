@@ -51,7 +51,7 @@ postForm = renderBootstrap3 BootstrapBasicForm $ (,)
 
 previewWidget :: Text -> Text -> Widget
 previewWidget title markdown =
-  let html = CMarkGFM.commonmarkToHtml [CMarkGFM.optSafe] [] markdown
+  let html = CMarkGFM.commonmarkToHtml [] [] markdown
    in [whamlet|
         <div>
           <h1>#{title}

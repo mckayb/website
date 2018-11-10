@@ -18,7 +18,7 @@ import           Data.Yaml                   (decodeEither')
 import           Database.Persist.Postgresql (PostgresConf)
 import           Language.Haskell.TH.Syntax  (Exp, Name, Q)
 import           Network.Wai.Handler.Warp    (HostPreference)
-import           Yesod.Default.Config2       (applyEnvValue, configSettingsYml)
+import           Yesod.Default.Config2       (getCurrentEnv, applyEnvValue, configSettingsYml)
 import           Yesod.Default.Util          (WidgetFileSettings,
                                               widgetFileNoReload,
                                               widgetFileReload)
@@ -59,6 +59,8 @@ data AppSettings = AppSettings
 
     , appAuthDummyLogin         :: Bool
     -- ^ Indicate if auth dummy login should be enabled.
+    , appAdminEmail             :: Text
+    , appAdminPassword          :: Text
     }
 
 instance FromJSON AppSettings where
@@ -87,6 +89,8 @@ instance FromJSON AppSettings where
     appAnalytics              <- o .:? "analytics"
 
     appAuthDummyLogin         <- o .:? "auth-dummy-login"      .!= dev
+    appAdminEmail             <- o .: "admin-email"
+    appAdminPassword          <- o .: "admin-password"
 
     return AppSettings {..}
 
@@ -125,6 +129,13 @@ configSettingsYmlValue = either Exception.throw id
 compileTimeAppSettings :: AppSettings
 compileTimeAppSettings =
   case fromJSON $ applyEnvValue False mempty configSettingsYmlValue of
+    Error e -> error e
+    Success settings -> settings
+
+compileTimeAppSettingsReadEnv :: IO AppSettings
+compileTimeAppSettingsReadEnv = do
+  currEnv <- getCurrentEnv
+  return $ case fromJSON $ applyEnvValue False currEnv configSettingsYmlValue of
     Error e -> error e
     Success settings -> settings
 

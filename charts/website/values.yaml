@@ -47,9 +47,15 @@ tolerations: []
 
 affinity: {}
 
+# Admin Secret
+admin:
+  email: test@example.com
+  password: example123
+
+# Postgres Subchart
 postgresql:
-  postgresUser: homestead
-  postgresPassword: secret
-  postgresDatabase: website
+  postgresqlUsername: homestead
+  postgresqlPassword: secret
+  postgresqlDatabase: website
   service:
     port: 5432
