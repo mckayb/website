@@ -11,17 +11,18 @@ Install the following:
   * [Helm](https://www.helm.sh/)
   * [Haskell Stack](https://docs.haskellstack.org/en/stable/README/)
 
-Once you have those installed, start up minikube with:
+Once you have those installed, start up minikube.
 ```
 minikube start --disk-size=40g
 ```
 
-Set your docker environment to the one inside minikube with:
+Set your docker environment to the one inside minikube.
 ```
 eval $(minikube docker-env)
 ```
 
-Build the base image for the application with:
+Build the base image for the application.
+If you'd like to change the name of the image, or the name of the base image, feel free to change those in the `stack.yaml` file under `image.container`.
 ```
 docker build -t website:base .
 ```
@@ -52,10 +53,10 @@ credentials you see fit. Specifically the following:
   * `postgresql.postgresqlDatabase`
 
 Add the following line into your `/etc/hosts` file.
+Replace the ip with the result of running `minikube ip`. Replace the url with whatever you used for the `ingress.hosts` value.
 ```
 192.168.99.100 chart-example.local
 ```
-Replace `192.168.99.100` with the result of running `minikube ip`. Replace `chart-example.local` with whatever you used for the `ingress.hosts` value.
 
 Run the application with:
 ```
@@ -63,7 +64,7 @@ helm dependencies update charts/website
 helm install charts/website
 ```
 
-Then, use the application by going to whatever domain you used in the `ingress.hosts` value.
+Then, use the application by visiting the domain you used in the `ingress.hosts` value in your browser.
 ```
 http://chart-example.local
 ```
