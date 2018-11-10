@@ -52,6 +52,8 @@ credentials you see fit. Specifically the following:
   * `postgresql.postgresqlPassword`
   * `postgresql.postgresqlDatabase`
 
+If you updated the name of the image container in the `stack.yaml`, replace that too under `image.repository` and `image.tag`.
+
 Add the following line into your `/etc/hosts` file.
 Replace the ip with the result of running `minikube ip`. Replace the url with whatever you used for the `ingress.hosts` value.
 ```
@@ -73,13 +75,13 @@ http://chart-example.local
 For the tests to work, you'll need a local installation of
 [Postgres](https://www.postgresql.org/).
 
-After installing Postgres, run:
-
+After installing Postgres, run the following.
 ```
 createuser homestead --password secret --superuser
 createdb website
 createdb website_test
 ```
+If you use different credentials, update the `config/test-settings.yml` file with whatever credentials you used.
 
 Afterwards, you can run the tests simply by running
 ```
