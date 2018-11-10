@@ -26,9 +26,7 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"]
   $(persistFileWith lowerCaseSettings "config/models")
 
 appDBConn :: IO ConnectionString
-appDBConn = do
-  settings <- Settings.compileTimeAppSettingsReadEnv
-  return $ pgConnStr $ Settings.appDatabaseConf settings
+appDBConn = pgConnStr . Settings.appDatabaseConf <$> Settings.compileTimeAppSettingsReadEnv
 
 runAppMigrationsUnsafe :: DB ()
 runAppMigrationsUnsafe = runMigrationUnsafe migrateAll
