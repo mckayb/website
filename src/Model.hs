@@ -25,8 +25,8 @@ import qualified Settings
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
   $(persistFileWith lowerCaseSettings "config/models")
 
-appDBConn :: ConnectionString
-appDBConn = pgConnStr $ Settings.appDatabaseConf Settings.compileTimeAppSettings
+appDBConn :: IO ConnectionString
+appDBConn = pgConnStr . Settings.appDatabaseConf <$> Settings.compileTimeAppSettingsReadEnv
 
 runAppMigrationsUnsafe :: DB ()
 runAppMigrationsUnsafe = runMigrationUnsafe migrateAll
@@ -35,13 +35,18 @@ runAppMigrationsSafe :: DB ()
 runAppMigrationsSafe = runMigration migrateAll
 
 runAppDB :: DB a -> IO a
-runAppDB a =
+runAppDB a = do
+  dbConn <- appDBConn
   runNoLoggingT $
-    withPostgresqlPool appDBConn 3
+    withPostgresqlPool dbConn 3
       $ \pool -> liftIO $ runSqlPersistMPool a pool
 
 runAppSeedDB :: DB ()
 runAppSeedDB = do
+  settings <- liftIO Settings.compileTimeAppSettingsReadEnv
+  let adminEmail = Settings.appAdminEmail settings
+  let adminPassword = Settings.appAdminPassword settings
+
   roles <- selectList ([] :: [Filter Role]) []
   -- If we've already seeded the initial data, we don't need to do it again
   if not (null roles)
@@ -49,8 +54,10 @@ runAppSeedDB = do
     else do
       adminRole <- insertEntity $ Role "Admin"
       _ <- insertEntity $ Role "Commoner"
-      let Just email = mkEmail "test@example.com"
-      pass' <- liftIO $ hashPassword "password123"
-      adminUser <- insertEntity $ User email (entityKey adminRole)
-      _ <- insertEntity $ Password (entityKey adminUser) pass'
-      return ()
+      case mkEmail adminEmail of
+        Just email -> do
+          adminUser <- insertEntity $ User email (entityKey adminRole)
+          passHash <- liftIO $ hashPassword adminPassword
+          _ <- insertEntity $ Password (entityKey adminUser) passHash
+          return ()
+        Nothing -> error "The admin email that was given is not a valid email address. Please check your settings."
