@@ -1,17 +1,16 @@
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies #-}
 
 module Handler.Auth.Register where
 
 import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
-import Helpers.Forms
-import Helpers.Database
-import Helpers.BCrypt
-import Helpers.Email
-import Database.Persist.Sql
+import Helpers.Forms (FormReaction, FormAlert(Danger))
+import Helpers.Email (Email)
+import qualified Helpers.Forms as Forms
+import qualified Helpers.Database as Database
+import qualified Helpers.BCrypt as BCrypt
+import qualified Helpers.Email as Email
+import qualified Database.Persist.Sql as Sql (toSqlKey)
 
 getRegisterR :: Handler Html
 getRegisterR = do
@@ -23,20 +22,19 @@ postRegisterR = do
   ((result, formWidget), _) <- runFormPost registerForm
   case result of
     FormSuccess (email, password) -> do
-      existingUser <- getUserByEmail email
+      existingUser <- Database.getUserByEmail email
       case existingUser of
         Just _ -> renderRegister formWidget [(Danger, "An account with that email already exists!")]
         Nothing -> do
-          uid <- insertUser (User email (toSqlKey 2))
-          password' <- liftIO $ Password uid <$> hashPassword password
-          _ <- insertPassword password'
+          uid <- Database.insertUser (User email (Sql.toSqlKey 2))
+          password' <- liftIO $ Password uid <$> BCrypt.hashPassword password
+          _ <- Database.insertPassword password'
           redirect LoginR
-    _ -> do
-      renderRegister formWidget [(Danger, "Form failed validation")]
+    _ -> renderRegister formWidget [(Danger, "Form failed validation")]
 
 registerForm :: Form (Email, Text)
 registerForm = renderBootstrap3 BootstrapBasicForm $ (,)
-  <$> areq emailField' emailSettings Nothing
+  <$> areq Email.emailField' emailSettings Nothing
   <*> areq passwordField passwordSettings Nothing
   where
     emailSettings = FieldSettings
@@ -58,9 +56,9 @@ renderRegister :: Widget -> [FormReaction] -> Handler Html
 renderRegister widget reactions =
   defaultLayout $ do
     setTitle "Register"
-    renderPanel $ [whamlet|
+    Forms.renderPanel [whamlet|
       <div>
-        ^{formReactionWidget reactions}
+        ^{Forms.formReactionWidget reactions}
       <div>
         <form method="POST" action="@{RegisterR}">
           ^{widget}

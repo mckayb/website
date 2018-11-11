@@ -4,7 +4,8 @@ module Handler.Role where
 
 import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
-import Helpers.Forms
+import Helpers.Forms (FormReaction, FormAlert(Danger, Success))
+import qualified Helpers.Forms as Forms
 import qualified Helpers.Database as Database
 
 getRoleR :: Handler Html
@@ -16,15 +17,14 @@ postRoleR :: Handler Html
 postRoleR = do
   ((result, formWidget), _) <- runFormPost roleForm
   case result of
-    FormSuccess (name) -> do
+    FormSuccess name -> do
       existingRole <- Database.getRoleByName name
       case existingRole of
         Just _ -> renderRole formWidget [(Danger, "A role already exists with that name.")]
         Nothing -> do
           _ <- runDB $ insertEntity $ Role name
           renderRole formWidget [(Success, "Successfully created new role" <> name <> ".")]
-    _ -> do
-      renderRole formWidget [(Danger, "There was an error submitting your form.")]
+    _ -> renderRole formWidget [(Danger, "There was an error submitting your form.")]
 
 roleForm :: Form Text
 roleForm = renderBootstrap3 BootstrapBasicForm $
@@ -41,9 +41,9 @@ renderRole :: Widget -> [FormReaction] -> Handler Html
 renderRole widget errors =
   defaultLayout $ do
     setTitle "Create Role"
-    renderPanel $ [whamlet|
+    Forms.renderPanel [whamlet|
       <div>
-        ^{formReactionWidget errors}
+        ^{Forms.formReactionWidget errors}
       <div>
         <form method="POST" action="@{RoleR}">
           ^{widget}

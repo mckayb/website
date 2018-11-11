@@ -15,7 +15,7 @@ spec = withApp $ do
 
     it "Should let you visit the page if you are an admin" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (Email.mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -27,23 +27,7 @@ spec = withApp $ do
 
     it "Should fail if there's no csrf token" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (Email.mkEmail . pack) <$> Faker.email
-      user <- createUser role em
-      _ <- createPassword user "mypassword"
-
-      goToRole em "mypassword"
-
-      request $ do
-        setMethod "POST"
-        setUrl RoleR
-
-      statusIs 200
-      htmlCount ".alert.alert-danger" 1
-      bodyContains "There was an error submitting your form."
-
-    it "Should fail if the params aren't set properly" $ do
-      role <- createRole "Admin"
-      Just em <- liftIO $ (Email.mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -54,13 +38,28 @@ spec = withApp $ do
         byLabelExact "Role" "Commoner"
         setUrl RoleR
 
+      statusIs 403
+
+    it "Should fail if the params aren't set properly" $ do
+      role <- createRole "Admin"
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      user <- createUser role em
+      _ <- createPassword user "mypassword"
+
+      goToRole em "mypassword"
+
+      request $ do
+        addToken
+        setMethod "POST"
+        setUrl RoleR
+
       statusIs 200
       htmlCount ".alert.alert-danger" 1
       bodyContains "There was an error submitting your form."
 
     it "Should let you create a new role" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (Email.mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -79,7 +78,28 @@ spec = withApp $ do
       assertEq "added a new role" 2 $ length rolesAfter
 
     it "Shouldn't let you create a duplicate role" $ do
-      assertEq "True" True True
+      role <- createRole "Admin"
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      user <- createUser role em
+      _ <- createPassword user "mypassword"
+
+      goToRole em "mypassword"
+
+      rolesBefore <- runDB $ selectList ([] :: [Filter Role]) []
+      assertEq "only 1 role before" 1 $ length rolesBefore
+
+      request $ do
+        addToken
+        byLabelExact "Role" "Admin"
+        setMethod "POST"
+        setUrl RoleR
+
+      statusIs 200
+      htmlCount ".alert.alert-danger" 1
+      bodyContains "A role already exists with that name"
+
+      rolesAfter <- runDB $ selectList ([] :: [Filter Role]) []
+      assertEq "only 1 role after" 1 $ length rolesAfter
 
   where
     goToRole em pass = do

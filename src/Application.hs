@@ -1,6 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
@@ -21,9 +19,7 @@ module Application
 
 import Control.Monad.Logger                 (liftLoc, runLoggingT)
 import Database.Persist.Postgresql          (createPostgresqlPool, pgConnStr,
-                                             pgPoolSize, runSqlPool
-                                             -- , runMigrationUnsafe
-                                            )
+                                             pgPoolSize, runSqlPool)
 import Import
 import Language.Haskell.TH.Syntax           (qLocation)
 import Network.HTTP.Client.TLS              (getGlobalManager)
@@ -38,13 +34,13 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
                                              mkRequestLogger, outputFormat)
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
+import Model                                (runAppMigrationsUnsafe, runAppSeedDB)
+import Settings                             (compileTimeAppSettingsReadEnv)
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 import Handler.Common
-import Handler.Home
 import Handler.Blog
-import Handler.User
 import Handler.Post
 import Handler.Role
 import Handler.Auth.Login
@@ -87,9 +83,10 @@ makeFoundation appSettings = do
     (pgConnStr  $ appDatabaseConf appSettings)
     (pgPoolSize $ appDatabaseConf appSettings)
 
-  -- Perform database migration using our application's logging settings.
-  runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
-  -- runLoggingT (runSqlPool (runMigrationUnsafe migrateAll) pool) logFunc
+  -- Run Migrations
+  runLoggingT (runSqlPool runAppMigrationsUnsafe pool) logFunc
+  -- Run Initial Seed Data
+  runLoggingT (runSqlPool runAppSeedDB pool) logFunc
 
   -- Return the foundation
   return $ mkFoundation pool
@@ -116,7 +113,6 @@ makeLogWare foundation =
     , destination = Logger $ loggerSet $ appLogger foundation
     }
 
-
 -- | Warp settings for the given foundation value.
 warpSettings :: App -> Settings
 warpSettings foundation =
@@ -142,11 +138,12 @@ getApplicationDev = do
   return (wsettings, app)
 
 getAppSettings :: IO AppSettings
-getAppSettings = loadYamlSettings [configSettingsYml] [] useEnv
+getAppSettings = compileTimeAppSettingsReadEnv
 
 -- | main function for use by yesod devel
 develMain :: IO ()
-develMain = develMainHelper getApplicationDev
+develMain = do
+  develMainHelper getApplicationDev
 
 -- | The @main@ function for an executable running this site.
 appMain :: IO ()
@@ -182,7 +179,6 @@ getApplicationRepl = do
 
 shutdownApp :: App -> IO ()
 shutdownApp _ = return ()
-
 
 ---------------------------------------------
 -- Functions for use in development with GHCi

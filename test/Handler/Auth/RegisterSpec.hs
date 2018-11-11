@@ -25,9 +25,7 @@ spec = withApp $ do
         setMethod "POST"
         setUrl RegisterR
 
-      statusIs 200
-      htmlCount ".alert.alert-danger" 1
-      bodyContains "Form failed validation"
+      statusIs 403
 
     it "Shouldn't let you register with invalid information" $ do
       get RegisterR
@@ -73,7 +71,7 @@ spec = withApp $ do
       bodyContains "Form failed validation"
 
     it "Should register successfully with valid information" $ do
-      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ mkEmail . pack <$> Faker.email
       _ <- createRole "Admin"
       role2 <- createRole "Commoner"
 
@@ -113,7 +111,7 @@ spec = withApp $ do
 
     it "Shouldn't let you register with a duplicate email" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "my_password"
 

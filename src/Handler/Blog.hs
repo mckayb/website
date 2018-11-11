@@ -3,14 +3,14 @@
 module Handler.Blog where
 
 import Import
-import Helpers.Database
-import CMarkGFM (commonmarkToHtml, optSafe)
-import Database.Persist.Sql (fromSqlKey)
+import qualified CMarkGFM
+import qualified Database.Persist.Sql as Sql (fromSqlKey)
+import qualified Helpers.Database as Database
 import qualified Data.Text as Text
 import qualified Helpers.Session as Session
 
 getPostContent :: Entity Post -> Text
-getPostContent = (commonmarkToHtml [optSafe] []) . postContent . entityVal
+getPostContent = CMarkGFM.commonmarkToHtml [] [] . postContent . entityVal
 
 getTimestamp :: Entity Post -> Text
 getTimestamp = Text.pack . formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal
@@ -29,8 +29,8 @@ getPostTeaser = Text.unlines . takeUntilFirstParagraphInc . Text.lines . getPost
 
 getBlogR :: Handler Html
 getBlogR = do
-  posts <- getPosts
-  let getId = fromSqlKey . entityKey
+  posts <- Database.getPosts
+  let getId = Sql.fromSqlKey . entityKey
   defaultLayout $ do
     setTitle "Blog"
     toWidget [lucius|
@@ -61,7 +61,8 @@ getBlogR = do
     |]
     [whamlet|
       $if (null posts)
-        <div>Coming soon!
+        <div .row>
+          <div .col-md-12>Coming soon!
 
       $else
         $forall post <- posts
@@ -69,7 +70,7 @@ getBlogR = do
             <div .col-md-12>
               <article .post>
                 <h1 .post__title>
-                  <a href="@{BlogR}/#{getId post}">#{getPostTitle post}
+                  <a href="@{BlogR}post/#{getId post}">#{getPostTitle post}
                 <div .post__date .text-muted>
                   #{getTimestamp post}
                 <div .post__content>
@@ -113,7 +114,7 @@ postBlogPostCommentR _ _ = do
 
 getBlogPostR :: Key Post -> Handler Html
 getBlogPostR a = do
-  post <- getPost a
+  post <- Database.getPost a
   case post of
     Just post' -> defaultLayout $ do
       toWidget [lucius|

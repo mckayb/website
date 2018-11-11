@@ -5,7 +5,6 @@
 {-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE FlexibleContexts #-}
 
 module Foundation where
 
@@ -62,10 +61,6 @@ mkYesodData "App" $(parseRoutesFile "config/routes")
 -- | A convenient synonym for creating forms.
 type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 
--- | A convenient synonym for database access functions.
-type DB a = forall (m :: * -> *).
-  (MonadIO m) => ReaderT SqlBackend m a
-
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
 instance Yesod App where
@@ -73,9 +68,7 @@ instance Yesod App where
   -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
   approot :: Approot App
   approot = ApprootRequest $ \app req ->
-    case appRoot $ appSettings app of
-      Nothing -> getApprootText guessApproot app req
-      Just root -> root
+    fromMaybe (getApprootText guessApproot app req) (appRoot $ appSettings app)
 
   -- Store session data on the client in encrypted cookies,
   -- default session idle timeout is 120 minutes
@@ -92,7 +85,7 @@ instance Yesod App where
   -- To add it, chain it together with the defaultMiddleware: yesodMiddleware = defaultYesodMiddleware . defaultCsrfMiddleware
   -- For details, see the CSRF documentation in the Yesod.Core.Handler module of the yesod-core package.
   yesodMiddleware :: ToTypedContent res => Handler res -> Handler res
-  yesodMiddleware = defaultYesodMiddleware
+  yesodMiddleware = defaultYesodMiddleware . defaultCsrfMiddleware
 
   defaultLayout :: Widget -> Handler Html
   defaultLayout widget = do
@@ -103,17 +96,12 @@ instance Yesod App where
     mcurrentRoute <- getCurrentRoute
 
     -- Get the breadcrumbs, as defined in the YesodBreadcrumbs instance.
-    (title, parents) <- breadcrumbs
+    -- (title, parents) <- breadcrumbs
 
     -- Define the menu items of the header.
     let menuItems =
           [ NavbarLeft $ MenuItem
             { menuItemLabel = "Home"
-            , menuItemRoute = HomeR
-            , menuItemAccessCallback = True
-            }
-          , NavbarRight $ MenuItem
-            { menuItemLabel = "Blog"
             , menuItemRoute = BlogR
             , menuItemAccessCallback = True
             }
@@ -140,7 +128,7 @@ instance Yesod App where
   authRoute
     :: App
     -> Maybe (Route App)
-  authRoute _ = Just $ LoginR
+  authRoute _ = Just LoginR
 
   isAuthorized
     :: Route App  -- ^ The route the user is visiting.
@@ -149,7 +137,6 @@ instance Yesod App where
   -- Routes not requiring authentication.
   isAuthorized RegisterR _ = return Authorized
   isAuthorized LoginR _ = return Authorized
-  isAuthorized HomeR _ = return Authorized
   isAuthorized BlogR _ = return Authorized
   isAuthorized (BlogPostR _) False = return Authorized
   isAuthorized FaviconR _ = return Authorized
@@ -161,7 +148,6 @@ instance Yesod App where
 
   -- Routes requiring authentication delegate to
   -- the isAuthenticated function
-  isAuthorized UserR _ = isAuthenticatedAdmin
   isAuthorized PostR _ = isAuthenticatedAdmin
   isAuthorized RoleR _ = isAuthenticatedAdmin
   isAuthorized (BlogPostR _) True = isAuthenticatedBasic
@@ -211,13 +197,12 @@ instance YesodBreadcrumbs App where
   breadcrumb
     :: Route App  -- ^ The route the user is visiting currently.
     -> Handler (Text, Maybe (Route App))
-  breadcrumb HomeR = return ("Home", Nothing)
-
-  breadcrumb LoginR = return ("Login", Just HomeR)
-  breadcrumb RegisterR = return ("Register", Just HomeR)
-
+  breadcrumb BlogR = return ("Blog", Nothing)
   breadcrumb (BlogPostR _) = return ("Post", Just BlogR)
-  breadcrumb BlogR = return ("Blog", Just HomeR)
+
+  breadcrumb LoginR = return ("Login", Nothing)
+  breadcrumb RegisterR = return ("Register", Nothing)
+
   breadcrumb _ = return ("home", Nothing)
 
 -- How to run database actions.

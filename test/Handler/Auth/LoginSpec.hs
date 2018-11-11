@@ -24,9 +24,7 @@ spec = withApp $ do
         setMethod "POST"
         setUrl LoginR
 
-      statusIs 200
-      htmlCount ".alert.alert-danger" 1
-      bodyContains "Form failed validation"
+      statusIs 403
 
     it "Should fail if no email or password is set" $ do
       get LoginR
@@ -73,7 +71,7 @@ spec = withApp $ do
 
     it "Should not let you log in if a password doesn't exist for the user" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ mkEmail . pack <$> Faker.email
       _ <- createUser role em
 
       get LoginR
@@ -92,7 +90,7 @@ spec = withApp $ do
 
     it "Should not let you log in if you have the wrong password" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -112,7 +110,7 @@ spec = withApp $ do
 
     it "Should let you log in successfully" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ (mkEmail . pack) <$> Faker.email
+      Just em <- liftIO $ mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 

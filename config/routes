@@ -7,19 +7,15 @@
 /robots.txt                      RobotsR          GET
 
 -- Html Routes
-/                                HomeR            GET POST
-
-/blog                            BlogR            GET
-/blog/#PostId                    BlogPostR        GET
-/blog/#PostId/comment/#CommentId BlogPostCommentR POST
+/                                BlogR            GET
+/post                            PostR            GET POST
+/post/#PostId                    BlogPostR        GET
+/post/#PostId/comment/#CommentId BlogPostCommentR POST
 
 /login                           LoginR           GET POST
 /register                        RegisterR        GET POST
 
-/post                            PostR            GET POST
 /role                            RoleR            GET POST
--- Json Routes
-/user                            UserR            GET POST
 
 -- Status Checks
 /health/liveness                 LivenessR        GET

@@ -31,10 +31,13 @@ ip-from-header: "_env:YESOD_IP_FROM_HEADER:false"
 database:
   user:     "_env:YESOD_PGUSER:homestead"
   password: "_env:YESOD_PGPASS:secret"
-  host:     "_env:YESOD_PGHOST:localhost"
+  host:     "_env:YESOD_PGHOST:website-postgresql"
   port:     "_env:YESOD_PGPORT:5432"
   # See config/test-settings.yml for an override during tests
   database: "_env:YESOD_PGDATABASE:website"
   poolsize: "_env:YESOD_PGPOOLSIZE:10"
 
 # analytics: UA-YOURCODE
+
+admin-email: "_env:ADMIN_EMAIL:admin@example.com"
+admin-password: "_env:ADMIN_PASSWORD:adminexample123"
