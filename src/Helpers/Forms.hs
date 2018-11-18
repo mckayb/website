@@ -3,6 +3,7 @@
 module Helpers.Forms where
 
 import Import
+import qualified Helpers.Theme as Theme
 
 data FormAlert = Success | Info | Warning | Danger
   deriving Eq
@@ -23,9 +24,19 @@ $if not (null formReactions)
       #{snd formReaction}
 |]
 
-renderPanel :: Widget -> Widget
-renderPanel widget = [whamlet|
-<div .panel>
-  <div .panel-body>
-    ^{widget}
-|]
+renderPanel :: Text -> Widget -> Widget
+renderPanel title widget = do
+  toWidget [lucius|
+    .panel.panel--dark > .panel-heading {
+      background-color: #{Theme.sidebarColor Theme.colorScheme};
+      border-color: #{Theme.hoverColor Theme.colorScheme};
+      color: white;
+    }
+  |]
+  [whamlet|
+    <div .panel.panel-default.panel--dark>
+      <div .panel-heading>
+        #{title}
+      <div .panel-body>
+        ^{widget}
+  |]

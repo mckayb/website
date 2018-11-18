@@ -7,6 +7,7 @@ import qualified CMarkGFM
 import qualified Database.Persist.Sql as Sql (fromSqlKey)
 import qualified Helpers.Database as Database
 import qualified Data.Text as Text
+import qualified Helpers.Theme as Theme
 
 getPostContent :: Entity Post -> Text
 getPostContent = CMarkGFM.commonmarkToHtml [] [] . postContent . entityVal
@@ -41,21 +42,18 @@ getBlogR = do
         margin-bottom: 15px;
       }
 
-      .post .post__title a {
-        color: black;
-      }
-
       .post h1,
       .post h2,
       .post h3 {
         margin-top: 0;
       }
 
-      .row-bottom-border {
-        border-bottom: 1px solid lightgray;
-        margin-left: 0;
-        margin-right: 0;
-        margin-bottom: 21px;
+      .post h1 {
+        font-size: 24px;
+      }
+
+      .post h2 {
+        font-size: 21px;
       }
     |]
     [whamlet|
@@ -65,33 +63,32 @@ getBlogR = do
 
       $else
         $forall post <- posts
-          <div .row .row-bottom-border>
-            <div .col-md-12>
-              <article .post>
-                <h1 .post__title>
-                  <a href="@{BlogR}post/#{getId post}">#{getPostTitle post}
-                <div .post__date .text-muted>
-                  #{getTimestamp post}
-                <div .post__content>
-                  #{preEscapedToMarkup (getPostTeaser post)}
+          <article .post>
+            <h1 .post__title>
+              <a href="@{BlogR}post/#{getId post}">#{getPostTitle post}
+            <div .post__date .text-muted>
+              #{getTimestamp post}
+            <div .post__content>
+              #{preEscapedToMarkup (getPostTeaser post)}
     |]
 
 getBlogPostR :: Key Post -> Handler Html
-getBlogPostR a = do
-  post <- Database.getPost a
+getBlogPostR postId = do
+  post <- Database.getPost postId
   case post of
     Just post' -> defaultLayout $ do
       toWidget [lucius|
-        .blog-post .blog-post__time {
-          position: absolute;
-          top: 0;
-          right: 0;
+        .blog-post .blog-post__header {
+          border-bottom: 1px solid #{Theme.sidebarColor Theme.colorScheme};
+          margin-bottom: 5vh;
         }
       |]
       [whamlet|
         <article .blog-post>
-          <span .blog-post__time .text-muted>#{getTimestamp post'}
-          <h1>#{getPostTitle post'}
-          #{preEscapedToMarkup (getPostContent post')}
+          <section .blog-post__header>
+            <h1>#{getPostTitle post'}
+            <div .blog-post__time .text-muted>#{getTimestamp post'}
+          <section .blog-post__body>
+            #{preEscapedToMarkup (getPostContent post')}
       |]
     Nothing -> notFound

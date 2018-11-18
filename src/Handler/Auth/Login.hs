@@ -71,7 +71,7 @@ renderLogin :: Widget -> [FormReaction] -> Handler Html
 renderLogin widget reactions =
   defaultLayout $ do
     setTitle "Login"
-    Forms.renderPanel [whamlet|
+    Forms.renderPanel "Login" [whamlet|
       <div>
         ^{Forms.formReactionWidget reactions}
       <div>

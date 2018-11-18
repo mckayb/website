@@ -41,7 +41,7 @@ renderRole :: Widget -> [FormReaction] -> Handler Html
 renderRole widget errors =
   defaultLayout $ do
     setTitle "Create Role"
-    Forms.renderPanel [whamlet|
+    Forms.renderPanel "Create Role" [whamlet|
       <div>
         ^{Forms.formReactionWidget errors}
       <div>

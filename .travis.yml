@@ -10,6 +10,7 @@ language: generic
 cache:
   directories:
   - $HOME/.stack
+  - .stack-work/
   timeout: 1000
 
 

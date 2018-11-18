@@ -62,7 +62,7 @@ renderPost :: Widget -> Maybe Widget -> [FormReaction] -> Handler Html
 renderPost widget mPrev reactions =
   defaultLayout $ do
     setTitle "Publish New Post"
-    Forms.renderPanel $ do
+    Forms.renderPanel "Create Post" $ do
       toWidget [lucius|
         section.post h4 {
           margin-bottom: 20px;

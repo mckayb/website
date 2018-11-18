@@ -41,7 +41,6 @@ import Settings                             (compileTimeAppSettingsReadEnv)
 -- Don't forget to add new modules to your cabal file!
 import Handler.Common
 import Handler.Blog
-import Handler.User
 import Handler.Post
 import Handler.Role
 import Handler.Auth.Login

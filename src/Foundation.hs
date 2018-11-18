@@ -5,6 +5,7 @@
 {-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 module Foundation where
 
@@ -21,6 +22,7 @@ import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
 import Helpers.Auth
+import qualified Helpers.Theme as Theme
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -90,28 +92,29 @@ instance Yesod App where
   defaultLayout :: Widget -> Handler Html
   defaultLayout widget = do
     master <- getYesod
-    mmsg <- getMessage
+    -- mmsg <- getMessage
 
     -- muser <- maybeAuthPair
-    mcurrentRoute <- getCurrentRoute
+    -- mcurrentRoute <- getCurrentRoute
 
     -- Get the breadcrumbs, as defined in the YesodBreadcrumbs instance.
     -- (title, parents) <- breadcrumbs
 
     -- Define the menu items of the header.
-    let menuItems =
-          [ NavbarLeft $ MenuItem
-            { menuItemLabel = "Home"
-            , menuItemRoute = BlogR
-            , menuItemAccessCallback = True
-            }
-          ]
+    -- let menuItems =
+          -- [ NavbarLeft $ MenuItem
+            -- { menuItemLabel = "Home"
+            -- , menuItemRoute = BlogR
+            -- , menuItemAccessCallback = True
+            -- }
+          -- ]
+    -- let menuItems = []
 
-    let navbarLeftMenuItems = [x | NavbarLeft x <- menuItems]
-    let navbarRightMenuItems = [x | NavbarRight x <- menuItems]
+    -- let navbarLeftMenuItems = [x | NavbarLeft x <- menuItems]
+    -- let navbarRightMenuItems = [x | NavbarRight x <- menuItems]
 
-    let navbarLeftFilteredMenuItems = [x | x <- navbarLeftMenuItems, menuItemAccessCallback x]
-    let navbarRightFilteredMenuItems = [x | x <- navbarRightMenuItems, menuItemAccessCallback x]
+    -- let navbarLeftFilteredMenuItems = [x | x <- navbarLeftMenuItems, menuItemAccessCallback x]
+    -- let navbarRightFilteredMenuItems = [x | x <- navbarRightMenuItems, menuItemAccessCallback x]
 
     -- We break up the default layout into two components:
     -- default-layout is the contents of the body tag, and
@@ -121,7 +124,114 @@ instance Yesod App where
 
     pc <- widgetToPageContent $ do
       addStylesheet $ StaticR css_bootstrap_css
-      $(widgetFile "default-layout")
+
+      toWidget [julius|
+        $("#sidebar-toggle").on("click", function() {
+          $(".page__left").toggleClass("page__left--hidden")
+        })
+      |]
+      toWidget [lucius|
+        html,body,.page {
+          height: 100%;
+          margin: 0;
+        }
+
+        .coordinates {
+          display: flex;
+        }
+
+        .coordinates.coordinates--x {
+          flex-direction: row;
+        }
+
+        .coordinates.coordinates--y {
+          flex-direction: column;
+        }
+
+        .page .page__left {
+          min-width: 25vw;
+          background-color: #{Theme.sidebarColor Theme.colorScheme};
+          color: white;
+        }
+
+        .page .page__left.page__left--hidden {
+          display: none;
+        }
+
+        .page .page__right {
+          flex: 1;
+          background-color: #{Theme.mainColor Theme.colorScheme};
+        }
+
+        .page .page__right p,
+        .page .page__right h1,
+        .page .page__right h2,
+        .page .page__right h3,
+        .page .page__right h4,
+        .page .page__right h5,
+        .page .page__right h6 {
+          color: #{Theme.textColor Theme.colorScheme};
+        }
+
+        .page .page__left a {
+          background-color: transparent;
+          border: 1px solid #{Theme.hoverColor Theme.colorScheme};
+          border-radius: 0;
+          color: white;
+        }
+
+        .page .page__left a:hover {
+          background-color: #{Theme.hoverColor Theme.colorScheme};
+          cursor: pointer;
+        }
+
+        .page .page__header {
+          padding: 2vh 2vw;
+          background-color: #{Theme.headerColor Theme.colorScheme};
+          border-bottom: 1px solid #{Theme.sidebarColor Theme.colorScheme};
+        }
+
+        .page .page__content {
+          padding: 5vh 8vw;
+        }
+
+        .banner .banner__brand {
+          font-size: 26px;
+          font-weight: bold;
+          align-self: auto;
+          color: #{Theme.sidebarColor Theme.colorScheme};
+        }
+
+        .banner .banner__actions {
+          margin-right: 2vw;
+        }
+
+        .banner .banner__actions > button {
+          background-color: #{Theme.linksColor Theme.colorScheme};
+          border-color: #{Theme.linksColor Theme.colorScheme};
+        }
+
+        .banner .banner__actions > button:hover {
+          background-color: #{Theme.hoverColor Theme.colorScheme};
+        }
+      |]
+      [whamlet|
+        <div .page.coordinates.coordinates--x>
+          <div .page__left.page__left--hidden>
+            <ul .list-group>
+              <a .list-group-item href="https://github.com/mckayb">GitHub</a>
+              <a .list-group-item href="https://twitter.com/mckay_broderick">Twitter</a>
+              <a .list-group-item href="https://www.linkedin.com/in/mckaybroderick/">LinkedIn</a>
+          <div .page__right.coordinates.coordinates--y>
+            <div .page__header.banner.coordinates.coordinates--x>
+              <div .banner__actions>
+                <button .btn.btn-default #sidebar-toggle>
+                  <i .glyphicon.glyphicon-menu-hamburger>
+              <div .banner__brand>
+                <a href=@{BlogR}>Structured Rants</a>
+            <div .page__content>
+              ^{widget}
+      |]
     withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
   -- The page to be redirected to when authentication is required.
@@ -147,7 +257,6 @@ instance Yesod App where
 
   -- Routes requiring authentication delegate to
   -- the isAuthenticated function
-  isAuthorized UserR _ = isAuthenticatedAdmin
   isAuthorized PostR _ = isAuthenticatedAdmin
   isAuthorized RoleR _ = isAuthenticatedAdmin
 
