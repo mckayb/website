@@ -56,7 +56,7 @@ renderRegister :: Widget -> [FormReaction] -> Handler Html
 renderRegister widget reactions =
   defaultLayout $ do
     setTitle "Register"
-    Forms.renderPanel [whamlet|
+    Forms.renderPanel "Register" [whamlet|
       <div>
         ^{Forms.formReactionWidget reactions}
       <div>

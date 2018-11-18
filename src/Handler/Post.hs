@@ -8,6 +8,7 @@ import Helpers.Forms (FormReaction, FormAlert(Danger))
 import qualified CMarkGFM
 import qualified Helpers.Forms as Forms
 import qualified Helpers.Session as Session
+import qualified Helpers.Theme as Theme
 
 getPostR :: Handler Html
 getPostR = do
@@ -62,16 +63,17 @@ renderPost :: Widget -> Maybe Widget -> [FormReaction] -> Handler Html
 renderPost widget mPrev reactions =
   defaultLayout $ do
     setTitle "Publish New Post"
-    Forms.renderPanel $ do
+    Forms.renderPanel "Create Post" $ do
       toWidget [lucius|
         section.post h4 {
           margin-bottom: 20px;
         }
 
         section.post .post__preview {
-          border: 2px solid lightgray;
+          border: 2px solid #{Theme.sidebarColor Theme.colorScheme};
           padding: 20px;
           border-radius: 5px;
+          color: black;
         }
 
         section.post .post__label {
@@ -83,8 +85,6 @@ renderPost widget mPrev reactions =
       |]
       [whamlet|
         <section .post>
-          <h4>Create Post
-
           $if not (null reactions)
             <div>
               ^{Forms.formReactionWidget reactions}

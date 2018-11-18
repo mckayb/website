@@ -16,9 +16,6 @@
 
 /role             RoleR      GET POST
 
--- Json Routes
-/user             UserR      GET POST
-
 -- Status Checks
 /health/liveness  LivenessR  GET
 /health/readiness ReadinessR GET
