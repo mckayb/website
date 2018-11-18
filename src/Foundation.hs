@@ -163,13 +163,13 @@ instance Yesod App where
           background-color: #{Theme.mainColor Theme.colorScheme};
         }
 
-        .page .page__right p,
-        .page .page__right h1,
-        .page .page__right h2,
-        .page .page__right h3,
-        .page .page__right h4,
-        .page .page__right h5,
-        .page .page__right h6 {
+        .page .page__right article p,
+        .page .page__right article h1,
+        .page .page__right article h2,
+        .page .page__right article h3,
+        .page .page__right article h4,
+        .page .page__right article h5,
+        .page .page__right article h6 {
           color: #{Theme.textColor Theme.colorScheme};
         }
 
