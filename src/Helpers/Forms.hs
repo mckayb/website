@@ -27,14 +27,33 @@ $if not (null formReactions)
 renderPanel :: Text -> Widget -> Widget
 renderPanel title widget = do
   toWidget [lucius|
-    .panel.panel--dark > .panel-heading {
-      background-color: #{Theme.sidebarColor Theme.colorScheme};
+    .panel.panel--dark {
+      background: transparent;
+      border-color: #{Theme.hoverColor Theme.colorScheme};
+    }
+
+    .panel.panel--dark > .panel-body input {
+      background: transparent;
       border-color: #{Theme.hoverColor Theme.colorScheme};
       color: white;
     }
+
+    .panel.panel--dark > .panel-body input.btn {
+      background: #{Theme.linkColor Theme.colorScheme}
+    }
+
+    .panel.panel--dark > .panel-body input.btn:hover {
+      background: #{Theme.hoverColor Theme.colorScheme}
+    }
+
+    .panel.panel--dark > .panel-heading {
+      background-color: #{Theme.sidebarColor Theme.colorScheme};
+      color: white;
+      border: none;
+    }
   |]
   [whamlet|
-    <div .panel.panel-default.panel--dark>
+    <div .panel.panel--dark>
       <div .panel-heading>
         #{title}
       <div .panel-body>

@@ -134,6 +134,7 @@ instance Yesod App where
         html,body,.page {
           height: 100%;
           margin: 0;
+          color: #{Theme.textColor Theme.colorScheme}
         }
 
         .coordinates {
@@ -161,16 +162,6 @@ instance Yesod App where
         .page .page__right {
           flex: 1;
           background-color: #{Theme.mainColor Theme.colorScheme};
-        }
-
-        .page .page__right article p,
-        .page .page__right article h1,
-        .page .page__right article h2,
-        .page .page__right article h3,
-        .page .page__right article h4,
-        .page .page__right article h5,
-        .page .page__right article h6 {
-          color: #{Theme.textColor Theme.colorScheme};
         }
 
         .page .page__left a {
@@ -207,8 +198,8 @@ instance Yesod App where
         }
 
         .banner .banner__actions > button {
-          background-color: #{Theme.linksColor Theme.colorScheme};
-          border-color: #{Theme.linksColor Theme.colorScheme};
+          background-color: #{Theme.linkColor Theme.colorScheme};
+          border-color: #{Theme.linkColor Theme.colorScheme};
         }
 
         .banner .banner__actions > button:hover {

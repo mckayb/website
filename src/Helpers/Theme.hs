@@ -6,7 +6,7 @@ data ColorScheme = ColorScheme
   { mainColor :: Text
   , textColor :: Text
   , sidebarColor :: Text
-  , linksColor :: Text
+  , linkColor :: Text
   , hoverColor :: Text
   , headerColor :: Text
   }

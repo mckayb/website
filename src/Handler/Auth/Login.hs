@@ -57,7 +57,7 @@ loginForm = renderBootstrap3 BootstrapBasicForm $ (,)
       , fsId = Nothing
       , fsTooltip = Nothing
       , fsName = Nothing
-      , fsAttrs = [("class", "form-control"), ("placeholder", "Email")]
+      , fsAttrs = [("class", "form-control"), ("placeholder", "Email Address")]
       }
     passwordSettings = FieldSettings
       { fsLabel = "Password"
