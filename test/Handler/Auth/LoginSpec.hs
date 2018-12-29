@@ -12,7 +12,7 @@ spec = withApp $ do
 
       statusIs 200
       htmlCount ".alert.alert-danger" 0
-      htmlCount "input[placeholder=Email]" 1
+      htmlCount "input[placeholder=Email Address]" 1
       htmlCount "input[placeholder=Password]" 1
       htmlCount "input.btn.btn-primary[type=submit][value=Login]" 1
 

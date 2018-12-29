@@ -32,7 +32,8 @@ renderPanel title widget = do
       border-color: #{Theme.hoverColor Theme.colorScheme};
     }
 
-    .panel.panel--dark > .panel-body input {
+    .panel.panel--dark > .panel-body input,
+    .panel.panel--dark > .panel-body textarea {
       background: transparent;
       border-color: #{Theme.hoverColor Theme.colorScheme};
       color: white;
