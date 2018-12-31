@@ -28,8 +28,8 @@ renderPanel :: Text -> Widget -> Widget
 renderPanel title widget = do
   toWidget [lucius|
     .panel.panel--themed {
-      background: transparent;
-      border-color: #{Theme.hoverColor Theme.colorScheme};
+      background-color: #{Theme.sidebarColor Theme.colorScheme};
+      border-color: #{Theme.borderColor Theme.colorScheme};
     }
 
     .panel.panel--themed > .panel-body input,
@@ -39,18 +39,14 @@ renderPanel title widget = do
       color: white;
     }
 
-    .panel.panel--themed > .panel-body input.btn {
-      background: #{Theme.linkColor Theme.colorScheme}
-    }
-
     .panel.panel--themed > .panel-body input.btn:hover {
       background: #{Theme.hoverColor Theme.colorScheme}
     }
 
     .panel.panel--themed > .panel-heading {
-      background-color: #{Theme.sidebarColor Theme.colorScheme};
       color: white;
-      border: none;
+      border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
+      font-size: 1.10rem;
     }
   |]
   [whamlet|

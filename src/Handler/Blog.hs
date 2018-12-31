@@ -48,21 +48,21 @@ getBlogR = do
       }
 
       .post .post__content {
-        padding: 10px;
+        padding: 0.5rem;
       }
 
       .post .post__actions {
-        padding: 5px;
+        padding: 0.25rem;
       }
 
       .post .post__date {
         text-align: center;
-        padding: 10px;
+        padding: 0.5rem;
         border-right: 1px solid #{Theme.borderColor Theme.colorScheme};
       }
 
       .post .post__date_day {
-        font-size: 26px;
+        font-size: 1.25rem;
       }
 
       .post .post__header {
@@ -70,8 +70,8 @@ getBlogR = do
       }
 
       .post .post__title {
-        padding: 10px;
-        font-size: 24px;
+        padding: 0.5rem;
+        font-size: 1.25rem;
         border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
       }
 

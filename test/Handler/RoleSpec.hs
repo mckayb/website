@@ -22,7 +22,7 @@ spec = withApp $ do
       goToRole em "mypassword"
 
       htmlCount ".alert.alert-danger" 0
-      htmlCount "input[placeholder=Role]" 1
+      htmlCount "input[placeholder=Role Name]" 1
       htmlCount "input.btn.btn-primary[type=submit][value=Submit]" 1
 
     it "Should fail if there's no csrf token" $ do

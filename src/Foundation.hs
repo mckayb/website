@@ -126,6 +126,9 @@ instance Yesod App where
       addStylesheet $ StaticR css_bootstrap_css
       addStylesheet $ StaticR css_fontawesome_css
       addStylesheet $ StaticR css_brands_css
+      -- Media queries don't seem to work in lucius
+      -- So I had to put them in here instead
+      addStylesheet $ StaticR css_app_css
 
       toWidget [julius|
         $("#sidebar-toggle").on("click", function() {
@@ -134,9 +137,20 @@ instance Yesod App where
         })
       |]
       toWidget [lucius|
-        html,body,.page {
+        html {
+          font-size: 16px;
+        }
+
+        html,body {
           margin: 0;
+          height: 100%;
+          background-color: #{Theme.mainColor Theme.colorScheme};
           color: #{Theme.textColor Theme.colorScheme};
+          overflow-x: hidden;
+        }
+
+        .page {
+          min-height: 100%;
         }
 
         .coordinates {
@@ -162,7 +176,6 @@ instance Yesod App where
         }
 
         .page .page__left {
-          min-width: 25vw;
           background-color: #{Theme.sidebarColor Theme.colorScheme};
           color: #{Theme.textColor Theme.colorScheme};
           border-right: 1px solid #{Theme.borderColor Theme.colorScheme};
@@ -170,6 +183,14 @@ instance Yesod App where
 
         .page .page__left.page__left--hidden {
           display: none;
+        }
+
+        .page .page__sidebar {
+          position: fixed;
+        }
+
+        .page .page__right {
+          min-width: 100%;
         }
 
         .page .page__header {
@@ -184,8 +205,7 @@ instance Yesod App where
         }
 
         .banner .banner__brand {
-          font-size: 26px;
-          font-weight: bold;
+          font-size: 1.5rem;
           align-self: center;
           color: #{Theme.sidebarColor Theme.colorScheme};
         }
@@ -194,7 +214,7 @@ instance Yesod App where
           flex: 1;
           text-align: right;
           align-self: center;
-          font-size: 24px;
+          font-size: 1.5rem;
         }
 
         .banner .banner__promos a {
@@ -232,7 +252,7 @@ instance Yesod App where
       [whamlet|
         <div .page.coordinates.coordinates--x>
           <div .page__left.page__left--hidden>
-            <div>
+            <div .page__sidebar>
               <div>Post tag filter (math/arcade/cs)
               <div>Post search
               <div>About me
@@ -246,10 +266,6 @@ instance Yesod App where
               <div .banner__promos>
                 <a href="https://github.com/mckayb">
                   <i .fab.fa-github>
-                <a href="https://twitter.com/mckay_broderick">
-                  <i .fab.fa-twitter>
-                <a href="https://www.linkedin.com/in/mckaybroderick/">
-                  <i .fab.fa-linkedin>
             <div .page__content>
               ^{widget}
       |]
