@@ -4,7 +4,6 @@ import Data.Text (Text)
 
 data ColorScheme = ColorScheme
   { mainColor :: Text
-  , mainAccentColor :: Text
   , textColor :: Text
   , sidebarColor :: Text
   , linkColor :: Text
@@ -16,7 +15,6 @@ data ColorScheme = ColorScheme
 colorScheme :: ColorScheme
 colorScheme = ColorScheme
   { mainColor = "#20262e"
-  , mainAccentColor = "#161a1f"
   , textColor = "#dedede"
   , sidebarColor = "#1c2128"
   , linkColor = "#009b90"

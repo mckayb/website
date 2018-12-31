@@ -120,10 +120,6 @@ instance Yesod App where
           overflow-x: hidden;
         }
 
-        .page {
-          min-height: 100%;
-        }
-
         .coordinates {
           display: flex;
         }
@@ -134,6 +130,10 @@ instance Yesod App where
 
         .coordinates.coordinates--y {
           flex-direction: column;
+        }
+
+        .page {
+          min-height: 100%;
         }
 
         .page a {
