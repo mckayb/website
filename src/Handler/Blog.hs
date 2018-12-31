@@ -113,26 +113,6 @@ getBlogR = do
                 <a href="@{BlogR}post/#{getId post}">#{getPostTitle post}
               <div .post__content>
                 #{preEscapedToMarkup (getPostTeaser post)}
-
-          <article .post.coordinates.coordinates--x>
-            <div .post__date.coordinates.coordinates--y>
-              <div .post__date_day>#{getTimestamp "%d" post}
-              <div .post__date_mon_year>#{getTimestamp "%b %Y" post}
-            <div .post__body.coordinates.coordinates--y>
-              <div .post__title>
-                <a href="@{BlogR}post/#{getId post}">#{getPostTitle post}
-              <div .post__content>
-                #{preEscapedToMarkup (getPostTeaser post)}
-
-          <article .post.coordinates.coordinates--x>
-            <div .post__date.coordinates.coordinates--y>
-              <div .post__date_day>#{getTimestamp "%d" post}
-              <div .post__date_mon_year>#{getTimestamp "%b %Y" post}
-            <div .post__body.coordinates.coordinates--y>
-              <div .post__title>
-                <a href="@{BlogR}post/#{getId post}">#{getPostTitle post}
-              <div .post__content>
-                #{preEscapedToMarkup (getPostTeaser post)}
     |]
 
 getBlogPostR :: Key Post -> Handler Html
