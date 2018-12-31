@@ -93,35 +93,6 @@ instance Yesod App where
   defaultLayout widget = do
     master <- getYesod
     -- mmsg <- getMessage
-
-    -- muser <- maybeAuthPair
-    -- mcurrentRoute <- getCurrentRoute
-
-    -- Get the breadcrumbs, as defined in the YesodBreadcrumbs instance.
-    -- (title, parents) <- breadcrumbs
-
-    -- Define the menu items of the header.
-    -- let menuItems =
-          -- [ NavbarLeft $ MenuItem
-            -- { menuItemLabel = "Home"
-            -- , menuItemRoute = BlogR
-            -- , menuItemAccessCallback = True
-            -- }
-          -- ]
-    -- let menuItems = []
-
-    -- let navbarLeftMenuItems = [x | NavbarLeft x <- menuItems]
-    -- let navbarRightMenuItems = [x | NavbarRight x <- menuItems]
-
-    -- let navbarLeftFilteredMenuItems = [x | x <- navbarLeftMenuItems, menuItemAccessCallback x]
-    -- let navbarRightFilteredMenuItems = [x | x <- navbarRightMenuItems, menuItemAccessCallback x]
-
-    -- We break up the default layout into two components:
-    -- default-layout is the contents of the body tag, and
-    -- default-layout-wrapper is the entire page. Since the final
-    -- value passed to hamletToRepHtml cannot be a widget, this allows
-    -- you to use normal widget features in default-layout.
-
     pc <- widgetToPageContent $ do
       addStylesheet $ StaticR css_bootstrap_css
       addStylesheet $ StaticR css_fontawesome_css
