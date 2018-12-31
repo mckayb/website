@@ -124,17 +124,19 @@ instance Yesod App where
 
     pc <- widgetToPageContent $ do
       addStylesheet $ StaticR css_bootstrap_css
+      addStylesheet $ StaticR css_fontawesome_css
+      addStylesheet $ StaticR css_brands_css
 
       toWidget [julius|
         $("#sidebar-toggle").on("click", function() {
           $(".page__left").toggleClass("page__left--hidden")
+          $("#sidebar-toggle").toggleClass("active")
         })
       |]
       toWidget [lucius|
         html,body,.page {
-          height: 100%;
           margin: 0;
-          color: #{Theme.textColor Theme.colorScheme}
+          color: #{Theme.textColor Theme.colorScheme};
         }
 
         .coordinates {
@@ -149,70 +151,91 @@ instance Yesod App where
           flex-direction: column;
         }
 
+        .page a {
+          color: #{Theme.linkColor Theme.colorScheme};
+        }
+
+        .page a:hover,
+        .page a:focus {
+          color: #{Theme.hoverColor Theme.colorScheme};
+          text-decoration: none;
+        }
+
         .page .page__left {
           min-width: 25vw;
           background-color: #{Theme.sidebarColor Theme.colorScheme};
-          color: white;
+          color: #{Theme.textColor Theme.colorScheme};
+          border-right: 1px solid #{Theme.borderColor Theme.colorScheme};
         }
 
         .page .page__left.page__left--hidden {
           display: none;
         }
 
-        .page .page__right {
-          flex: 1;
-          background-color: #{Theme.mainColor Theme.colorScheme};
-        }
-
-        .page .page__left a {
-          background-color: transparent;
-          border: 1px solid #{Theme.hoverColor Theme.colorScheme};
-          border-radius: 0;
-          color: white;
-        }
-
-        .page .page__left a:hover {
-          background-color: #{Theme.hoverColor Theme.colorScheme};
-          cursor: pointer;
-        }
-
         .page .page__header {
           padding: 2vh 2vw;
           background-color: #{Theme.headerColor Theme.colorScheme};
-          border-bottom: 1px solid #{Theme.sidebarColor Theme.colorScheme};
+          border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
         }
 
         .page .page__content {
-          padding: 5vh 8vw;
+          padding: 4vh 8vw;
+          background-color: #{Theme.mainColor Theme.colorScheme};
         }
 
         .banner .banner__brand {
           font-size: 26px;
           font-weight: bold;
-          align-self: auto;
+          align-self: center;
           color: #{Theme.sidebarColor Theme.colorScheme};
+        }
+
+        .banner .banner__promos {
+          flex: 1;
+          text-align: right;
+          align-self: center;
+          font-size: 24px;
+        }
+
+        .banner .banner__promos a {
+          color: #{Theme.linkColor Theme.colorScheme};
+          margin-left: 1vw;
+        }
+
+        .banner .banner__promos a:hover,
+        .banner .banner__promos a:focus {
+          text-decoration: none;
+          color: #{Theme.hoverColor Theme.colorScheme};
         }
 
         .banner .banner__actions {
           margin-right: 2vw;
         }
 
-        .banner .banner__actions > button {
-          background-color: #{Theme.linkColor Theme.colorScheme};
+        .banner .banner__actions > button,
+        .banner .banner__actions > button.active:hover,
+        .banner .banner__actions > button.active:focus {
+          background-color: transparent;
           border-color: #{Theme.linkColor Theme.colorScheme};
+          color: #{Theme.linkColor Theme.colorScheme};
+          border-width: 1px;
         }
 
-        .banner .banner__actions > button:hover {
+        .banner .banner__actions > button:not(.active):hover,
+        .banner .banner__actions > button:not(.active):focus,
+        .banner .banner__actions > button.active {
           background-color: #{Theme.hoverColor Theme.colorScheme};
+          color: #{Theme.textColor Theme.colorScheme};
+          border-color: #{Theme.hoverColor Theme.colorScheme};
         }
       |]
       [whamlet|
         <div .page.coordinates.coordinates--x>
           <div .page__left.page__left--hidden>
-            <ul .list-group>
-              <a .list-group-item href="https://github.com/mckayb">GitHub</a>
-              <a .list-group-item href="https://twitter.com/mckay_broderick">Twitter</a>
-              <a .list-group-item href="https://www.linkedin.com/in/mckaybroderick/">LinkedIn</a>
+            <div>
+              <div>Post tag filter (math/arcade/cs)
+              <div>Post search
+              <div>About me
           <div .page__right.coordinates.coordinates--y>
             <div .page__header.banner.coordinates.coordinates--x>
               <div .banner__actions>
@@ -220,6 +243,13 @@ instance Yesod App where
                   <i .glyphicon.glyphicon-menu-hamburger>
               <div .banner__brand>
                 <a href=@{BlogR}>Structured Rants</a>
+              <div .banner__promos>
+                <a href="https://github.com/mckayb">
+                  <i .fab.fa-github>
+                <a href="https://twitter.com/mckay_broderick">
+                  <i .fab.fa-twitter>
+                <a href="https://www.linkedin.com/in/mckaybroderick/">
+                  <i .fab.fa-linkedin>
             <div .page__content>
               ^{widget}
       |]
