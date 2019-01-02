@@ -65,15 +65,10 @@ renderPost widget mPrev reactions =
     setTitle "Publish New Post"
     Forms.renderPanel "Create Post" $ do
       toWidget [lucius|
-        section.post h4 {
-          margin-bottom: 20px;
-        }
-
         section.post .post__preview {
-          border: 2px solid #{Theme.sidebarColor Theme.colorScheme};
-          padding: 20px;
+          border: 1px solid #{Theme.borderColor Theme.colorScheme};
+          padding: 2rem;
           border-radius: 5px;
-          color: black;
         }
 
         section.post .post__label {

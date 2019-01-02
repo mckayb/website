@@ -93,47 +93,31 @@ instance Yesod App where
   defaultLayout widget = do
     master <- getYesod
     -- mmsg <- getMessage
-
-    -- muser <- maybeAuthPair
-    -- mcurrentRoute <- getCurrentRoute
-
-    -- Get the breadcrumbs, as defined in the YesodBreadcrumbs instance.
-    -- (title, parents) <- breadcrumbs
-
-    -- Define the menu items of the header.
-    -- let menuItems =
-          -- [ NavbarLeft $ MenuItem
-            -- { menuItemLabel = "Home"
-            -- , menuItemRoute = BlogR
-            -- , menuItemAccessCallback = True
-            -- }
-          -- ]
-    -- let menuItems = []
-
-    -- let navbarLeftMenuItems = [x | NavbarLeft x <- menuItems]
-    -- let navbarRightMenuItems = [x | NavbarRight x <- menuItems]
-
-    -- let navbarLeftFilteredMenuItems = [x | x <- navbarLeftMenuItems, menuItemAccessCallback x]
-    -- let navbarRightFilteredMenuItems = [x | x <- navbarRightMenuItems, menuItemAccessCallback x]
-
-    -- We break up the default layout into two components:
-    -- default-layout is the contents of the body tag, and
-    -- default-layout-wrapper is the entire page. Since the final
-    -- value passed to hamletToRepHtml cannot be a widget, this allows
-    -- you to use normal widget features in default-layout.
-
     pc <- widgetToPageContent $ do
       addStylesheet $ StaticR css_bootstrap_css
+      addStylesheet $ StaticR css_fontawesome_css
+      addStylesheet $ StaticR css_brands_css
+      -- Media queries don't seem to work in lucius
+      -- So I had to put them in here instead
+      addStylesheet $ StaticR css_app_css
 
       toWidget [julius|
         $("#sidebar-toggle").on("click", function() {
           $(".page__left").toggleClass("page__left--hidden")
+          $("#sidebar-toggle").toggleClass("active")
         })
       |]
       toWidget [lucius|
-        html,body,.page {
-          height: 100%;
+        html {
+          font-size: 16px;
+        }
+
+        html,body {
           margin: 0;
+          height: 100%;
+          background-color: #{Theme.mainColor Theme.colorScheme};
+          color: #{Theme.textColor Theme.colorScheme};
+          overflow-x: hidden;
         }
 
         .coordinates {
@@ -148,10 +132,24 @@ instance Yesod App where
           flex-direction: column;
         }
 
+        .page {
+          min-height: 100%;
+        }
+
+        .page a {
+          color: #{Theme.linkColor Theme.colorScheme};
+        }
+
+        .page a:hover,
+        .page a:focus {
+          color: #{Theme.hoverColor Theme.colorScheme};
+          text-decoration: none;
+        }
+
         .page .page__left {
-          min-width: 25vw;
           background-color: #{Theme.sidebarColor Theme.colorScheme};
-          color: white;
+          color: #{Theme.textColor Theme.colorScheme};
+          border-right: 1px solid #{Theme.borderColor Theme.colorScheme};
         }
 
         .page .page__left.page__left--hidden {
@@ -159,69 +157,116 @@ instance Yesod App where
         }
 
         .page .page__right {
-          flex: 1;
-          background-color: #{Theme.mainColor Theme.colorScheme};
-        }
-
-        .page .page__right article p,
-        .page .page__right article h1,
-        .page .page__right article h2,
-        .page .page__right article h3,
-        .page .page__right article h4,
-        .page .page__right article h5,
-        .page .page__right article h6 {
-          color: #{Theme.textColor Theme.colorScheme};
-        }
-
-        .page .page__left a {
-          background-color: transparent;
-          border: 1px solid #{Theme.hoverColor Theme.colorScheme};
-          border-radius: 0;
-          color: white;
-        }
-
-        .page .page__left a:hover {
-          background-color: #{Theme.hoverColor Theme.colorScheme};
-          cursor: pointer;
+          min-width: 100%;
         }
 
         .page .page__header {
           padding: 2vh 2vw;
           background-color: #{Theme.headerColor Theme.colorScheme};
-          border-bottom: 1px solid #{Theme.sidebarColor Theme.colorScheme};
+          border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
         }
 
         .page .page__content {
-          padding: 5vh 8vw;
+          padding: 4vh 8vw;
+          background-color: #{Theme.mainColor Theme.colorScheme};
+        }
+
+        .page .page__synopsis {
+          padding: 20px;
         }
 
         .banner .banner__brand {
-          font-size: 26px;
-          font-weight: bold;
-          align-self: auto;
+          font-size: 1.5rem;
+          align-self: center;
           color: #{Theme.sidebarColor Theme.colorScheme};
+        }
+
+        .banner .banner__promos {
+          flex: 1;
+          text-align: right;
+          align-self: center;
+          font-size: 1.5rem;
+        }
+
+        .banner .banner__promos a {
+          color: #{Theme.linkColor Theme.colorScheme};
+          margin-left: 1vw;
+        }
+
+        .banner .banner__promos a:hover,
+        .banner .banner__promos a:focus {
+          text-decoration: none;
+          color: #{Theme.hoverColor Theme.colorScheme};
         }
 
         .banner .banner__actions {
           margin-right: 2vw;
         }
 
-        .banner .banner__actions > button {
-          background-color: #{Theme.linksColor Theme.colorScheme};
-          border-color: #{Theme.linksColor Theme.colorScheme};
+        .banner .banner__actions > button,
+        .banner .banner__actions > button.active:hover,
+        .banner .banner__actions > button.active:focus {
+          background-color: transparent;
+          border-color: #{Theme.linkColor Theme.colorScheme};
+          color: #{Theme.linkColor Theme.colorScheme};
+          border-width: 1px;
         }
 
-        .banner .banner__actions > button:hover {
+        .banner .banner__actions > button:not(.active):hover,
+        .banner .banner__actions > button:not(.active):focus,
+        .banner .banner__actions > button.active {
           background-color: #{Theme.hoverColor Theme.colorScheme};
+          color: #{Theme.textColor Theme.colorScheme};
+          border-color: #{Theme.hoverColor Theme.colorScheme};
+        }
+
+        .list {
+          padding-left: 0;
+        }
+
+        .list .list__title {
+          padding: 10px 15px;
+          font-size: 1.10rem;
+          border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
+        }
+
+        .list .list__item {
+          display: block;
+          padding: 10px 15px;
+          border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
+          color: #{Theme.linkColor Theme.colorScheme};
+        }
+
+        .list .list__item:first-child {
+          border-top: 1px solid #{Theme.borderColor Theme.colorScheme};
+        }
+
+        .list .list__item i {
+          padding-right: 1vw;
+        }
+
+        .list .list__item:hover,
+        .list .list__item:focus {
+          background-color: #{Theme.hoverColor Theme.colorScheme};
+          color: #{Theme.textColor Theme.colorScheme};
         }
       |]
       [whamlet|
         <div .page.coordinates.coordinates--x>
           <div .page__left.page__left--hidden>
-            <ul .list-group>
-              <a .list-group-item href="https://github.com/mckayb">GitHub</a>
-              <a .list-group-item href="https://twitter.com/mckay_broderick">Twitter</a>
-              <a .list-group-item href="https://www.linkedin.com/in/mckaybroderick/">LinkedIn</a>
+            <div .page__sidebar>
+              <div .page__synopsis>This website is devoted to various rants about programming, math or whatever else I decide to monologue about.
+              <div .list>
+                <div .list__title>Social Media
+                <a .list__item href="https://github.com/mckayb">
+                  <i .fab.fa-lg.fa-github>
+                  GitHub
+                <a .list__item href="https://twitter.com/mckay_broderick">
+                  <i .fab.fa-lg.fa-twitter>
+                  Twitter
+                <a .list__item href="https://www.linkedin.com/in/mckaybroderick/">
+                  <i .fab.fa-lg.fa-linkedin>
+                  LinkedIn
           <div .page__right.coordinates.coordinates--y>
             <div .page__header.banner.coordinates.coordinates--x>
               <div .banner__actions>
@@ -229,6 +274,9 @@ instance Yesod App where
                   <i .glyphicon.glyphicon-menu-hamburger>
               <div .banner__brand>
                 <a href=@{BlogR}>Structured Rants</a>
+              <div .banner__promos>
+                <a href="https://github.com/mckayb/website">
+                  <i .fab.fa-lg.fa-github>
             <div .page__content>
               ^{widget}
       |]

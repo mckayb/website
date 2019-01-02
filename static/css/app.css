@@ -1,0 +1,21 @@
+.page .page__left {
+  min-width: 75vw;
+}
+
+@media(min-width:576px) {
+  .page .page__left {
+    min-width: 50vw;
+  }
+}
+
+@media(min-width:768px) {
+  .page .page__left {
+    min-width: 33vw;
+  }
+}
+
+@media(min-width:992px) {
+  .page .page__left {
+    min-width: 25vw;
+  }
+}

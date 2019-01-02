@@ -26,12 +26,12 @@ spec = withApp $ do
       get BlogR
       statusIs 200
       htmlCount "article.post" 1
-      htmlCount "article.post div.post__date.text-muted" 1
-      htmlAnyContain "h1" "This is the title"
+      htmlCount "article.post div.post__date" 1
+      htmlAnyContain "article.post .post__title > a" "This is the title"
       htmlAnyContain "h2" "Test"
 
       htmlCount "article.blog-post" 0
-      clickOn "article.post > h1.post__title > a"
+      clickOn "article.post .post__title > a"
       statusIs 200
       htmlCount "article.blog-post" 1
 
@@ -47,10 +47,10 @@ spec = withApp $ do
       get BlogR
       statusIs 200
       htmlCount "article.post" 3
-      htmlCount "article.post div.post__date.text-muted" 3
-      htmlAnyContain "h1" "First"
-      htmlAnyContain "h1" "Second"
-      htmlAnyContain "h1" "Third"
+      htmlCount "article.post div.post__date" 3
+      htmlAnyContain "article.post .post__title > a" "First"
+      htmlAnyContain "article.post .post__title > a" "Second"
+      htmlAnyContain "article.post .post__title > a" "Third"
 
     it "Only grabs the first paragraph from the post content" $ do
       role <- createRole "Admin"
@@ -61,7 +61,7 @@ spec = withApp $ do
 
       get BlogR
       statusIs 200
-      htmlAllContain "h1.post__title > a" "The Post"
+      htmlAllContain ".post__title > a" "The Post"
       bodyContains "First"
       bodyNotContains "Second"
 

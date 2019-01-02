@@ -34,7 +34,7 @@ roleForm = renderBootstrap3 BootstrapBasicForm $
           , fsId = Nothing
           , fsTooltip = Nothing
           , fsName = Nothing
-          , fsAttrs = [("class", "form-control"), ("placeholder", "Role")]
+          , fsAttrs = [("class", "form-control"), ("placeholder", "Role Name")]
           }
 
 renderRole :: Widget -> [FormReaction] -> Handler Html

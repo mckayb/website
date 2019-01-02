@@ -12,8 +12,14 @@ import qualified Helpers.Theme as Theme
 getPostContent :: Entity Post -> Text
 getPostContent = CMarkGFM.commonmarkToHtml [] [] . postContent . entityVal
 
-getTimestamp :: Entity Post -> Text
-getTimestamp = Text.pack . formatTime defaultTimeLocale "%d %B %Y" . postTimestamp . entityVal
+getTimestamp :: String -> Entity Post -> Text
+getTimestamp fmt = Text.pack . formatTime defaultTimeLocale fmt . postTimestamp . entityVal
+
+-- getPostDay :: Entity Post -> Text
+-- getPostDay = Text.pack . formatTime defaultTimeLocale "%d" . postTimestamp . entityVal
+
+-- getPostMonthYear :: Entity Post -> Text
+-- getPostMonthYear = Text.pack . formatTime defaultTimeLocale "%b %Y" . postTimestamp . entityVal
 
 getPostTitle :: Entity Post -> Text
 getPostTitle = postTitle . entityVal
@@ -34,12 +40,39 @@ getBlogR = do
   defaultLayout $ do
     setTitle "Blog"
     toWidget [lucius|
+      .post {
+        margin-bottom: 2vh;
+        background-color: #{Theme.headerColor Theme.colorScheme};
+        border-radius: 5px;
+        border: 1px solid #{Theme.borderColor Theme.colorScheme};
+      }
+
       .post .post__content {
-        margin-bottom: 21px;
+        padding: 0.5rem;
+      }
+
+      .post .post__actions {
+        padding: 0.25rem;
       }
 
       .post .post__date {
-        margin-bottom: 15px;
+        text-align: center;
+        padding: 0.5rem;
+        border-right: 1px solid #{Theme.borderColor Theme.colorScheme};
+      }
+
+      .post .post__date_day {
+        font-size: 1.25rem;
+      }
+
+      .post .post__header {
+        border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
+      }
+
+      .post .post__title {
+        padding: 0.5rem;
+        font-size: 1.25rem;
+        border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
       }
 
       .post h1,
@@ -55,6 +88,14 @@ getBlogR = do
       .post h2 {
         font-size: 21px;
       }
+
+      .post .post__left {
+        border-right: 1px solid #{Theme.borderColor Theme.colorScheme};
+      }
+
+      .post .post__body {
+        flex: 1;
+      }
     |]
     [whamlet|
       $if (null posts)
@@ -63,13 +104,15 @@ getBlogR = do
 
       $else
         $forall post <- posts
-          <article .post>
-            <h1 .post__title>
-              <a href="@{BlogR}post/#{getId post}">#{getPostTitle post}
-            <div .post__date .text-muted>
-              #{getTimestamp post}
-            <div .post__content>
-              #{preEscapedToMarkup (getPostTeaser post)}
+          <article .post.coordinates.coordinates--x>
+            <div .post__date.coordinates.coordinates--y>
+              <div .post__date_day>#{getTimestamp "%d" post}
+              <div .post__date_mon_year>#{getTimestamp "%b %Y" post}
+            <div .post__body.coordinates.coordinates--y>
+              <div .post__title>
+                <a href="@{BlogR}post/#{getId post}">#{getPostTitle post}
+              <div .post__content>
+                #{preEscapedToMarkup (getPostTeaser post)}
     |]
 
 getBlogPostR :: Key Post -> Handler Html
@@ -87,7 +130,7 @@ getBlogPostR postId = do
         <article .blog-post>
           <section .blog-post__header>
             <h1>#{getPostTitle post'}
-            <div .blog-post__time .text-muted>#{getTimestamp post'}
+            <div .blog-post__time .text-muted>#{getTimestamp "%d %B %Y" post'}
           <section .blog-post__body>
             #{preEscapedToMarkup (getPostContent post')}
       |]
