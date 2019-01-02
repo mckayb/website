@@ -156,10 +156,6 @@ instance Yesod App where
           display: none;
         }
 
-        .page .page__sidebar {
-          position: fixed;
-        }
-
         .page .page__right {
           min-width: 100%;
         }
@@ -173,6 +169,10 @@ instance Yesod App where
         .page .page__content {
           padding: 4vh 8vw;
           background-color: #{Theme.mainColor Theme.colorScheme};
+        }
+
+        .page .page__synopsis {
+          padding: 20px;
         }
 
         .banner .banner__brand {
@@ -219,14 +219,54 @@ instance Yesod App where
           color: #{Theme.textColor Theme.colorScheme};
           border-color: #{Theme.hoverColor Theme.colorScheme};
         }
+
+        .list {
+          padding-left: 0;
+        }
+
+        .list .list__title {
+          padding: 10px 15px;
+          font-size: 1.10rem;
+          border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
+        }
+
+        .list .list__item {
+          display: block;
+          padding: 10px 15px;
+          border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
+          color: #{Theme.linkColor Theme.colorScheme};
+        }
+
+        .list .list__item:first-child {
+          border-top: 1px solid #{Theme.borderColor Theme.colorScheme};
+        }
+
+        .list .list__item i {
+          padding-right: 1vw;
+        }
+
+        .list .list__item:hover,
+        .list .list__item:focus {
+          background-color: #{Theme.hoverColor Theme.colorScheme};
+          color: #{Theme.textColor Theme.colorScheme};
+        }
       |]
       [whamlet|
         <div .page.coordinates.coordinates--x>
           <div .page__left.page__left--hidden>
             <div .page__sidebar>
-              <div>Post tag filter (math/arcade/cs)
-              <div>Post search
-              <div>About me
+              <div .page__synopsis>This website is devoted to various rants about programming, math or whatever else I decide to monologue about.
+              <div .list>
+                <div .list__title>Social Media
+                <a .list__item href="https://github.com/mckayb">
+                  <i .fab.fa-lg.fa-github>
+                  GitHub
+                <a .list__item href="https://twitter.com/mckay_broderick">
+                  <i .fab.fa-lg.fa-twitter>
+                  Twitter
+                <a .list__item href="https://www.linkedin.com/in/mckaybroderick/">
+                  <i .fab.fa-lg.fa-linkedin>
+                  LinkedIn
           <div .page__right.coordinates.coordinates--y>
             <div .page__header.banner.coordinates.coordinates--x>
               <div .banner__actions>
@@ -235,8 +275,8 @@ instance Yesod App where
               <div .banner__brand>
                 <a href=@{BlogR}>Structured Rants</a>
               <div .banner__promos>
-                <a href="https://github.com/mckayb">
-                  <i .fab.fa-github>
+                <a href="https://github.com/mckayb/website">
+                  <i .fab.fa-lg.fa-github>
             <div .page__content>
               ^{widget}
       |]
