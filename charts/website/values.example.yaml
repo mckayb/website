@@ -5,8 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: mckayb/website
-  tag: 1.0-website
+  repository: website
+  tag: v1
   pullPolicy: IfNotPresent
 
 nameOverride: ""
