@@ -21,22 +21,17 @@ Set your docker environment to the one inside minikube.
 eval $(minikube docker-env)
 ```
 
-Build the base image for the application.
-If you'd like to change the name of the image, or the name of the base image, feel free to change those in the `stack.yaml` file under `image.container`.
-```
-docker build -t website:base .
-```
-
 Pull the image used to build the image with the following command.
 The tag `lts-12.16` should match the resolver in the `stack.yaml`, so adjust accordingly.
 ```
 docker pull fpco/stack-build:lts-12.16
 ```
+Be aware, this will take a while... go get a coffee or something.
 
 Build the application image with:
 ```
-stack --docker build
-stack --docker image container
+stack --docker build --copy-bins
+docker build -t website:v1 .
 ```
 
 Edit the helm values file with:
@@ -52,7 +47,7 @@ credentials you see fit. Specifically the following:
   * `postgresql.postgresqlPassword`
   * `postgresql.postgresqlDatabase`
 
-If you updated the name of the image container in the `stack.yaml`, replace that too under `image.repository` and `image.tag`.
+If you changed the name of the image when you built it, replace that too under `image.repository` and `image.tag`.
 
 Add the following line into your `/etc/hosts` file.
 Replace the ip with the result of running `minikube ip`. Replace the url with whatever you used for the `ingress.hosts` value.
@@ -60,9 +55,13 @@ Replace the ip with the result of running `minikube ip`. Replace the url with wh
 192.168.99.100 chart-example.local
 ```
 
-Run the application with:
+Build the helm dependencies with:
 ```
 helm dependencies update charts/website
+```
+
+Run the application with:
+```
 helm install charts/website
 ```
 
