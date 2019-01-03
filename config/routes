@@ -15,6 +15,7 @@
 /register         RegisterR  GET POST
 
 /role             RoleR      GET POST
+/tag              TagR       GET POST
 
 -- Status Checks
 /health/liveness  LivenessR  GET

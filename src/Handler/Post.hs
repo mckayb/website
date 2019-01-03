@@ -9,31 +9,42 @@ import qualified CMarkGFM
 import qualified Helpers.Forms as Forms
 import qualified Helpers.Session as Session
 import qualified Helpers.Theme as Theme
+import qualified Helpers.Database as Database
+
+getTagOpts :: Handler [(Text, Key Tag)]
+getTagOpts = do
+  tags <- Database.getTags
+  return $ fmap (\tag -> ((tagName . entityVal) tag, entityKey tag)) tags
 
 getPostR :: Handler Html
 getPostR = do
   _ <- Session.requireAdminUser
-  (formWidget, _) <- generateFormPost postForm
+  opts <- getTagOpts
+  (formWidget, _) <- generateFormPost $ postForm opts
   renderPost formWidget Nothing []
 
 postPostR :: Handler Html
 postPostR = do
   user <- Session.requireAdminUser
-  ((result, formWidget), _) <- runFormPost postForm
+  opts <- getTagOpts
+  ((result, formWidget), _) <- runFormPost $ postForm opts
   action <- lookupPostParam "action"
   case (result, action) of
-    (FormSuccess (title, Textarea markdown), Just "Preview") ->
+    (FormSuccess (title, Textarea markdown, _), Just "Preview") ->
       renderPost formWidget (Just $ previewWidget title markdown) []
-    (FormSuccess (title, Textarea markdown), Just "Publish") -> do
+    (FormSuccess (title, Textarea markdown, tagIds), Just "Publish") -> do
       time <- liftIO getCurrentTime
-      _ <- runDB $ insertEntity $ Post title markdown time (entityKey user)
+      post <- runDB $ insertEntity $ Post title markdown time (entityKey user)
+      _ <- runDB $ insertMany $ fmap (\tagId -> (PostTag (entityKey post) tagId)) tagIds
       renderPost formWidget Nothing []
     _ -> renderPost formWidget Nothing [(Danger, "Something went wrong")]
 
-postForm :: Form (Text, Textarea)
-postForm = renderBootstrap3 BootstrapBasicForm $ (,)
+postForm :: [(Text, Key Tag)] -> Form (Text, Textarea, [Key Tag])
+postForm opts =
+  renderBootstrap3 BootstrapBasicForm $ (,,)
   <$> areq textField titleSettings Nothing
   <*> areq textareaField contentSettings Nothing
+  <*> areq (multiSelectFieldList opts) multiSelectSettings Nothing
   where
     titleSettings = FieldSettings
       { fsLabel = "Title"
@@ -48,6 +59,13 @@ postForm = renderBootstrap3 BootstrapBasicForm $ (,)
       , fsTooltip = Nothing
       , fsName = Nothing
       , fsAttrs = [("class", "form-control"), ("placeholder", "Content")]
+      }
+    multiSelectSettings = FieldSettings
+      { fsLabel = "Tags"
+      , fsId = Nothing
+      , fsTooltip = Nothing
+      , fsName = Nothing
+      , fsAttrs = [("class", "form-control"), ("placeholder", "Tags")]
       }
 
 previewWidget :: Text -> Text -> Widget

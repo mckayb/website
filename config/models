@@ -28,3 +28,12 @@ Post json
   timestamp UTCTime
   userId UserId
   deriving Eq Show
+Tag json
+  name Text
+  UniqueTagName name
+  deriving Eq Show
+PostTag json
+  postId PostId
+  tagId TagId
+  UniquePostTag postId tagId
+  deriving Eq Show

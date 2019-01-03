@@ -15,12 +15,6 @@ getPostContent = CMarkGFM.commonmarkToHtml [] [] . postContent . entityVal
 getTimestamp :: String -> Entity Post -> Text
 getTimestamp fmt = Text.pack . formatTime defaultTimeLocale fmt . postTimestamp . entityVal
 
--- getPostDay :: Entity Post -> Text
--- getPostDay = Text.pack . formatTime defaultTimeLocale "%d" . postTimestamp . entityVal
-
--- getPostMonthYear :: Entity Post -> Text
--- getPostMonthYear = Text.pack . formatTime defaultTimeLocale "%b %Y" . postTimestamp . entityVal
-
 getPostTitle :: Entity Post -> Text
 getPostTitle = postTitle . entityVal
 
