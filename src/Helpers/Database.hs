@@ -21,7 +21,7 @@ getPosts = runDB $ selectList [] []
 getPost :: Key Post -> Handler (Maybe (Entity Post))
 getPost postId = runDB $ selectFirst [PostId ==. postId] []
 
-groupFirst :: Ord a => [(a, Maybe b)] -> Map (a) [b]
+groupFirst :: Ord a => [(a, Maybe b)] -> Map a [b]
 groupFirst = foldr (\tuple acc -> M.insertWith (++) (fst tuple) (maybeToList (snd tuple)) acc) M.empty
 
 getPostsWithTags :: Handler (Map (Entity Post) [Entity Tag])
