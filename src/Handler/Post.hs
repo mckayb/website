@@ -4,7 +4,7 @@ module Handler.Post where
 
 import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
-import Helpers.Forms (FormReaction, FormAlert(Danger))
+import Helpers.Forms (FormReaction, FormAlert(Danger, Success))
 import qualified CMarkGFM
 import qualified Helpers.Forms as Forms
 import qualified Helpers.Session as Session
@@ -12,9 +12,7 @@ import qualified Helpers.Theme as Theme
 import qualified Helpers.Database as Database
 
 getTagOpts :: Handler [(Text, Key Tag)]
-getTagOpts = do
-  tags <- Database.getTags
-  return $ fmap (\tag -> ((tagName . entityVal) tag, entityKey tag)) tags
+getTagOpts = fmap (\tag -> ((tagName . entityVal) tag, entityKey tag)) <$> Database.getTags
 
 getPostR :: Handler Html
 getPostR = do
@@ -35,9 +33,10 @@ postPostR = do
     (FormSuccess (title, Textarea markdown, tagIds), Just "Publish") -> do
       time <- liftIO getCurrentTime
       post <- runDB $ insertEntity $ Post title markdown time (entityKey user)
-      _ <- runDB $ insertMany $ fmap (\tagId -> (PostTag (entityKey post) tagId)) tagIds
-      renderPost formWidget Nothing []
-    _ -> renderPost formWidget Nothing [(Danger, "Something went wrong")]
+      _ <- runDB $ insertMany $ fmap (PostTag (entityKey post)) tagIds
+      renderPost formWidget Nothing [(Success, "Successfully published new post")]
+    _ -> do
+      renderPost formWidget Nothing [(Danger, "Something went wrong")]
 
 postForm :: [(Text, Key Tag)] -> Form (Text, Textarea, [Key Tag])
 postForm opts =

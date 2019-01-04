@@ -2,6 +2,9 @@ module Helpers.Database where
 
 import Import
 import Helpers.Email (Email)
+import Database.Esqueleto ((^.), (?.))
+import qualified Database.Esqueleto as E
+import qualified Data.Map.Strict as M
 
 getUsers :: Handler [Entity User]
 getUsers = runDB $ selectList [] []
@@ -17,6 +20,19 @@ getPosts = runDB $ selectList [] []
 
 getPost :: Key Post -> Handler (Maybe (Entity Post))
 getPost postId = runDB $ selectFirst [PostId ==. postId] []
+
+groupFirst :: Ord a => [(a, Maybe b)] -> Map (a) [b]
+groupFirst = foldr (\tuple acc -> M.insertWith (++) (fst tuple) (maybeToList (snd tuple)) acc) M.empty
+
+getPostsWithTags :: Handler (Map (Entity Post) [Entity Tag])
+getPostsWithTags = do
+  postTagTuples <- runDB
+    $ E.select
+    $ E.from $ \(p `E.LeftOuterJoin` mpt `E.LeftOuterJoin` mt) -> do
+      E.on (mpt ?. PostTagTagId E.==. mt ?. TagId)
+      E.on (E.just (p ^. PostId) E.==. mpt ?. PostTagPostId)
+      return (p, mt)
+  return $ groupFirst postTagTuples
 
 getRoles :: Handler [Entity Role]
 getRoles = runDB $ selectList [] []
@@ -40,4 +56,4 @@ insertPassword :: Password -> Handler (Key Password)
 insertPassword password = runDB $ insert password
 
 insertPost :: Post -> Handler (Key Post)
-insertPost post = runDB $ insert post
+insertPost post' = runDB $ insert post'
