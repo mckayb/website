@@ -79,7 +79,7 @@ previewWidget title markdown =
 renderPost :: Widget -> Maybe Widget -> [FormReaction] -> Handler Html
 renderPost widget mPrev reactions =
   defaultLayout $ do
-    setTitle "Publish New Post"
+    setTitle "Structured Rants - New Post"
     Forms.renderPanel "Create Post" $ do
       toWidget [lucius|
         section.post .post__preview {

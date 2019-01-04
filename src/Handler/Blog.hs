@@ -35,7 +35,7 @@ getBlogR = do
   let tagsForPost post = postTagsMap Map.! post
   let getId = Sql.fromSqlKey . entityKey
   defaultLayout $ do
-    setTitle "Blog"
+    setTitle "Structured Rants"
     toWidget [lucius|
       .post {
         margin-bottom: 2vh;
@@ -130,6 +130,7 @@ getBlogPostR postId = do
   post <- Database.getPost postId
   case post of
     Just post' -> defaultLayout $ do
+      setTitle "Structured Rants"
       toWidget [lucius|
         .blog-post .blog-post__header {
           border-bottom: 1px solid #{Theme.sidebarColor Theme.colorScheme};

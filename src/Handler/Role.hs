@@ -40,7 +40,7 @@ roleForm = renderBootstrap3 BootstrapBasicForm $
 renderRole :: Widget -> [FormReaction] -> Handler Html
 renderRole widget errors =
   defaultLayout $ do
-    setTitle "Create Role"
+    setTitle "Structured Rants - New Role"
     Forms.renderPanel "Create Role" [whamlet|
       <div>
         ^{Forms.formReactionWidget errors}

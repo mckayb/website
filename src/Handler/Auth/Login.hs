@@ -70,7 +70,7 @@ loginForm = renderBootstrap3 BootstrapBasicForm $ (,)
 renderLogin :: Widget -> [FormReaction] -> Handler Html
 renderLogin widget reactions =
   defaultLayout $ do
-    setTitle "Login"
+    setTitle "Structured Rants - Login"
     Forms.renderPanel "Login" [whamlet|
       <div>
         ^{Forms.formReactionWidget reactions}

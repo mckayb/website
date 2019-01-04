@@ -40,7 +40,7 @@ tagForm = renderBootstrap3 BootstrapBasicForm $
 renderTag :: Widget -> [FormReaction] -> Handler Html
 renderTag widget errors =
   defaultLayout $ do
-    setTitle "Create Tag"
+    setTitle "Structured Rants - New Tag"
     Forms.renderPanel "Create Tag" [whamlet|
       <div>
         ^{Forms.formReactionWidget errors}
