@@ -8,18 +8,13 @@ import qualified Database.Persist.Sql as Sql (fromSqlKey)
 import qualified Helpers.Database as Database
 import qualified Data.Text as Text
 import qualified Helpers.Theme as Theme
+import qualified Data.Map.Strict as Map
 
 getPostContent :: Entity Post -> Text
 getPostContent = CMarkGFM.commonmarkToHtml [] [] . postContent . entityVal
 
 getTimestamp :: String -> Entity Post -> Text
 getTimestamp fmt = Text.pack . formatTime defaultTimeLocale fmt . postTimestamp . entityVal
-
--- getPostDay :: Entity Post -> Text
--- getPostDay = Text.pack . formatTime defaultTimeLocale "%d" . postTimestamp . entityVal
-
--- getPostMonthYear :: Entity Post -> Text
--- getPostMonthYear = Text.pack . formatTime defaultTimeLocale "%b %Y" . postTimestamp . entityVal
 
 getPostTitle :: Entity Post -> Text
 getPostTitle = postTitle . entityVal
@@ -35,10 +30,12 @@ getPostTeaser = Text.unlines . takeUntilFirstParagraphInc . Text.lines . getPost
 
 getBlogR :: Handler Html
 getBlogR = do
-  posts <- Database.getPosts
+  postTagsMap <- Database.getPostsWithTags
+  let posts = Map.keys postTagsMap
+  let tagsForPost post = postTagsMap Map.! post
   let getId = Sql.fromSqlKey . entityKey
   defaultLayout $ do
-    setTitle "Blog"
+    setTitle "Structured Rants"
     toWidget [lucius|
       .post {
         margin-bottom: 2vh;
@@ -55,7 +52,7 @@ getBlogR = do
         padding: 0.25rem;
       }
 
-      .post .post__date {
+      .post .post__sidebar {
         text-align: center;
         padding: 0.5rem;
         border-right: 1px solid #{Theme.borderColor Theme.colorScheme};
@@ -96,6 +93,14 @@ getBlogR = do
       .post .post__body {
         flex: 1;
       }
+
+      .post .post__tag {
+        margin-top: 5px;
+      }
+
+      .post .post__tag:first-child {
+        margin-top: 15px;
+      }
     |]
     [whamlet|
       $if (null posts)
@@ -105,9 +110,14 @@ getBlogR = do
       $else
         $forall post <- posts
           <article .post.coordinates.coordinates--x>
-            <div .post__date.coordinates.coordinates--y>
-              <div .post__date_day>#{getTimestamp "%d" post}
-              <div .post__date_mon_year>#{getTimestamp "%b %Y" post}
+            <div .post__sidebar.coordinates.coordinates--y>
+              <div .post__date>
+                <div .post__date_day>#{getTimestamp "%d" post}
+                <div .post__date_mon_year>#{getTimestamp "%b %Y" post}
+
+              <div .post__tags.coordinates.coordinates--y>
+                $forall tag <- (tagsForPost post)
+                  <div .post__tag.badge>#{(tagName . entityVal) tag}
             <div .post__body.coordinates.coordinates--y>
               <div .post__title>
                 <a href="@{BlogR}post/#{getId post}">#{getPostTitle post}
@@ -120,6 +130,7 @@ getBlogPostR postId = do
   post <- Database.getPost postId
   case post of
     Just post' -> defaultLayout $ do
+      setTitle "Structured Rants"
       toWidget [lucius|
         .blog-post .blog-post__header {
           border-bottom: 1px solid #{Theme.sidebarColor Theme.colorScheme};

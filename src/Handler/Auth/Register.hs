@@ -55,7 +55,7 @@ registerForm = renderBootstrap3 BootstrapBasicForm $ (,)
 renderRegister :: Widget -> [FormReaction] -> Handler Html
 renderRegister widget reactions =
   defaultLayout $ do
-    setTitle "Register"
+    setTitle "Structured Rants - Register"
     Forms.renderPanel "Register" [whamlet|
       <div>
         ^{Forms.formReactionWidget reactions}

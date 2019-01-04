@@ -33,6 +33,7 @@ renderPanel title widget = do
     }
 
     .panel.panel--themed > .panel-body input,
+    .panel.panel--themed > .panel-body select,
     .panel.panel--themed > .panel-body textarea {
       background: transparent;
       border-color: #{Theme.hoverColor Theme.colorScheme};

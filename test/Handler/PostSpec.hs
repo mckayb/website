@@ -5,6 +5,7 @@ module Handler.PostSpec (spec) where
 import TestImport
 import qualified Faker.Internet as Faker
 import qualified Helpers.Email as Email
+import qualified Database.Persist.Sql as Sql (fromSqlKey)
 
 spec :: Spec
 spec = withApp $ do
@@ -23,7 +24,7 @@ spec = withApp $ do
 
       bodyContains "Create Post"
 
-    it "Shouldn't let you preview a post if you don't have the title or content set" $ do
+    it "Shouldn't let you preview a post if you don't have all the required fields set" $ do
       role <- createRole "Admin"
       Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
@@ -40,7 +41,7 @@ spec = withApp $ do
       statusIs 200
       bodyContains "Something went wrong"
 
-    it "Shouldn't let you publish a post if you don't have the title or content set" $ do
+    it "Shouldn't let you publish a post if you don't have the required fields set" $ do
       role <- createRole "Admin"
       Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
@@ -62,6 +63,7 @@ spec = withApp $ do
       Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
+      tag <- createTag "Foo"
 
       goToPost em "mypassword"
 
@@ -73,6 +75,7 @@ spec = withApp $ do
         addPostParam "action" "Preview"
         byLabelExact "Title" "This is the title"
         byLabelExact "Content" "## This is the content"
+        byLabelExact "Tags" (pack $ show $ Sql.fromSqlKey $ entityKey tag)
         setMethod "POST"
         setUrl PostR
 
@@ -89,29 +92,41 @@ spec = withApp $ do
       Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
+      tag <- createTag "foo"
 
       goToPost em "mypassword"
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
+      postTagsBefore <- runDB $ selectList ([] :: [Filter PostTag]) []
       assertEq "No posts before we publish" 0 $ length postsBefore
+      assertEq "No post tags before we publish" 0 $ length postTagsBefore
 
       request $ do
         addToken
         addPostParam "action" "Publish"
         byLabelExact "Title" "This is the title"
         byLabelExact "Content" "## This is the content"
+        byLabelExact "Tags" (pack $ show $ Sql.fromSqlKey $ entityKey tag)
         setMethod "POST"
         setUrl PostR
 
       statusIs 200
 
       postsAfter <- runDB $ selectList ([] :: [Filter Post]) []
+      postTagsAfter <- runDB $ selectList ([] :: [Filter PostTag]) []
       assertEq "added a new post" 1 $ length postsAfter
+      assertEq "added a new post tag" 1 $ length postTagsAfter
       let Just post' = listToMaybe postsAfter
+      let Just postTag' = listToMaybe postTagsAfter
 
       assertEq "Post title" ((postTitle . entityVal) post') "This is the title"
       assertEq "Post content" ((postContent . entityVal) post') "## This is the content"
       assertEq "Post user" ((postUserId . entityVal) post') (entityKey user)
+
+      assertEq "PostTag post id" ((postTagPostId . entityVal) postTag') (entityKey post')
+      assertEq "PostTag tag id" ((postTagTagId . entityVal) postTag') (entityKey tag)
+      bodyContains "Successfully published new post"
+
 
   where
     goToPost em pass = do

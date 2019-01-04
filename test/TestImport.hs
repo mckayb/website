@@ -85,6 +85,10 @@ truncateTables = do
 wipeDB :: App -> IO ()
 wipeDB app = runDBWithApp app truncateTables
 
+createTag :: Text -> YesodExample App (Entity Tag)
+createTag name =
+  runDB $ insertEntity $ Tag name
+
 createRole :: Text -> YesodExample App (Entity Role)
 createRole name =
   runDB $ insertEntity $ Role name
@@ -101,3 +105,7 @@ createPassword user pass = do
 createPost :: Entity User -> Text -> Text -> UTCTime -> YesodExample App (Entity Post)
 createPost user title content timestamp =
   runDB $ insertEntity $ Post title content timestamp (entityKey user)
+
+createPostTag :: Entity Post -> Entity Tag -> YesodExample App (Entity PostTag)
+createPostTag post' tag =
+  runDB $ insertEntity $ PostTag (entityKey post') (entityKey tag)

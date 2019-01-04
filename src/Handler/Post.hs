@@ -4,36 +4,46 @@ module Handler.Post where
 
 import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
-import Helpers.Forms (FormReaction, FormAlert(Danger))
+import Helpers.Forms (FormReaction, FormAlert(Danger, Success))
 import qualified CMarkGFM
 import qualified Helpers.Forms as Forms
 import qualified Helpers.Session as Session
 import qualified Helpers.Theme as Theme
+import qualified Helpers.Database as Database
+
+getTagOpts :: Handler [(Text, Key Tag)]
+getTagOpts = fmap (\tag -> ((tagName . entityVal) tag, entityKey tag)) <$> Database.getTags
 
 getPostR :: Handler Html
 getPostR = do
   _ <- Session.requireAdminUser
-  (formWidget, _) <- generateFormPost postForm
+  opts <- getTagOpts
+  (formWidget, _) <- generateFormPost $ postForm opts
   renderPost formWidget Nothing []
 
 postPostR :: Handler Html
 postPostR = do
   user <- Session.requireAdminUser
-  ((result, formWidget), _) <- runFormPost postForm
+  opts <- getTagOpts
+  ((result, formWidget), _) <- runFormPost $ postForm opts
   action <- lookupPostParam "action"
   case (result, action) of
-    (FormSuccess (title, Textarea markdown), Just "Preview") ->
+    (FormSuccess (title, Textarea markdown, _), Just "Preview") ->
       renderPost formWidget (Just $ previewWidget title markdown) []
-    (FormSuccess (title, Textarea markdown), Just "Publish") -> do
+    (FormSuccess (title, Textarea markdown, tagIds), Just "Publish") -> do
       time <- liftIO getCurrentTime
-      _ <- runDB $ insertEntity $ Post title markdown time (entityKey user)
-      renderPost formWidget Nothing []
-    _ -> renderPost formWidget Nothing [(Danger, "Something went wrong")]
+      post <- runDB $ insertEntity $ Post title markdown time (entityKey user)
+      _ <- runDB $ insertMany $ fmap (PostTag (entityKey post)) tagIds
+      renderPost formWidget Nothing [(Success, "Successfully published new post")]
+    _ -> do
+      renderPost formWidget Nothing [(Danger, "Something went wrong")]
 
-postForm :: Form (Text, Textarea)
-postForm = renderBootstrap3 BootstrapBasicForm $ (,)
+postForm :: [(Text, Key Tag)] -> Form (Text, Textarea, [Key Tag])
+postForm opts =
+  renderBootstrap3 BootstrapBasicForm $ (,,)
   <$> areq textField titleSettings Nothing
   <*> areq textareaField contentSettings Nothing
+  <*> areq (multiSelectFieldList opts) multiSelectSettings Nothing
   where
     titleSettings = FieldSettings
       { fsLabel = "Title"
@@ -49,6 +59,13 @@ postForm = renderBootstrap3 BootstrapBasicForm $ (,)
       , fsName = Nothing
       , fsAttrs = [("class", "form-control"), ("placeholder", "Content")]
       }
+    multiSelectSettings = FieldSettings
+      { fsLabel = "Tags"
+      , fsId = Nothing
+      , fsTooltip = Nothing
+      , fsName = Nothing
+      , fsAttrs = [("class", "form-control"), ("placeholder", "Tags")]
+      }
 
 previewWidget :: Text -> Text -> Widget
 previewWidget title markdown =
@@ -62,7 +79,7 @@ previewWidget title markdown =
 renderPost :: Widget -> Maybe Widget -> [FormReaction] -> Handler Html
 renderPost widget mPrev reactions =
   defaultLayout $ do
-    setTitle "Publish New Post"
+    setTitle "Structured Rants - New Post"
     Forms.renderPanel "Create Post" $ do
       toWidget [lucius|
         section.post .post__preview {
