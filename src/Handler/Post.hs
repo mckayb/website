@@ -89,7 +89,7 @@ renderPost widget mPrev reactions =
     Forms.renderPanel "Create Post" $ do
       toWidget [lucius|
         section.post .post__preview {
-          border: 1px solid #{Theme.borderColor Theme.colorScheme};
+          border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
           padding: 2rem;
           border-radius: 5px;
         }
