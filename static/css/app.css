@@ -27,57 +27,65 @@
 .source-code .dt {
  color:#dedede;
 }
+
 .source-code .dv {
- /* color:#fd7e14; */
  color: #ed8a68;
 }
+
 .source-code .cf {
- /* font-weight:700; */
  color:#2727af;
 }
+
 .source-code .bn {
  color:#17a2b8;
 }
+
 .source-code .fu {
- /* color:#007bff; */
  color: #f2e090;
 }
+
 .source-code .kw {
- /* font-weight:700; */
- /* color:#2727af; */
  color: cornflowerblue;
 }
+
 .source-code .pr {
  color:#dc3545;
 }
+
 .source-code .sy {
  color:#e83e8c;
 }
-.source-code .va {
- /* color:#007bff; */
-}
+
+.source-code .va {}
+
 .source-code .cr {
  color:#6f42c1;
 }
+
 .source-code .op {
- /* color:#2727af */
  color: #dedede;
 }
+
 .source-code .ch {
  color:#17a2b8;
 }
+
 .source-code .st {
  color: #ed8a68;
 }
+
 .source-code .it {
  color:#fd7e14;
 }
+
 .source-code .ra {
  color:#fd7e14;
 }
+
 .source-code .co {
  color:#6c757d;
 }
+
 .source-code .at {
   color: #f2e090;
 }
@@ -89,21 +97,3 @@
 .source-code .ot {
   color: cornflowerblue;
 }
-
-/* table.source-code, tr.source-code, td.lineNumbers, td.source-code, table.source-code pre
-   { margin: 0; padding: 0; border: 0; vertical-align: baseline; border: none; }
-td.lineNumbers { text-align: right; background-color: #EBEBEB; color: black; padding-right: 5px; padding-left: 5px; }
-td.source-code { padding-left: 5px; }
-pre.source-code { }
-.source-code span.kw { font-weight: bold; }
-.source-code span.dt { color: #800000; }
-.source-code span.dv { color: #0000FF; }
-.source-code span.bn { color: #0000FF; }
-.source-code span.fl { color: #800080; }
-.source-code span.ch { color: #FF00FF; }
-.source-code span.st { color: #DD0000; }
-.source-code span.co { color: #808080; font-style: italic; }
-.source-code span.ot { }
-.source-code span.fu { color: #000080; }
-code.source-code span.re { }
-code.source-code span.er { color: red; font-weight: bold; } */
