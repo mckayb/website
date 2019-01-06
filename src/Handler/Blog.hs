@@ -16,7 +16,7 @@ import qualified Data.Text.Lazy as LazyText
 
 getPostContent :: Entity Post -> Text
 getPostContent post = case MMark.parse "" content of
-  Left errs -> (Text.pack "<h2>Whoops...</h2>") <> (Text.pack $ MMark.parseErrorsPretty content errs)
+  Left errs -> Text.pack "<h2>Whoops...</h2>" <> Text.pack (MMark.parseErrorsPretty content errs)
   Right parsed -> render parsed
   where
     render = LazyText.toStrict . Lucid.renderText . MMark.render . MMark.useExtensions [Ext.skylighting]
@@ -40,7 +40,7 @@ getPostTeaser = Text.unlines . takeUntilFirstParagraphInc . Text.lines . getPost
 getBlogR :: Handler Html
 getBlogR = do
   postTagsMap <- Database.getPostsWithTags
-  let posts = sortBy (comparing $ Down . postTimestamp . entityVal) . Map.keys $ postTagsMap
+  let posts = sortOn (Down . postTimestamp . entityVal) . Map.keys $ postTagsMap
   let tagsForPost post = sortOn (tagName . entityVal) $ postTagsMap Map.! post
   let getId = Sql.fromSqlKey . entityKey
   defaultLayout $ do
