@@ -3,15 +3,24 @@
 module Handler.Blog where
 
 import Import
-import qualified CMarkGFM
 import qualified Database.Persist.Sql as Sql (fromSqlKey)
 import qualified Helpers.Database as Database
 import qualified Data.Text as Text
 import qualified Helpers.Theme as Theme
 import qualified Data.Map.Strict as Map
+import qualified Text.MMark as MMark
+import qualified Text.MMark.Extension.Common as Ext
+import qualified Lucid.Base as Lucid
+import qualified Data.Text.Lazy as LazyText
+
 
 getPostContent :: Entity Post -> Text
-getPostContent = CMarkGFM.commonmarkToHtml [] [] . postContent . entityVal
+getPostContent post = case MMark.parse "" content of
+  Left errs -> Text.pack "<h2>Whoops...</h2>" <> Text.pack (MMark.parseErrorsPretty content errs)
+  Right parsed -> render parsed
+  where
+    render = LazyText.toStrict . Lucid.renderText . MMark.render . MMark.useExtensions [Ext.skylighting]
+    content = (postContent . entityVal) post
 
 getTimestamp :: String -> Entity Post -> Text
 getTimestamp fmt = Text.pack . formatTime defaultTimeLocale fmt . postTimestamp . entityVal
@@ -31,8 +40,8 @@ getPostTeaser = Text.unlines . takeUntilFirstParagraphInc . Text.lines . getPost
 getBlogR :: Handler Html
 getBlogR = do
   postTagsMap <- Database.getPostsWithTags
-  let posts = Map.keys postTagsMap
-  let tagsForPost post = postTagsMap Map.! post
+  let posts = sortOn (Down . postTimestamp . entityVal) . Map.keys $ postTagsMap
+  let tagsForPost post = sortOn (tagName . entityVal) $ postTagsMap Map.! post
   let getId = Sql.fromSqlKey . entityKey
   defaultLayout $ do
     setTitle "Structured Rants"
@@ -114,7 +123,6 @@ getBlogR = do
               <div .post__date>
                 <div .post__date_day>#{getTimestamp "%d" post}
                 <div .post__date_mon_year>#{getTimestamp "%b %Y" post}
-
               <div .post__tags.coordinates.coordinates--y>
                 $forall tag <- (tagsForPost post)
                   <div .post__tag.badge>#{(tagName . entityVal) tag}
@@ -135,6 +143,11 @@ getBlogPostR postId = do
         .blog-post .blog-post__header {
           border-bottom: 1px solid #{Theme.sidebarColor Theme.colorScheme};
           margin-bottom: 5vh;
+        }
+
+        .source-code pre {
+          background: #{Theme.headerColor Theme.colorScheme};
+          border: 1px solid #{Theme.borderColor Theme.colorScheme};
         }
       |]
       [whamlet|

@@ -51,10 +51,12 @@ dependencies:
 - wai
 - foreign-store
 - bcrypt
-- cmark-gfm
 - string-conversions
 - email-validate
 - esqueleto >= 2.5 && < 2.7
+- mmark
+- mmark-ext
+- lucid
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.
