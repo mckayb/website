@@ -71,7 +71,7 @@ postForm opts =
 
 previewWidget :: Text -> Text -> Widget
 previewWidget title markdown =
-  let render = preEscapedToMarkup . Lucid.renderText . MMark.render . MMark.useExtensions [Ext.skylighting]
+  let render = preEscapedToMarkup . Lucid.renderText . MMark.render . MMark.useExtensions [Ext.ghcSyntaxHighlighter, Ext.skylighting]
   in case MMark.parse "" markdown of
     Left errs -> [whamlet|
       <h2>Errors

@@ -19,7 +19,7 @@ getPostContent post = case MMark.parse "" content of
   Left errs -> Text.pack "<h2>Whoops...</h2>" <> Text.pack (MMark.parseErrorsPretty content errs)
   Right parsed -> render parsed
   where
-    render = LazyText.toStrict . Lucid.renderText . MMark.render . MMark.useExtensions [Ext.skylighting]
+    render = LazyText.toStrict . Lucid.renderText . MMark.render . MMark.useExtensions [Ext.ghcSyntaxHighlighter, Ext.skylighting]
     content = (postContent . entityVal) post
 
 getTimestamp :: String -> Entity Post -> Text
