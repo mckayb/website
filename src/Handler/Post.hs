@@ -5,11 +5,13 @@ module Handler.Post where
 import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Helpers.Forms (FormReaction, FormAlert(Danger, Success))
-import qualified CMarkGFM
 import qualified Helpers.Forms as Forms
 import qualified Helpers.Session as Session
 import qualified Helpers.Theme as Theme
 import qualified Helpers.Database as Database
+import qualified Text.MMark as MMark
+import qualified Text.MMark.Extension.Common as Ext
+import qualified Lucid.Base as Lucid
 
 getTagOpts :: Handler [(Text, Key Tag)]
 getTagOpts = fmap (\tag -> ((tagName . entityVal) tag, entityKey tag)) <$> Database.getTags
@@ -69,12 +71,16 @@ postForm opts =
 
 previewWidget :: Text -> Text -> Widget
 previewWidget title markdown =
-  let html = CMarkGFM.commonmarkToHtml [] [] markdown
-   in [whamlet|
-        <div>
-          <h1>#{title}
-          #{preEscapedToMarkup html}
-      |]
+  let render = preEscapedToMarkup . Lucid.renderText . MMark.render . MMark.useExtensions [Ext.skylighting]
+  in case MMark.parse "" markdown of
+    Left errs -> [whamlet|
+      <h2>Errors
+      <div>#{MMark.parseErrorsPretty markdown errs}
+    |]
+    Right r -> [whamlet|
+      <h1>#{title}
+      #{render r}
+    |]
 
 renderPost :: Widget -> Maybe Widget -> [FormReaction] -> Handler Html
 renderPost widget mPrev reactions =
@@ -87,13 +93,6 @@ renderPost widget mPrev reactions =
           padding: 2rem;
           border-radius: 5px;
         }
-
-        section.post .post__label {
-          font-weight: bold;
-          margin-bottom: 5px;
-          max-width: 100%;
-          display: inline-block;
-        }
       |]
       [whamlet|
         <section .post>
@@ -103,7 +102,6 @@ renderPost widget mPrev reactions =
             <br>
 
           $maybe prev <- mPrev
-            <div .post__label>Preview
             <div .post__preview>
               ^{prev}
             <br>

@@ -250,6 +250,12 @@ instance Yesod App where
           background-color: #{Theme.hoverColor Theme.colorScheme};
           color: #{Theme.textColor Theme.colorScheme};
         }
+
+        .source-code pre {
+          background-color: #{Theme.headerColor Theme.colorScheme};
+          border: 1px solid #{Theme.borderColor Theme.colorScheme};
+          color: #{Theme.textColor Theme.colorScheme};
+        }
       |]
       [whamlet|
         <div .page.coordinates.coordinates--x>

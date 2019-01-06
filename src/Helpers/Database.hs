@@ -29,9 +29,9 @@ getPostsWithTags = do
   postTagTuples <- runDB
     $ E.select
     $ E.from $ \(p `E.LeftOuterJoin` mpt `E.LeftOuterJoin` mt) -> do
-      E.on (mpt ?. PostTagTagId E.==. mt ?. TagId)
-      E.on (E.just (p ^. PostId) E.==. mpt ?. PostTagPostId)
-      return (p, mt)
+    E.on (mpt ?. PostTagTagId E.==. mt ?. TagId)
+    E.on (E.just (p ^. PostId) E.==. mpt ?. PostTagPostId)
+    return (p, mt)
   return $ groupFirst postTagTuples
 
 getRoles :: Handler [Entity Role]
