@@ -22,6 +22,7 @@ import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
 import Helpers.Auth
+import Helpers.Slug
 import qualified Helpers.Theme as Theme
 
 -- | The foundation datatype for your application. This can be a good place to
@@ -302,12 +303,12 @@ instance Yesod App where
   isAuthorized RegisterR _ = return Authorized
   isAuthorized LoginR _ = return Authorized
   isAuthorized BlogR _ = return Authorized
-  isAuthorized (BlogPostR _) _ = return Authorized
   isAuthorized FaviconR _ = return Authorized
   isAuthorized RobotsR _ = return Authorized
   isAuthorized (StaticR _) _ = return Authorized
   isAuthorized LivenessR _ = return Authorized
   isAuthorized ReadinessR _ = return Authorized
+  isAuthorized (BlogPostSlugR _) _ = return Authorized
 
   -- Routes requiring authentication delegate to
   -- the isAuthenticated function
@@ -360,7 +361,6 @@ instance YesodBreadcrumbs App where
     :: Route App  -- ^ The route the user is visiting currently.
     -> Handler (Text, Maybe (Route App))
   breadcrumb BlogR = return ("Blog", Nothing)
-  breadcrumb (BlogPostR _) = return ("Post", Just BlogR)
 
   breadcrumb LoginR = return ("Login", Nothing)
   breadcrumb RegisterR = return ("Register", Nothing)

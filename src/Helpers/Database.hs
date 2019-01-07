@@ -2,6 +2,7 @@ module Helpers.Database where
 
 import Import
 import Helpers.Email (Email)
+import Helpers.Slug (Slug)
 import Database.Esqueleto ((^.), (?.))
 import qualified Database.Esqueleto as E
 import qualified Data.Map.Strict as M
@@ -20,6 +21,9 @@ getPosts = runDB $ selectList [] []
 
 getPost :: Key Post -> Handler (Maybe (Entity Post))
 getPost postId = runDB $ selectFirst [PostId ==. postId] []
+
+getPostBySlug :: Slug -> Handler (Maybe (Entity Post))
+getPostBySlug slug = runDB $ selectFirst [PostSlug ==. slug] []
 
 groupFirst :: Ord a => [(a, Maybe b)] -> Map a [b]
 groupFirst = foldr (\tuple acc -> M.insertWith (++) (fst tuple) (maybeToList (snd tuple)) acc) M.empty

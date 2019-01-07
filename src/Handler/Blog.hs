@@ -3,7 +3,7 @@
 module Handler.Blog where
 
 import Import
-import qualified Database.Persist.Sql as Sql (fromSqlKey)
+import Helpers.Slug (Slug(unSlug))
 import qualified Helpers.Database as Database
 import qualified Data.Text as Text
 import qualified Helpers.Theme as Theme
@@ -37,12 +37,14 @@ takeUntilFirstParagraphInc = takeWhileOneMore (not . Text.isPrefixOf "<p>")
 getPostTeaser :: Entity Post -> Text
 getPostTeaser = Text.unlines . takeUntilFirstParagraphInc . Text.lines . getPostContent
 
+getPostSlug :: Entity Post -> Text
+getPostSlug = unSlug . postSlug . entityVal
+
 getBlogR :: Handler Html
 getBlogR = do
   postTagsMap <- Database.getPostsWithTags
   let posts = sortOn (Down . postTimestamp . entityVal) . Map.keys $ postTagsMap
   let tagsForPost post = sortOn (tagName . entityVal) $ postTagsMap Map.! post
-  let getId = Sql.fromSqlKey . entityKey
   defaultLayout $ do
     setTitle "Structured Rants"
     toWidget [lucius|
@@ -128,12 +130,12 @@ getBlogR = do
                   <div .post__tag.badge>#{(tagName . entityVal) tag}
             <div .post__body.coordinates.coordinates--y>
               <div .post__title>
-                <a href="@{BlogR}post/#{getId post}">#{getPostTitle post}
+                <a href="@{BlogR}post/#{getPostSlug post}">#{getPostTitle post}
               <div .post__content>
                 #{preEscapedToMarkup (getPostTeaser post)}
     |]
 
-getBlogPostR :: Key Post -> Handler Html
+{- getBlogPostR :: Key Post -> Handler Html
 getBlogPostR postId = do
   post <- Database.getPost postId
   case post of
@@ -144,10 +146,28 @@ getBlogPostR postId = do
           border-bottom: 1px solid #{Theme.sidebarColor Theme.colorScheme};
           margin-bottom: 5vh;
         }
+      |]
+      [whamlet|
+        <article .blog-post>
+          <section .blog-post__header>
+            <h1>#{getPostTitle post'}
+            <div .blog-post__time .text-muted>#{getTimestamp "%d %B %Y" post'}
+          <section .blog-post__body>
+            #{preEscapedToMarkup (getPostContent post')}
+      |]
+    Nothing -> notFound
+-}
 
-        .source-code pre {
-          background: #{Theme.headerColor Theme.colorScheme};
-          border: 1px solid #{Theme.borderColor Theme.colorScheme};
+getBlogPostSlugR :: Slug -> Handler Html
+getBlogPostSlugR slug = do
+  mPost <- Database.getPostBySlug slug
+  case mPost of
+    Just post' -> defaultLayout $ do
+      setTitle "Structured Rants"
+      toWidget [lucius|
+        .blog-post .blog-post__header {
+          border-bottom: 1px solid #{Theme.sidebarColor Theme.colorScheme};
+          margin-bottom: 5vh;
         }
       |]
       [whamlet|

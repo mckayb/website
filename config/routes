@@ -3,19 +3,19 @@
 
 /static           StaticR    Static appStatic
 
-/favicon.ico      FaviconR   GET
-/robots.txt       RobotsR    GET
+/favicon.ico      FaviconR      GET
+/robots.txt       RobotsR       GET
 
 -- Html Routes
-/                 BlogR      GET
-/post             PostR      GET POST
-/post/#PostId     BlogPostR  GET
+/                 BlogR         GET
+/post             PostR         GET POST
+/post/#Slug       BlogPostSlugR GET
 
-/login            LoginR     GET POST
-/register         RegisterR  GET POST
+/login            LoginR        GET POST
+/register         RegisterR     GET POST
 
-/role             RoleR      GET POST
-/tag              TagR       GET POST
+/role             RoleR         GET POST
+/tag              TagR          GET POST
 
 -- Status Checks
 /health/liveness  LivenessR  GET

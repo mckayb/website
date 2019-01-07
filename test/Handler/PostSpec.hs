@@ -5,6 +5,7 @@ module Handler.PostSpec (spec) where
 import TestImport
 import qualified Faker.Internet as Faker
 import qualified Helpers.Email as Email
+import qualified Helpers.Slug as Slug
 import qualified Database.Persist.Sql as Sql (fromSqlKey)
 
 spec :: Spec
@@ -64,6 +65,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
       tag <- createTag "Foo"
+      let Right slug = Slug.mkSlug "the-slug"
 
       goToPost em "mypassword"
 
@@ -75,6 +77,7 @@ spec = withApp $ do
         addPostParam "action" "Preview"
         byLabelExact "Title" "This is the title"
         byLabelExact "Content" "## This is the content"
+        byLabelExact "Slug" (Slug.unSlug slug)
         byLabelExact "Tags" (pack $ show $ Sql.fromSqlKey $ entityKey tag)
         setMethod "POST"
         setUrl PostR
@@ -93,6 +96,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
       tag <- createTag "foo"
+      let Right slug = Slug.mkSlug "the-slug"
 
       goToPost em "mypassword"
 
@@ -106,6 +110,7 @@ spec = withApp $ do
         addPostParam "action" "Publish"
         byLabelExact "Title" "This is the title"
         byLabelExact "Content" "## This is the content"
+        byLabelExact "Slug" (Slug.unSlug slug)
         byLabelExact "Tags" (pack $ show $ Sql.fromSqlKey $ entityKey tag)
         setMethod "POST"
         setUrl PostR
@@ -122,12 +127,11 @@ spec = withApp $ do
       assertEq "Post title" ((postTitle . entityVal) post') "This is the title"
       assertEq "Post content" ((postContent . entityVal) post') "## This is the content"
       assertEq "Post user" ((postUserId . entityVal) post') (entityKey user)
+      assertEq "Post slug" ((postSlug . entityVal) post') slug
 
       assertEq "PostTag post id" ((postTagPostId . entityVal) postTag') (entityKey post')
       assertEq "PostTag tag id" ((postTagTagId . entityVal) postTag') (entityKey tag)
       bodyContains "Successfully published new post"
-
-
   where
     goToPost em pass = do
       get LoginR
