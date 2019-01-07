@@ -13,6 +13,7 @@ import Control.Monad.Logger (runNoLoggingT)
 import Database.Persist.Quasi
 import Helpers.BCrypt
 import Helpers.Email
+import Helpers.Slug
 import Database.Persist.Sql (runSqlPersistMPool)
 import Database.Persist.Postgresql (ConnectionString, withPostgresqlPool, pgConnStr, runMigration, runMigrationUnsafe)
 import Helpers.Types (DB)

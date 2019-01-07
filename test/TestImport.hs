@@ -21,6 +21,7 @@ import Text.Shakespeare.Text (st)
 import Helpers.BCrypt
 import Helpers.Email
 import Helpers.Types
+import Helpers.Slug
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do
@@ -102,9 +103,9 @@ createPassword user pass = do
   hash' <- liftIO $ hashPassword pass
   runDB $ insertEntity $ Password (entityKey user) hash'
 
-createPost :: Entity User -> Text -> Text -> UTCTime -> YesodExample App (Entity Post)
-createPost user title content timestamp =
-  runDB $ insertEntity $ Post title content timestamp (entityKey user)
+createPost :: Entity User -> Text -> Text -> Slug -> UTCTime -> YesodExample App (Entity Post)
+createPost user title content slug timestamp =
+  runDB $ insertEntity $ Post title content slug timestamp (entityKey user)
 
 createPostTag :: Entity Post -> Entity Tag -> YesodExample App (Entity PostTag)
 createPostTag post' tag =

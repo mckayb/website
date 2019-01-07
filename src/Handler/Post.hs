@@ -5,6 +5,7 @@ module Handler.Post where
 import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Helpers.Forms (FormReaction, FormAlert(Danger, Success))
+import Helpers.Slug (Slug, slugField)
 import qualified Helpers.Forms as Forms
 import qualified Helpers.Session as Session
 import qualified Helpers.Theme as Theme
@@ -30,21 +31,22 @@ postPostR = do
   ((result, formWidget), _) <- runFormPost $ postForm opts
   action <- lookupPostParam "action"
   case (result, action) of
-    (FormSuccess (title, Textarea markdown, _), Just "Preview") ->
+    (FormSuccess (title, Textarea markdown, _, _), Just "Preview") ->
       renderPost formWidget (Just $ previewWidget title markdown) []
-    (FormSuccess (title, Textarea markdown, tagIds), Just "Publish") -> do
+    (FormSuccess (title, Textarea markdown, slug, tagIds), Just "Publish") -> do
       time <- liftIO getCurrentTime
-      post <- runDB $ insertEntity $ Post title markdown time (entityKey user)
+      post <- runDB $ insertEntity $ Post title markdown slug time (entityKey user)
       _ <- runDB $ insertMany $ fmap (PostTag (entityKey post)) tagIds
       renderPost formWidget Nothing [(Success, "Successfully published new post")]
     _ -> do
       renderPost formWidget Nothing [(Danger, "Something went wrong")]
 
-postForm :: [(Text, Key Tag)] -> Form (Text, Textarea, [Key Tag])
+postForm :: [(Text, Key Tag)] -> Form (Text, Textarea, Slug, [Key Tag])
 postForm opts =
-  renderBootstrap3 BootstrapBasicForm $ (,,)
+  renderBootstrap3 BootstrapBasicForm $ (,,,)
   <$> areq textField titleSettings Nothing
   <*> areq textareaField contentSettings Nothing
+  <*> areq slugField slugSettings Nothing
   <*> areq (multiSelectFieldList opts) multiSelectSettings Nothing
   where
     titleSettings = FieldSettings
@@ -60,6 +62,13 @@ postForm opts =
       , fsTooltip = Nothing
       , fsName = Nothing
       , fsAttrs = [("class", "form-control"), ("placeholder", "Content")]
+      }
+    slugSettings = FieldSettings
+      { fsLabel = "Slug"
+      , fsId = Nothing
+      , fsTooltip = Nothing
+      , fsName = Nothing
+      , fsAttrs = [("class", "form-control"), ("placeholder", "Slug")]
       }
     multiSelectSettings = FieldSettings
       { fsLabel = "Tags"
