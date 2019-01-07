@@ -135,29 +135,6 @@ getBlogR = do
                 #{preEscapedToMarkup (getPostTeaser post)}
     |]
 
-{- getBlogPostR :: Key Post -> Handler Html
-getBlogPostR postId = do
-  post <- Database.getPost postId
-  case post of
-    Just post' -> defaultLayout $ do
-      setTitle "Structured Rants"
-      toWidget [lucius|
-        .blog-post .blog-post__header {
-          border-bottom: 1px solid #{Theme.sidebarColor Theme.colorScheme};
-          margin-bottom: 5vh;
-        }
-      |]
-      [whamlet|
-        <article .blog-post>
-          <section .blog-post__header>
-            <h1>#{getPostTitle post'}
-            <div .blog-post__time .text-muted>#{getTimestamp "%d %B %Y" post'}
-          <section .blog-post__body>
-            #{preEscapedToMarkup (getPostContent post')}
-      |]
-    Nothing -> notFound
--}
-
 getBlogPostSlugR :: Slug -> Handler Html
 getBlogPostSlugR slug = do
   mPost <- Database.getPostBySlug slug
