@@ -37,7 +37,7 @@ database:
   database: "_env:YESOD_PGDATABASE:website"
   poolsize: "_env:YESOD_PGPOOLSIZE:10"
 
-# analytics: UA-YOURCODE
+analytics: UA-131904536-1
 
 admin-email: "_env:ADMIN_EMAIL:admin@example.com"
 admin-password: "_env:ADMIN_PASSWORD:adminexample123"
