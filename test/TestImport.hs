@@ -22,6 +22,7 @@ import Helpers.BCrypt
 import Helpers.Email
 import Helpers.Types
 import Helpers.Slug
+import Helpers.Markdown
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do
@@ -103,7 +104,7 @@ createPassword user pass = do
   hash' <- liftIO $ hashPassword pass
   runDB $ insertEntity $ Password (entityKey user) hash'
 
-createPost :: Entity User -> Text -> Text -> Slug -> UTCTime -> YesodExample App (Entity Post)
+createPost :: Entity User -> Text -> Markdown -> Slug -> UTCTime -> YesodExample App (Entity Post)
 createPost user title content slug timestamp =
   runDB $ insertEntity $ Post title content slug timestamp (entityKey user)
 

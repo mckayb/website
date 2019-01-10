@@ -4,6 +4,7 @@ import TestImport
 import qualified Faker.Internet as Faker
 import qualified Helpers.Email as Email
 import qualified Helpers.Slug as Slug
+import qualified Helpers.Markdown as Markdown
 
 spec :: Spec
 spec = withApp $ do
@@ -22,7 +23,7 @@ spec = withApp $ do
       let Right slug = Slug.mkSlug "the-test"
 
       user <- createUser role em
-      _ <- createPost user "This is the title" "## Test" slug time
+      _ <- createPost user "This is the title" (Markdown.Markdown "## Test") slug time
 
       get BlogR
       statusIs 200
@@ -44,9 +45,9 @@ spec = withApp $ do
       let Right slug1 = Slug.mkSlug "first-i-was-afraid"
       let Right slug2 = Slug.mkSlug "i-was-petrified"
       let Right slug3 = Slug.mkSlug "could-never-live-without-you"
-      _ <- createPost user "The First Post" "First, I was afraid" slug1 time
-      _ <- createPost user "The Second Post" "I was petrified" slug2 time
-      _ <- createPost user "The Third Post" "Kept thinking I could never live without you by my side" slug3 time
+      _ <- createPost user "The First Post" (Markdown.Markdown "First, I was afraid") slug1 time
+      _ <- createPost user "The Second Post" (Markdown.Markdown "I was petrified") slug2 time
+      _ <- createPost user "The Third Post" (Markdown.Markdown "Kept thinking I could never live without you by my side") slug3 time
 
       get BlogR
       statusIs 200
@@ -62,7 +63,7 @@ spec = withApp $ do
       time <- liftIO getCurrentTime
       user <- createUser role em
       let Right slug = Slug.mkSlug "first-second-third"
-      _ <- createPost user "The Post" "First\n\nSecond\n\nThird" slug time
+      _ <- createPost user "The Post" (Markdown.Markdown "First\n\nSecond\n\nThird") slug time
 
       get BlogR
       statusIs 200
@@ -77,13 +78,13 @@ spec = withApp $ do
       time <- liftIO getCurrentTime
       user <- createUser role em
       let Right slug = Slug.mkSlug "first-second-third"
-      post' <- createPost user "The Post" "First\nSecond\nThird" slug time
+      post' <- createPost user "The Post" (Markdown.Markdown "First\nSecond\nThird") slug time
 
       get $ BlogPostSlugR slug
       statusIs 200
       htmlCount "article.blog-post" 1
       htmlAllContain "h1" $ (unpack . postTitle . entityVal) post'
-      bodyContains $ (unpack . postContent . entityVal) post'
+      bodyContains $ (unpack . Markdown.unMarkdown . postContent . entityVal) post'
 
     it "Renders not found if the post doesn't exist" $ do
       let Right slug = Slug.mkSlug "first-second-third"

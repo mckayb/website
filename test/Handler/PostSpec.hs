@@ -6,6 +6,7 @@ import TestImport
 import qualified Faker.Internet as Faker
 import qualified Helpers.Email as Email
 import qualified Helpers.Slug as Slug
+import qualified Helpers.Markdown as Markdown
 import qualified Database.Persist.Sql as Sql (fromSqlKey)
 
 spec :: Spec
@@ -125,7 +126,7 @@ spec = withApp $ do
       let Just postTag' = listToMaybe postTagsAfter
 
       assertEq "Post title" ((postTitle . entityVal) post') "This is the title"
-      assertEq "Post content" ((postContent . entityVal) post') "## This is the content"
+      assertEq "Post content" ((Markdown.unMarkdown . postContent . entityVal) post') "## This is the content"
       assertEq "Post user" ((postUserId . entityVal) post') (entityKey user)
       assertEq "Post slug" ((postSlug . entityVal) post') slug
 

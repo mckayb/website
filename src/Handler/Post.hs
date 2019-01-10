@@ -6,6 +6,7 @@ import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Helpers.Forms (FormReaction, FormAlert(Danger, Success))
 import Helpers.Slug (Slug, slugField)
+import Helpers.Markdown (Markdown(Markdown), markdownField)
 import qualified Helpers.Forms as Forms
 import qualified Helpers.Session as Session
 import qualified Helpers.Theme as Theme
@@ -31,9 +32,9 @@ postPostR = do
   ((result, formWidget), _) <- runFormPost $ postForm opts
   action <- lookupPostParam "action"
   case (result, action) of
-    (FormSuccess (title, Textarea markdown, _, _), Just "Preview") ->
+    (FormSuccess (title, Markdown markdown, _, _), Just "Preview") ->
       renderPost formWidget (Just $ previewWidget title markdown) []
-    (FormSuccess (title, Textarea markdown, slug, tagIds), Just "Publish") -> do
+    (FormSuccess (title, markdown, slug, tagIds), Just "Publish") -> do
       time <- liftIO getCurrentTime
       post <- runDB $ insertEntity $ Post title markdown slug time (entityKey user)
       _ <- runDB $ insertMany $ fmap (PostTag (entityKey post)) tagIds
@@ -41,11 +42,11 @@ postPostR = do
     _ -> do
       renderPost formWidget Nothing [(Danger, "Something went wrong")]
 
-postForm :: [(Text, Key Tag)] -> Form (Text, Textarea, Slug, [Key Tag])
+postForm :: [(Text, Key Tag)] -> Form (Text, Markdown, Slug, [Key Tag])
 postForm opts =
   renderBootstrap3 BootstrapBasicForm $ (,,,)
   <$> areq textField titleSettings Nothing
-  <*> areq textareaField contentSettings Nothing
+  <*> areq markdownField contentSettings Nothing
   <*> areq slugField slugSettings Nothing
   <*> areq (multiSelectFieldList opts) multiSelectSettings Nothing
   where

@@ -24,12 +24,12 @@ Comment json -- Adding "json" causes ToJSON and FromJSON instances to be derived
   deriving Eq Show
 Post json
   title Text
-  content Text
+  content Markdown
   slug Slug
   timestamp UTCTime
   userId UserId
   UniquePostSlug slug
-  deriving Eq Ord Show
+  deriving Eq Show
 Tag json
   name Text
   UniqueTagName name

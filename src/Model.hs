@@ -14,6 +14,7 @@ import Database.Persist.Quasi
 import Helpers.BCrypt
 import Helpers.Email
 import Helpers.Slug
+import Helpers.Markdown
 import Database.Persist.Sql (runSqlPersistMPool)
 import Database.Persist.Postgresql (ConnectionString, withPostgresqlPool, pgConnStr, runMigration, runMigrationUnsafe)
 import Helpers.Types (DB)
@@ -25,6 +26,9 @@ import qualified Settings
 -- http://www.yesodweb.com/book/persistent/
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
   $(persistFileWith lowerCaseSettings "config/models")
+
+instance Ord Post where
+  (Post _ _ _ timestamp _) `compare` (Post _ _ _ timestamp2 _) = timestamp `compare` timestamp2
 
 appDBConn :: IO ConnectionString
 appDBConn = pgConnStr . Settings.appDatabaseConf <$> Settings.compileTimeAppSettingsReadEnv
