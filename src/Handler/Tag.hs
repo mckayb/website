@@ -1,5 +1,4 @@
 {-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE TupleSections #-}
 
 module Handler.Tag where
 
