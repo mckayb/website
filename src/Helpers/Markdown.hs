@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-module Helpers.Markdown where
+module Helpers.Markdown (Markdown(unMarkdown), mkMarkdown, markdownField) where
 
 import Prelude
 import Database.Persist.Sql (PersistField, PersistFieldSql)

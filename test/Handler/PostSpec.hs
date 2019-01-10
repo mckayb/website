@@ -41,7 +41,8 @@ spec = withApp $ do
         setUrl PostR
 
       statusIs 200
-      bodyContains "Something went wrong"
+      bodyContains "Form failed validation"
+      bodyContains "Value is required"
 
     it "Shouldn't let you publish a post if you don't have the required fields set" $ do
       role <- createRole "Admin"
@@ -58,7 +59,29 @@ spec = withApp $ do
         setUrl PostR
 
       statusIs 200
-      bodyContains "Something went wrong"
+      bodyContains "Form failed validation"
+      bodyContains "Value is required"
+
+    it "Should throw errors if you try to preview the post with invalid markdown" $ do
+      role <- createRole "Admin"
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      user <- createUser role em
+      _ <- createPassword user "mypassword"
+      tag <- createTag "Foo"
+      let Right slug = Slug.mkSlug "the-slug"
+
+      goToPost em "mypassword"
+      request $ do
+        addToken
+        addPostParam "action" "Preview"
+        byLabelExact "Title" "This is the title"
+        byLabelExact "Content" "```This is the content"
+        byLabelExact "Slug" (Slug.unSlug slug)
+        byLabelExact "Tags" (pack $ show $ Sql.fromSqlKey $ entityKey tag)
+        setMethod "POST"
+        setUrl PostR
+
+      statusIs 200
 
     it "Should let you preview the post you're about to publish" $ do
       role <- createRole "Admin"
@@ -83,6 +106,7 @@ spec = withApp $ do
         setMethod "POST"
         setUrl PostR
 
+      statusIs 200
       bodyContains "Preview"
       htmlCount ".post__preview" 1
       htmlAnyContain "h1" "This is the title"

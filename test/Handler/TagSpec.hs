@@ -55,7 +55,8 @@ spec = withApp $ do
 
       statusIs 200
       htmlCount ".alert.alert-danger" 1
-      bodyContains "There was an error submitting your form."
+      bodyContains "Form failed validation"
+      bodyContains "Value is required"
 
     it "Should let you create a new tag" $ do
       role <- createRole "Admin"

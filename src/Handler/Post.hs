@@ -6,7 +6,7 @@ import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Helpers.Forms (FormReaction, FormAlert(Danger, Success))
 import Helpers.Slug (Slug, slugField)
-import Helpers.Markdown (Markdown(Markdown), markdownField)
+import Helpers.Markdown (Markdown(unMarkdown), markdownField)
 import qualified Helpers.Forms as Forms
 import qualified Helpers.Session as Session
 import qualified Helpers.Theme as Theme
@@ -32,15 +32,14 @@ postPostR = do
   ((result, formWidget), _) <- runFormPost $ postForm opts
   action <- lookupPostParam "action"
   case (result, action) of
-    (FormSuccess (title, Markdown markdown, _, _), Just "Preview") ->
-      renderPost formWidget (Just $ previewWidget title markdown) []
+    (FormSuccess (title, markdown, _, _), Just "Preview") ->
+      renderPost formWidget (Just $ previewWidget title $ unMarkdown markdown) []
     (FormSuccess (title, markdown, slug, tagIds), Just "Publish") -> do
       time <- liftIO getCurrentTime
       post <- runDB $ insertEntity $ Post title markdown slug time (entityKey user)
       _ <- runDB $ insertMany $ fmap (PostTag (entityKey post)) tagIds
       renderPost formWidget Nothing [(Success, "Successfully published new post")]
-    _ -> do
-      renderPost formWidget Nothing [(Danger, "Something went wrong")]
+    _ -> renderPost formWidget Nothing [(Danger, "Form failed validation")]
 
 postForm :: [(Text, Key Tag)] -> Form (Text, Markdown, Slug, [Key Tag])
 postForm opts =

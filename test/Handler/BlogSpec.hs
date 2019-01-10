@@ -21,9 +21,10 @@ spec = withApp $ do
       Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       let Right slug = Slug.mkSlug "the-test"
+      let Right markdown = Markdown.mkMarkdown "## Test"
 
       user <- createUser role em
-      _ <- createPost user "This is the title" (Markdown.Markdown "## Test") slug time
+      _ <- createPost user "This is the title" markdown slug time
 
       get BlogR
       statusIs 200
@@ -45,9 +46,12 @@ spec = withApp $ do
       let Right slug1 = Slug.mkSlug "first-i-was-afraid"
       let Right slug2 = Slug.mkSlug "i-was-petrified"
       let Right slug3 = Slug.mkSlug "could-never-live-without-you"
-      _ <- createPost user "The First Post" (Markdown.Markdown "First, I was afraid") slug1 time
-      _ <- createPost user "The Second Post" (Markdown.Markdown "I was petrified") slug2 time
-      _ <- createPost user "The Third Post" (Markdown.Markdown "Kept thinking I could never live without you by my side") slug3 time
+      let Right markdown1 = Markdown.mkMarkdown "First, I was afraid"
+      let Right markdown2 = Markdown.mkMarkdown "I was petrified"
+      let Right markdown3 = Markdown.mkMarkdown "Kept thinking I could never live without you by my side"
+      _ <- createPost user "The First Post" markdown1 slug1 time
+      _ <- createPost user "The Second Post" markdown2 slug2 time
+      _ <- createPost user "The Third Post" markdown3 slug3 time
 
       get BlogR
       statusIs 200
@@ -63,7 +67,8 @@ spec = withApp $ do
       time <- liftIO getCurrentTime
       user <- createUser role em
       let Right slug = Slug.mkSlug "first-second-third"
-      _ <- createPost user "The Post" (Markdown.Markdown "First\n\nSecond\n\nThird") slug time
+      let Right markdown = Markdown.mkMarkdown "First\n\nSecond\n\nThird"
+      _ <- createPost user "The Post" markdown slug time
 
       get BlogR
       statusIs 200
@@ -78,7 +83,8 @@ spec = withApp $ do
       time <- liftIO getCurrentTime
       user <- createUser role em
       let Right slug = Slug.mkSlug "first-second-third"
-      post' <- createPost user "The Post" (Markdown.Markdown "First\nSecond\nThird") slug time
+      let Right markdown = Markdown.mkMarkdown "First\nSecond\nThird"
+      post' <- createPost user "The Post" markdown slug time
 
       get $ BlogPostSlugR slug
       statusIs 200

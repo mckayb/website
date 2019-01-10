@@ -127,7 +127,7 @@ spec = withApp $ do
 
       statusIs 200
       htmlCount ".alert.alert-danger" 1
-      bodyContains "An account with that email already exists!"
+      bodyContains "An account with that email already exists"
 
 
 

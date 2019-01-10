@@ -24,7 +24,7 @@ postRegisterR = do
     FormSuccess (email, password) -> do
       existingUser <- Database.getUserByEmail email
       case existingUser of
-        Just _ -> renderRegister formWidget [(Danger, "An account with that email already exists!")]
+        Just _ -> renderRegister formWidget [(Danger, "An account with that email already exists")]
         Nothing -> do
           uid <- Database.insertUser (User email (Sql.toSqlKey 2))
           password' <- liftIO $ Password uid <$> BCrypt.hashPassword password
