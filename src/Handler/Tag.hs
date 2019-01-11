@@ -20,11 +20,11 @@ postTagR = do
     FormSuccess name -> do
       existingTag <- Database.getTagByName name
       case existingTag of
-        Just _ -> renderTag formWidget [(Danger, "A tag already exists with that name.")]
+        Just _ -> renderTag formWidget [(Danger, "A tag already exists with that name")]
         Nothing -> do
           _ <- runDB $ insertEntity $ Tag name
-          renderTag formWidget [(Success, "Successfully created new tag " <> name <> ".")]
-    _ -> renderTag formWidget [(Danger, "There was an error submitting your form.")]
+          renderTag formWidget [(Success, "Successfully created new tag " <> name)]
+    _ -> renderTag formWidget [(Danger, "Form failed validation")]
 
 tagForm :: Form Text
 tagForm = renderBootstrap3 BootstrapBasicForm $

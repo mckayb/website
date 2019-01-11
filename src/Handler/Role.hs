@@ -20,11 +20,11 @@ postRoleR = do
     FormSuccess name -> do
       existingRole <- Database.getRoleByName name
       case existingRole of
-        Just _ -> renderRole formWidget [(Danger, "A role already exists with that name.")]
+        Just _ -> renderRole formWidget [(Danger, "A role already exists with that name")]
         Nothing -> do
           _ <- runDB $ insertEntity $ Role name
-          renderRole formWidget [(Success, "Successfully created new role" <> name <> ".")]
-    _ -> renderRole formWidget [(Danger, "There was an error submitting your form.")]
+          renderRole formWidget [(Success, "Successfully created new role" <> name)]
+    _ -> renderRole formWidget [(Danger, "Form failed validation")]
 
 roleForm :: Form Text
 roleForm = renderBootstrap3 BootstrapBasicForm $

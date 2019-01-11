@@ -1,4 +1,4 @@
-module Helpers.BCrypt where
+module Helpers.BCrypt (BCrypt, hashPassword, passwordMatches) where
 
 import Prelude
 import Database.Persist.Sql (PersistField, PersistFieldSql)
@@ -10,7 +10,7 @@ import qualified Data.Text.Encoding as TE
 
 newtype BCrypt =
   BCrypt { unBCrypt ::  Text }
-  deriving (Eq, PersistField, PersistFieldSql, Show)
+  deriving (PersistField, PersistFieldSql)
 
 policy :: HashingPolicy
 policy = HashingPolicy

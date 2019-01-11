@@ -39,6 +39,7 @@ spec = withApp $ do
       statusIs 200
       htmlCount ".alert.alert-danger" 1
       bodyContains "Form failed validation"
+      bodyContains "Value is required"
 
     it "Should not let you log in if you have a malformed email address" $ do
       get LoginR

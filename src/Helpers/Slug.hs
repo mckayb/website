@@ -10,7 +10,7 @@ import Yesod.Core.Dispatch (PathPiece)
 import Data.Aeson (FromJSON, ToJSON)
 import GHC.Generics (Generic)
 import Yesod.Form (FormMessage)
-import Yesod.Form.Types (Field(..))
+import Yesod.Form.Types (Field)
 import Yesod.Core (HandlerSite, RenderMessage)
 import qualified Yesod.Form as Form
 import qualified Yesod.Form.Functions as FormFunctions

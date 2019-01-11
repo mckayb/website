@@ -4,6 +4,7 @@ module Handler.Blog where
 
 import Import
 import Helpers.Slug (Slug(unSlug))
+import Helpers.Markdown (Markdown(unMarkdown))
 import qualified Helpers.Database as Database
 import qualified Data.Text as Text
 import qualified Helpers.Theme as Theme
@@ -20,7 +21,7 @@ getPostContent post = case MMark.parse "" content of
   Right parsed -> render parsed
   where
     render = LazyText.toStrict . Lucid.renderText . MMark.render . MMark.useExtensions [Ext.ghcSyntaxHighlighter, Ext.skylighting]
-    content = (postContent . entityVal) post
+    content = (unMarkdown . postContent . entityVal) post
 
 getTimestamp :: String -> Entity Post -> Text
 getTimestamp fmt = Text.pack . formatTime defaultTimeLocale fmt . postTimestamp . entityVal
