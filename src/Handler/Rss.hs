@@ -30,7 +30,7 @@ getRssR = do
     , feedAuthor = "McKay Broderick"
     , feedDescription = "Musings about Tech, Math, Arcade Games or whatever else I decide to monologue about."
     , feedLanguage = "en-us"
-    , feedUpdated = time -- TODO: CHANGE THIS
+    , feedUpdated = time -- Change this to be the most recent post... maybe?
     , feedLogo = Just (FaviconR, "Structured Rants")
     , feedEntries = fmap postToFeedEntry posts
     }
