@@ -4,24 +4,14 @@ module Handler.Blog where
 
 import Import
 import Helpers.Slug (Slug(unSlug))
-import Helpers.Markdown (Markdown(unMarkdown))
 import qualified Helpers.Database as Database
+import qualified Helpers.Markdown as Markdown
 import qualified Data.Text as Text
 import qualified Helpers.Theme as Theme
 import qualified Data.Map.Strict as Map
-import qualified Text.MMark as MMark
-import qualified Text.MMark.Extension.Common as Ext
-import qualified Lucid.Base as Lucid
-import qualified Data.Text.Lazy as LazyText
-
 
 getPostContent :: Entity Post -> Text
-getPostContent post = case MMark.parse "" content of
-  Left errs -> Text.pack "<h2>Whoops...</h2>" <> Text.pack (MMark.parseErrorsPretty content errs)
-  Right parsed -> render parsed
-  where
-    render = LazyText.toStrict . Lucid.renderText . MMark.render . MMark.useExtensions [Ext.ghcSyntaxHighlighter, Ext.skylighting]
-    content = (unMarkdown . postContent . entityVal) post
+getPostContent = Markdown.parseMarkdown . postContent . entityVal
 
 getTimestamp :: String -> Entity Post -> Text
 getTimestamp fmt = Text.pack . formatTime defaultTimeLocale fmt . postTimestamp . entityVal

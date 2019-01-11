@@ -6,14 +6,12 @@ import Import
 import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3)
 import Helpers.Forms (FormReaction, FormAlert(Danger, Success))
 import Helpers.Slug (Slug, slugField)
-import Helpers.Markdown (Markdown(unMarkdown), markdownField)
+import Helpers.Markdown (Markdown, markdownField)
 import qualified Helpers.Forms as Forms
 import qualified Helpers.Session as Session
 import qualified Helpers.Theme as Theme
 import qualified Helpers.Database as Database
-import qualified Text.MMark as MMark
-import qualified Text.MMark.Extension.Common as Ext
-import qualified Lucid.Base as Lucid
+import qualified Helpers.Markdown as Markdown
 
 getTagOpts :: Handler [(Text, Key Tag)]
 getTagOpts = fmap (\tag -> ((tagName . entityVal) tag, entityKey tag)) <$> Database.getTags
@@ -33,7 +31,7 @@ postPostR = do
   action <- lookupPostParam "action"
   case (result, action) of
     (FormSuccess (title, markdown, _, _), Just "Preview") ->
-      renderPost formWidget (Just $ previewWidget title $ unMarkdown markdown) []
+      renderPost formWidget (Just $ previewWidget title markdown) []
     (FormSuccess (title, markdown, slug, tagIds), Just "Publish") -> do
       time <- liftIO getCurrentTime
       post <- runDB $ insertEntity $ Post title markdown slug time (entityKey user)
@@ -78,18 +76,12 @@ postForm opts =
       , fsAttrs = [("class", "form-control"), ("placeholder", "Tags")]
       }
 
-previewWidget :: Text -> Text -> Widget
-previewWidget title markdown =
-  let render = preEscapedToMarkup . Lucid.renderText . MMark.render . MMark.useExtensions [Ext.ghcSyntaxHighlighter, Ext.skylighting]
-  in case MMark.parse "" markdown of
-    Left errs -> [whamlet|
-      <h2>Errors
-      <div>#{MMark.parseErrorsPretty markdown errs}
-    |]
-    Right r -> [whamlet|
-      <h1>#{title}
-      #{render r}
-    |]
+previewWidget :: Text -> Markdown -> Widget
+previewWidget title markdown = let res = Markdown.parseMarkdown markdown in
+  [whamlet|
+    <h1>#{title}
+    #{preEscapedToMarkup res}
+  |]
 
 renderPost :: Widget -> Maybe Widget -> [FormReaction] -> Handler Html
 renderPost widget mPrev reactions =
