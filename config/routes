@@ -10,6 +10,7 @@
 /                 BlogR         GET
 /post             PostR         GET POST
 /post/#Slug       BlogPostSlugR GET
+/feed.xml         RssR          GET
 
 /login            LoginR        GET POST
 /register         RegisterR     GET POST

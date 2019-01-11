@@ -309,6 +309,7 @@ instance Yesod App where
   isAuthorized LivenessR _ = return Authorized
   isAuthorized ReadinessR _ = return Authorized
   isAuthorized (BlogPostSlugR _) _ = return Authorized
+  isAuthorized RssR _ = return Authorized
 
   -- Routes requiring authentication delegate to
   -- the isAuthenticated function
