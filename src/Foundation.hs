@@ -14,16 +14,14 @@ import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
 import Control.Monad.Logger (LogSource)
-
--- Used only when in "auth-dummy-login" setting is enabled.
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
+import qualified Helpers.Theme as Theme
 import Helpers.Auth
 import Helpers.Slug
-import qualified Helpers.Theme as Theme
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -93,11 +91,12 @@ instance Yesod App where
   defaultLayout :: Widget -> Handler Html
   defaultLayout widget = do
     master <- getYesod
-    -- mmsg <- getMessage
+    mmsg <- getMessage
     pc <- widgetToPageContent $ do
       addStylesheet $ StaticR css_bootstrap_css
       addStylesheet $ StaticR css_fontawesome_css
       addStylesheet $ StaticR css_brands_css
+      addStylesheet $ StaticR css_solid_css
       -- Media queries don't seem to work in lucius
       -- So I had to put them in here instead
       addStylesheet $ StaticR css_app_css
@@ -264,7 +263,7 @@ instance Yesod App where
             <div .page__sidebar>
               <div .page__synopsis>This website is devoted to various rants about programming, math or whatever else I decide to monologue about.
               <div .list>
-                <div .list__title>Social Media
+                <div .list__title>Follow
                 <a .list__item href="https://github.com/mckayb">
                   <i .fab.fa-lg.fa-github>
                   GitHub
@@ -274,6 +273,9 @@ instance Yesod App where
                 <a .list__item href="https://www.linkedin.com/in/mckaybroderick/">
                   <i .fab.fa-lg.fa-linkedin>
                   LinkedIn
+                <a .list__item href="@{RssR}">
+                  <i .fas.fa-lg.fa-rss>
+                  RSS Feed
           <div .page__right.coordinates.coordinates--y>
             <div .page__header.banner.coordinates.coordinates--x>
               <div .banner__actions>
@@ -285,6 +287,8 @@ instance Yesod App where
                 <a href="https://github.com/mckayb/website">
                   <i .fab.fa-lg.fa-github>
             <div .page__content>
+              $maybe msg <- mmsg
+                <div .alert.alert-info>#{msg}
               ^{widget}
       |]
     withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
@@ -309,6 +313,7 @@ instance Yesod App where
   isAuthorized LivenessR _ = return Authorized
   isAuthorized ReadinessR _ = return Authorized
   isAuthorized (BlogPostSlugR _) _ = return Authorized
+  isAuthorized RssR _ = return Authorized
 
   -- Routes requiring authentication delegate to
   -- the isAuthenticated function

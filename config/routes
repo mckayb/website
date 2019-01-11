@@ -5,6 +5,7 @@
 
 /favicon.ico      FaviconR      GET
 /robots.txt       RobotsR       GET
+/feed.rss         RssR          GET
 
 -- Html Routes
 /                 BlogR         GET
