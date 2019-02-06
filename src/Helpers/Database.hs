@@ -58,14 +58,12 @@ getTagByName :: Text -> Handler (Maybe (Entity Tag))
 getTagByName n = runDB $ selectFirst [TagName ==. n] []
 
 getTagsByPost :: Entity Post -> Handler [Entity Tag]
-getTagsByPost post = do
-  tags <- runDB
-    $ E.select
-    $ E.from $ \(pt `E.InnerJoin` t) -> do
-    E.on (pt ^. PostTagTagId E.==. t ^. TagId)
-    E.where_ (pt ^. PostTagPostId E.==. E.val (entityKey post))
-    return t
-  return tags
+getTagsByPost post = runDB
+  $ E.select
+  $ E.from $ \(pt `E.InnerJoin` t) -> do
+  E.on ((pt ^. PostTagTagId) E.==. (t ^. TagId))
+  E.where_ (pt ^. PostTagPostId E.==. E.val (entityKey post))
+  return t
 
 insertUser :: User -> Handler (Key User)
 insertUser user = runDB $ insert user

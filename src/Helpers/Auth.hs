@@ -26,7 +26,7 @@ isAuthenticatedAdmin = do
   return $ Maybe.fromMaybe (Unauthorized "You are not allowed to access this page") (validateAdmin <$> mUser <*> mRole)
   where
     validateAdmin user role =
-      if (Model.roleName . entityVal) role == "Admin" && (entityKey role) == (Model.userRoleId . entityVal) user
+      if (Model.roleName . entityVal) role == "Admin" && entityKey role == (Model.userRoleId . entityVal) user
         then Authorized
         else Unauthorized "You are not allowed to access this page"
 
