@@ -20,81 +20,23 @@
   }
 }
 
-.source-code pre {
-  color: #dedede;
-}
-
-.source-code .dt {
-  color:#dedede;
-}
-
-.source-code .dv {
-  color: #ed8a68;
-}
-
-.source-code .cf {
-  color:#2727af;
-}
-
-.source-code .bn {
-  color:#17a2b8;
-}
-
-.source-code .fu {
-  color: #f2e090;
-}
-
-.source-code .kw {
-  font-weight: 600;
-  color: cornflowerblue;
-}
-
-.source-code .pr {
-  color:#dc3545;
-}
-
-.source-code .sy {
-  color:#e83e8c;
-}
-
-.source-code .va {}
-
-.source-code .cr {
-  color: #5a86d5;
-}
-
-.source-code .op {
-  color: #dedede;
-}
-
-.source-code .ch {
-  color:#17a2b8;
-}
-
-.source-code .st {
-  color: #d1453e;
-}
-
-.source-code .it {
-  color:#fd7e14;
-}
-
-.source-code .ra {
-  color:#fd7e14;
-}
-
-.source-code .co {
-  color:#6c757d;
-}
-
-.source-code .at {
-  color: #f2e090;
-}
-
-.source-code .language-php .ot {
-  color: #dedede;
-}
-
-.source-code .ot {
-  color: cornflowerblue;
-}
+.source-code pre { color: #dedede; }
+.source-code .dt { color:#dedede; }                           /* DataType */
+.source-code .dv { color: #ed8a68; }                          /* DecVal */
+.source-code .cf { color:#2727af; }                           /* ControlFlow */
+.source-code .bn { color:#17a2b8; }                           /* BaseN */
+.source-code .fu { color: #f2e090; }                          /* Function */
+.source-code .kw { font-weight: 600; color: cornflowerblue; } /* Keyword */
+.source-code .pr { color:#dc3545; }
+.source-code .sy { color:#e83e8c; }
+.source-code .va {}                                             /* Variable */
+.source-code .cr { color: #5a86d5; }
+.source-code .op { color: #dedede; }
+.source-code .ch { color:#17a2b8; }
+.source-code .st { color: #d1453e; }
+.source-code .it { color:#fd7e14; }
+.source-code .ra { color:#fd7e14; }
+.source-code .co { color:#6c757d; }
+.source-code .at { color: #f2e090; } /* Attribute */
+.source-code .language-php .ot { color: #dedede; }
+.source-code .ot { color: cornflowerblue; }

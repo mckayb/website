@@ -28,6 +28,7 @@ Post json
   slug Slug
   timestamp UTCTime
   userId UserId
+  published Bool default=True
   UniquePostSlug slug
   deriving Eq Show
 Tag json

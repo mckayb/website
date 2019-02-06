@@ -28,7 +28,7 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"]
   $(persistFileWith lowerCaseSettings "config/models")
 
 instance Ord Post where
-  (Post _ _ _ timestamp _) `compare` (Post _ _ _ timestamp2 _) = timestamp `compare` timestamp2
+  (Post _ _ _ timestamp _ _) `compare` (Post _ _ _ timestamp2 _ _) = timestamp `compare` timestamp2
 
 appDBConn :: IO ConnectionString
 appDBConn = pgConnStr . Settings.appDatabaseConf <$> Settings.compileTimeAppSettingsReadEnv

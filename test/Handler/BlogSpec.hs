@@ -24,7 +24,7 @@ spec = withApp $ do
       let Right markdown = Markdown.mkMarkdown "## Test"
 
       user <- createUser role em
-      _ <- createPost user "This is the title" markdown slug time
+      _ <- createPost user "This is the title" markdown slug time True
 
       get BlogR
       statusIs 200
@@ -49,9 +49,9 @@ spec = withApp $ do
       let Right markdown1 = Markdown.mkMarkdown "First, I was afraid"
       let Right markdown2 = Markdown.mkMarkdown "I was petrified"
       let Right markdown3 = Markdown.mkMarkdown "Kept thinking I could never live without you by my side"
-      _ <- createPost user "The First Post" markdown1 slug1 time
-      _ <- createPost user "The Second Post" markdown2 slug2 time
-      _ <- createPost user "The Third Post" markdown3 slug3 time
+      _ <- createPost user "The First Post" markdown1 slug1 time True
+      _ <- createPost user "The Second Post" markdown2 slug2 time True
+      _ <- createPost user "The Third Post" markdown3 slug3 time True
 
       get BlogR
       statusIs 200
@@ -68,7 +68,7 @@ spec = withApp $ do
       user <- createUser role em
       let Right slug = Slug.mkSlug "first-second-third"
       let Right markdown = Markdown.mkMarkdown "First\n\nSecond\n\nThird"
-      _ <- createPost user "The Post" markdown slug time
+      _ <- createPost user "The Post" markdown slug time True
 
       get BlogR
       statusIs 200
@@ -84,7 +84,7 @@ spec = withApp $ do
       user <- createUser role em
       let Right slug = Slug.mkSlug "first-second-third"
       let Right markdown = Markdown.mkMarkdown "First\nSecond\nThird"
-      post' <- createPost user "The Post" markdown slug time
+      post' <- createPost user "The Post" markdown slug time True
 
       get $ BlogPostSlugR slug
       statusIs 200

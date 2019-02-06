@@ -3,7 +3,8 @@
 module Handler.Blog where
 
 import Import
-import Helpers.Slug (Slug(unSlug))
+import Helpers.Slug (Slug)
+import qualified Helpers.Session as Session
 import qualified Helpers.Database as Database
 import qualified Helpers.Markdown as Markdown
 import qualified Data.Text as Text
@@ -28,12 +29,22 @@ takeUntilFirstParagraphInc = takeWhileOneMore (not . Text.isPrefixOf "<p>")
 getPostTeaser :: Entity Post -> Text
 getPostTeaser = Text.unlines . takeUntilFirstParagraphInc . Text.lines . getPostContent
 
-getPostSlug :: Entity Post -> Text
-getPostSlug = unSlug . postSlug . entityVal
+getPostSlug :: Entity Post -> Slug
+getPostSlug = postSlug . entityVal
 
 getBlogR :: Handler Html
 getBlogR = do
-  postTagsMap <- Database.getPostsWithTags
+  postTagsMap <- Database.getPostsWithTags True
+  showPosts comingSoonWidget postTagsMap
+
+getBlogDraftsR :: Handler Html
+getBlogDraftsR = do
+  postTagsMap <- Database.getPostsWithTags False
+  showPosts noDraftsWidget postTagsMap
+
+showPosts :: Widget -> Map (Entity Post) [Entity Tag] -> Handler Html
+showPosts noPostsWidget postTagsMap = do
+  isAdmin <- Session.isAdmin
   let posts = sortOn (Down . postTimestamp . entityVal) . Map.keys $ postTagsMap
   let tagsForPost post = sortOn (tagName . entityVal) $ postTagsMap Map.! post
   defaultLayout $ do
@@ -71,7 +82,11 @@ getBlogR = do
       .post .post__title {
         padding: 0.5rem;
         font-size: 1.25rem;
-        border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
+        flex: 1;
+      }
+
+      .post .post__actions {
+        align-self: center;
       }
 
       .post h1,
@@ -106,10 +121,10 @@ getBlogR = do
     |]
     [whamlet|
       $if (null posts)
-        <div .row>
-          <div .col-md-12>Coming soon!
+        ^{noPostsWidget}
 
       $else
+        <!-- TODO: Add a link to the edit if you're an admin -->
         $forall post <- posts
           <article .post.coordinates.coordinates--x>
             <div .post__sidebar.coordinates.coordinates--y>
@@ -120,8 +135,13 @@ getBlogR = do
                 $forall tag <- (tagsForPost post)
                   <div .post__tag.badge>#{(tagName . entityVal) tag}
             <div .post__body.coordinates.coordinates--y>
-              <div .post__title>
-                <a href="@{BlogR}post/#{getPostSlug post}">#{getPostTitle post}
+              <div .post__header.coordinates.coordinates--x>
+                <div .post__title>
+                  <a href="@{BlogPostSlugR (getPostSlug post)}">#{getPostTitle post}
+                $if isAdmin
+                  <div .post__actions>
+                    <a href="@{EditPostR (entityKey post)}">
+                      <i .fa.fa-edit>
               <div .post__content>
                 #{preEscapedToMarkup (getPostTeaser post)}
     |]
@@ -147,3 +167,15 @@ getBlogPostSlugR slug = do
             #{preEscapedToMarkup (getPostContent post')}
       |]
     Nothing -> notFound
+
+noDraftsWidget :: Widget
+noDraftsWidget = [whamlet|
+  <div .row>
+    <div .col-md-12>No drafts.
+|]
+
+comingSoonWidget :: Widget
+comingSoonWidget = [whamlet|
+  <div .row>
+    <div .col-md-12>Coming soon!
+|]

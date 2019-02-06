@@ -104,9 +104,9 @@ createPassword user pass = do
   hash' <- liftIO $ hashPassword pass
   runDB $ insertEntity $ Password (entityKey user) hash'
 
-createPost :: Entity User -> Text -> Markdown -> Slug -> UTCTime -> YesodExample App (Entity Post)
-createPost user title content slug timestamp =
-  runDB $ insertEntity $ Post title content slug timestamp (entityKey user)
+createPost :: Entity User -> Text -> Markdown -> Slug -> UTCTime -> Bool -> YesodExample App (Entity Post)
+createPost user title content slug timestamp published =
+  runDB $ insertEntity $ Post title content slug timestamp (entityKey user) published
 
 createPostTag :: Entity Post -> Entity Tag -> YesodExample App (Entity PostTag)
 createPostTag post' tag =
