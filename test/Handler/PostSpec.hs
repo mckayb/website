@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleContexts #-}
-
 module Handler.PostSpec (spec) where
 
 import TestImport
@@ -22,7 +20,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToPost CreatePostR em "mypassword"
+      authGet em "mypassword" CreatePostR
 
       bodyContains "Create Post"
 
@@ -32,7 +30,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToPost CreatePostR em "mypassword"
+      authGet em "mypassword" CreatePostR
 
       request $ do
         addToken
@@ -50,7 +48,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToPost CreatePostR em "mypassword"
+      authGet em "mypassword" CreatePostR
 
       request $ do
         addToken
@@ -68,7 +66,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToPost CreatePostR em "mypassword"
+      authGet em "mypassword" CreatePostR
 
       request $ do
         addToken
@@ -88,7 +86,7 @@ spec = withApp $ do
       tag <- createTag "Foo"
       let Right slug = Slug.mkSlug "the-slug"
 
-      goToPost CreatePostR em "mypassword"
+      authGet em "mypassword" CreatePostR
       request $ do
         addToken
         addPostParam "action" "Preview"
@@ -109,7 +107,7 @@ spec = withApp $ do
       tag <- createTag "Foo"
       let Right slug = Slug.mkSlug "the-slug"
 
-      goToPost CreatePostR em "mypassword"
+      authGet em "mypassword" CreatePostR
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       assertEq "No posts before we preview" 0 $ length postsBefore
@@ -141,7 +139,7 @@ spec = withApp $ do
       tag <- createTag "foo"
       let Right slug = Slug.mkSlug "the-slug"
 
-      goToPost CreatePostR em "mypassword"
+      authGet em "mypassword" CreatePostR
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       postTagsBefore <- runDB $ selectList ([] :: [Filter PostTag]) []
@@ -185,7 +183,7 @@ spec = withApp $ do
       tag <- createTag "foo"
       let Right slug = Slug.mkSlug "the-slug"
 
-      goToPost CreatePostR em "mypassword"
+      authGet em "mypassword" CreatePostR
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       postTagsBefore <- runDB $ selectList ([] :: [Filter PostTag]) []
@@ -247,7 +245,7 @@ spec = withApp $ do
       let Right markdown = Markdown.mkMarkdown "First\nSecond\nThird"
       post' <- createPost user "The Post" markdown slug time True
 
-      goToPost (EditPostR (entityKey post')) em "mypassword"
+      authGet em "mypassword" $ EditPostR (entityKey post')
 
       bodyContains "Create Post"
 
@@ -263,7 +261,7 @@ spec = withApp $ do
       post' <- createPost user "The Post" markdown slug time True
       _ <- createPostTag post' tag
 
-      goToPost (EditPostR (entityKey post')) em "mypassword"
+      authGet em "mypassword" $ EditPostR (entityKey post')
 
       request $ do
         addToken
@@ -287,7 +285,7 @@ spec = withApp $ do
       post' <- createPost user "The Post" markdown slug time True
       _ <- createPostTag post' tag
 
-      goToPost (EditPostR (entityKey post')) em "mypassword"
+      authGet em "mypassword" $ EditPostR (entityKey post')
 
       request $ do
         addToken
@@ -311,7 +309,7 @@ spec = withApp $ do
       post' <- createPost user "The Post" markdown slug time True
       _ <- createPostTag post' tag
 
-      goToPost (EditPostR (entityKey post')) em "mypassword"
+      authGet em "mypassword" $ EditPostR (entityKey post')
 
       request $ do
         addToken
@@ -335,7 +333,7 @@ spec = withApp $ do
       post' <- createPost user "The Post" markdown slug time True
       _ <- createPostTag post' tag
 
-      goToPost (EditPostR (entityKey post')) em "mypassword"
+      authGet em "mypassword" $ EditPostR (entityKey post')
 
       request $ do
         addToken
@@ -361,7 +359,7 @@ spec = withApp $ do
       post' <- createPost user "The Post" markdown slug time True
       _ <- createPostTag post' tag
 
-      goToPost (EditPostR (entityKey post')) em "mypassword"
+      authGet em "mypassword" $ EditPostR (entityKey post')
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       assertEq "Single post before we preview" 1 $ length postsBefore
@@ -397,7 +395,7 @@ spec = withApp $ do
       post' <- createPost user "The Post" markdown slug time False
       _ <- createPostTag post' tag
 
-      goToPost (EditPostR (entityKey post')) em "mypassword"
+      authGet em "mypassword" $ EditPostR (entityKey post')
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       postTagsBefore <- runDB $ selectList ([] :: [Filter PostTag]) []
@@ -451,7 +449,7 @@ spec = withApp $ do
       post' <- createPost user "The Post" markdown slug time True
       _ <- createPostTag post' tag
 
-      goToPost (EditPostR (entityKey post')) em "mypassword"
+      authGet em "mypassword" $ EditPostR (entityKey post')
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       postTagsBefore <- runDB $ selectList ([] :: [Filter PostTag]) []
@@ -505,7 +503,7 @@ spec = withApp $ do
       post' <- createPost user "The Post" markdown slug time True
       _ <- createPostTag post' tag
 
-      goToPost (EditPostR (entityKey post')) em "mypassword"
+      authGet em "mypassword" $ EditPostR (entityKey post')
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       postTagsBefore <- runDB $ selectList ([] :: [Filter PostTag]) []
@@ -527,20 +525,3 @@ spec = withApp $ do
 
       assertEq "deleted the post" 0 $ length postsAfter
       assertEq "deleted the post tag" 0 $ length postTagsAfter
-  where
-    goToPost route em pass = do
-      get LoginR
-      statusIs 200
-
-      request $ do
-        addToken
-        byLabelExact "Email" $ Email.unEmail em
-        byLabelExact "Password" pass
-        setMethod "POST"
-        setUrl LoginR
-
-      statusIs 303
-      _ <- followRedirect
-      statusIs 200
-      get route
-      statusIs 200

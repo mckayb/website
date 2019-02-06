@@ -96,3 +96,69 @@ spec = withApp $ do
       let Right slug = Slug.mkSlug "first-second-third"
       get $ BlogPostSlugR slug
       statusIs 404
+
+  describe "BlogDraftsR" $ do
+    it "Won't load if you aren't an admin" $ do
+      get BlogDraftsR
+      statusIs 403
+
+    it "Renders no drafts" $ do
+      role <- createRole "Admin"
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      user <- createUser role em
+      _ <- createPassword user "mypassword"
+
+      authGet em "mypassword" BlogDraftsR
+      statusIs 200
+      bodyContains "No drafts."
+
+    it "Renders a single draft" $ do
+      role <- createRole "Admin"
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      time <- liftIO getCurrentTime
+      user <- createUser role em
+      _ <- createPassword user "mypassword"
+      let Right slug = Slug.mkSlug "first-second-third"
+      let Right markdown = Markdown.mkMarkdown "First\nSecond\nThird"
+      post' <- createPost user "The Post" markdown slug time False
+
+      authGet em "mypassword" BlogDraftsR
+      statusIs 200
+
+      htmlAllContain ".post__title > a" $ (unpack . postTitle . entityVal) post'
+
+    it "Renders multiple drafts" $ do
+      role <- createRole "Admin"
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      time <- liftIO getCurrentTime
+      user <- createUser role em
+      _ <- createPassword user "mypassword"
+      let Right slug = Slug.mkSlug "first"
+      let Right slug2 = Slug.mkSlug "second"
+      let Right slug3 = Slug.mkSlug "third"
+      let Right markdown = Markdown.mkMarkdown "First\nSecond\nThird"
+      post' <- createPost user "The Post" markdown slug time False
+      post2' <- createPost user "The Second Post" markdown slug2 time False
+      post3' <- createPost user "The Third Post" markdown slug3 time False
+
+      authGet em "mypassword" BlogDraftsR
+      statusIs 200
+
+      htmlAnyContain ".post__title > a" $ (unpack . postTitle . entityVal) post'
+      htmlAnyContain ".post__title > a" $ (unpack . postTitle . entityVal) post2'
+      htmlAnyContain ".post__title > a" $ (unpack . postTitle . entityVal) post3'
+
+    it "Lets you edit those drafts" $ do
+      role <- createRole "Admin"
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      time <- liftIO getCurrentTime
+      user <- createUser role em
+      _ <- createPassword user "mypassword"
+      let Right slug = Slug.mkSlug "first-second-third"
+      let Right markdown = Markdown.mkMarkdown "First\nSecond\nThird"
+      post' <- createPost user "The Post" markdown slug time False
+
+      authGet em "mypassword" BlogDraftsR
+      statusIs 200
+
+      htmlAllContain ".post__title > a" $ (unpack . postTitle . entityVal) post'
