@@ -124,7 +124,6 @@ showPosts noPostsWidget postTagsMap = do
         ^{noPostsWidget}
 
       $else
-        <!-- TODO: Add a link to the edit if you're an admin -->
         $forall post <- posts
           <article .post.coordinates.coordinates--x>
             <div .post__sidebar.coordinates.coordinates--y>
