@@ -21,6 +21,7 @@ spec = withApp $ do
       _ <- createPassword user "mypassword"
 
       authGet em "mypassword" CreatePostR
+      statusIs 200
 
       bodyContains "Create Post"
 
@@ -31,6 +32,7 @@ spec = withApp $ do
       _ <- createPassword user "mypassword"
 
       authGet em "mypassword" CreatePostR
+      statusIs 200
 
       request $ do
         addToken
@@ -49,6 +51,7 @@ spec = withApp $ do
       _ <- createPassword user "mypassword"
 
       authGet em "mypassword" CreatePostR
+      statusIs 200
 
       request $ do
         addToken
@@ -67,6 +70,7 @@ spec = withApp $ do
       _ <- createPassword user "mypassword"
 
       authGet em "mypassword" CreatePostR
+      statusIs 200
 
       request $ do
         addToken
@@ -87,6 +91,8 @@ spec = withApp $ do
       let Right slug = Slug.mkSlug "the-slug"
 
       authGet em "mypassword" CreatePostR
+      statusIs 200
+
       request $ do
         addToken
         addPostParam "action" "Preview"
@@ -108,6 +114,7 @@ spec = withApp $ do
       let Right slug = Slug.mkSlug "the-slug"
 
       authGet em "mypassword" CreatePostR
+      statusIs 200
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       assertEq "No posts before we preview" 0 $ length postsBefore
@@ -140,6 +147,7 @@ spec = withApp $ do
       let Right slug = Slug.mkSlug "the-slug"
 
       authGet em "mypassword" CreatePostR
+      statusIs 200
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       postTagsBefore <- runDB $ selectList ([] :: [Filter PostTag]) []
@@ -184,6 +192,7 @@ spec = withApp $ do
       let Right slug = Slug.mkSlug "the-slug"
 
       authGet em "mypassword" CreatePostR
+      statusIs 200
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       postTagsBefore <- runDB $ selectList ([] :: [Filter PostTag]) []
@@ -246,6 +255,7 @@ spec = withApp $ do
       post' <- createPost user "The Post" markdown slug time True
 
       authGet em "mypassword" $ EditPostR (entityKey post')
+      statusIs 200
 
       bodyContains "Create Post"
 
@@ -262,6 +272,7 @@ spec = withApp $ do
       _ <- createPostTag post' tag
 
       authGet em "mypassword" $ EditPostR (entityKey post')
+      statusIs 200
 
       request $ do
         addToken
@@ -286,6 +297,7 @@ spec = withApp $ do
       _ <- createPostTag post' tag
 
       authGet em "mypassword" $ EditPostR (entityKey post')
+      statusIs 200
 
       request $ do
         addToken
@@ -310,6 +322,7 @@ spec = withApp $ do
       _ <- createPostTag post' tag
 
       authGet em "mypassword" $ EditPostR (entityKey post')
+      statusIs 200
 
       request $ do
         addToken
@@ -334,6 +347,7 @@ spec = withApp $ do
       _ <- createPostTag post' tag
 
       authGet em "mypassword" $ EditPostR (entityKey post')
+      statusIs 200
 
       request $ do
         addToken
@@ -360,6 +374,7 @@ spec = withApp $ do
       _ <- createPostTag post' tag
 
       authGet em "mypassword" $ EditPostR (entityKey post')
+      statusIs 200
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       assertEq "Single post before we preview" 1 $ length postsBefore
@@ -396,6 +411,7 @@ spec = withApp $ do
       _ <- createPostTag post' tag
 
       authGet em "mypassword" $ EditPostR (entityKey post')
+      statusIs 200
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       postTagsBefore <- runDB $ selectList ([] :: [Filter PostTag]) []
@@ -450,6 +466,7 @@ spec = withApp $ do
       _ <- createPostTag post' tag
 
       authGet em "mypassword" $ EditPostR (entityKey post')
+      statusIs 200
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       postTagsBefore <- runDB $ selectList ([] :: [Filter PostTag]) []
@@ -504,6 +521,7 @@ spec = withApp $ do
       _ <- createPostTag post' tag
 
       authGet em "mypassword" $ EditPostR (entityKey post')
+      statusIs 200
 
       postsBefore <- runDB $ selectList ([] :: [Filter Post]) []
       postTagsBefore <- runDB $ selectList ([] :: [Filter PostTag]) []

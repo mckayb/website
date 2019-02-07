@@ -9,9 +9,9 @@
 
 -- Html Routes
 /                    BlogR         GET
-/post/create         CreatePostR   GET POST
-/post/#PostId/edit   EditPostR     GET POST
-/drafts              BlogDraftsR   GET
+/post                CreatePostR   GET POST
+/post/#PostId        EditPostR     GET POST
+/draft               BlogDraftsR   GET
 /blog/#Slug          BlogPostSlugR GET
 
 /login               LoginR        GET POST
