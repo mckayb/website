@@ -136,7 +136,7 @@ instance Yesod App where
           min-height: 100%;
         }
 
-        .btn.btn-link
+        .btn.btn-link,
         .page a {
           color: #{Theme.linkColor Theme.colorScheme};
         }
