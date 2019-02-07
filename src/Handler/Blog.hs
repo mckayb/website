@@ -149,7 +149,13 @@ getBlogPostSlugR :: Slug -> Handler Html
 getBlogPostSlugR slug = do
   mPost <- Database.getPostBySlug slug
   case mPost of
-    Just post' -> defaultLayout $ do
+    Just post' ->
+      if (not . postPublished . entityVal) post'
+        then Session.requireAdminUser >>= const (render post')
+        else render post'
+    Nothing -> notFound
+  where
+    render post' = defaultLayout $ do
       setTitle "Structured Rants"
       toWidget [lucius|
         .blog-post .blog-post__header {
@@ -165,7 +171,6 @@ getBlogPostSlugR slug = do
           <section .blog-post__body>
             #{preEscapedToMarkup (getPostContent post')}
       |]
-    Nothing -> notFound
 
 noDraftsWidget :: Widget
 noDraftsWidget = [whamlet|

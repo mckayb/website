@@ -135,4 +135,3 @@ authGet em pass route = do
   _ <- followRedirect
   statusIs 200
   get route
-  statusIs 200

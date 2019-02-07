@@ -76,6 +76,19 @@ spec = withApp $ do
       bodyContains "First"
       bodyNotContains "Second"
 
+    it "Won't render a draft" $ do
+      role <- createRole "Admin"
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      time <- liftIO getCurrentTime
+      user <- createUser role em
+      let Right slug = Slug.mkSlug "first-second-third"
+      let Right markdown = Markdown.mkMarkdown "First\n\nSecond\n\nThird"
+      _ <- createPost user "The Post" markdown slug time False
+
+      get BlogR
+      statusIs 200
+      bodyContains "Coming soon"
+
   describe "BlogPostSlugR" $ do
     it "Renders the post correctly if the post exists" $ do
       role <- createRole "Admin"
@@ -96,6 +109,36 @@ spec = withApp $ do
       let Right slug = Slug.mkSlug "first-second-third"
       get $ BlogPostSlugR slug
       statusIs 404
+
+    it "Won't let you visit a draft post if you aren't logged in" $ do
+      role <- createRole "Admin"
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      time <- liftIO getCurrentTime
+      user <- createUser role em
+      _ <- createPassword user "mypassword"
+      let Right slug = Slug.mkSlug "first-second-third"
+      let Right markdown = Markdown.mkMarkdown "First\nSecond\nThird"
+      _ <- createPost user "The Post" markdown slug time False
+
+      get $ BlogPostSlugR slug
+      statusIs 403
+      bodyContains "Permission Denied"
+      bodyContains "You must login to access this page"
+
+    it "Won't let you visit a draft post if you aren't an admin" $ do
+      role <- createRole "Foo"
+      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      time <- liftIO getCurrentTime
+      user <- createUser role em
+      _ <- createPassword user "mypassword"
+      let Right slug = Slug.mkSlug "first-second-third"
+      let Right markdown = Markdown.mkMarkdown "First\nSecond\nThird"
+      _ <- createPost user "The Post" markdown slug time False
+
+      authGet em "mypassword" $ BlogPostSlugR slug
+      statusIs 403
+      bodyContains "Permission Denied"
+      bodyContains "You must be an admin to access this page"
 
   describe "BlogDraftsR" $ do
     it "Won't load if you aren't an admin" $ do
