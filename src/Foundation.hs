@@ -136,10 +136,13 @@ instance Yesod App where
           min-height: 100%;
         }
 
+        .btn.btn-link
         .page a {
           color: #{Theme.linkColor Theme.colorScheme};
         }
 
+        .btn.btn-link:hover,
+        .btn.btn-link:focus,
         .page a:hover,
         .page a:focus {
           color: #{Theme.hoverColor Theme.colorScheme};
@@ -317,7 +320,9 @@ instance Yesod App where
 
   -- Routes requiring authentication delegate to
   -- the isAuthenticated function
-  isAuthorized PostR _ = isAuthenticatedAdmin
+  isAuthorized BlogDraftsR _ = isAuthenticatedAdmin
+  isAuthorized CreatePostR _ = isAuthenticatedAdmin
+  isAuthorized (EditPostR _) _ = isAuthenticatedAdmin
   isAuthorized RoleR _ = isAuthenticatedAdmin
   isAuthorized TagR _ = isAuthenticatedAdmin
 

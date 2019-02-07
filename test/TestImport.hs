@@ -1,4 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module TestImport
   ( module TestImport
@@ -15,7 +16,7 @@ import Test.Hspec            as X
 import Yesod.Default.Config2 (useEnv, loadYamlSettings)
 import Yesod.Auth            as X hiding (LoginR)
 import Yesod.Test            as X
-import Yesod.Core            as X (SessionBackend, defaultClientSessionBackend, setSession)
+import Yesod.Core            as X (Yesod, Route, RedirectUrl, SessionBackend, defaultClientSessionBackend, setSession)
 import Yesod.Core.Unsafe     (fakeHandlerGetLogger)
 import Text.Shakespeare.Text (st)
 import Helpers.BCrypt
@@ -104,10 +105,34 @@ createPassword user pass = do
   hash' <- liftIO $ hashPassword pass
   runDB $ insertEntity $ Password (entityKey user) hash'
 
-createPost :: Entity User -> Text -> Markdown -> Slug -> UTCTime -> YesodExample App (Entity Post)
-createPost user title content slug timestamp =
-  runDB $ insertEntity $ Post title content slug timestamp (entityKey user)
+createPost :: Entity User -> Text -> Markdown -> Slug -> UTCTime -> Bool -> YesodExample App (Entity Post)
+createPost user title content slug timestamp published =
+  runDB $ insertEntity $ Post title content slug timestamp (entityKey user) published
 
 createPostTag :: Entity Post -> Entity Tag -> YesodExample App (Entity PostTag)
 createPostTag post' tag =
   runDB $ insertEntity $ PostTag (entityKey post') (entityKey tag)
+
+authGet :: ( Yesod site
+           , RedirectUrl site url
+           , RedirectUrl site (Route App)
+           ) => Email
+           -> Text
+           -> url
+           -> SIO (YesodExampleData site) ()
+authGet em pass route = do
+  get LoginR
+  statusIs 200
+
+  request $ do
+    addToken
+    byLabelExact "Email" $ unEmail em
+    byLabelExact "Password" pass
+    setMethod "POST"
+    setUrl LoginR
+
+  statusIs 303
+  _ <- followRedirect
+  statusIs 200
+  get route
+  statusIs 200

@@ -18,12 +18,37 @@ requireAdminUser = do
   mRole <- Auth.getCurrentRole
   case mRole of
     Nothing -> permissionDenied "You must be an admin to access this page"
-    Just r ->
-      case roleName r of
-        "Admin" -> return user
-        _ -> permissionDenied "You must be an admin to access this page"
+    Just role ->
+      if (roleName . entityVal) role == "Admin" && ((userRoleId . entityVal) user == entityKey role)
+        then return user
+        else permissionDenied "You must be an admin to access this page"
 
-keepLoggedIn :: Entity User -> Role -> Handler ()
+optionalAdminUser :: Handler (Maybe (Entity User))
+optionalAdminUser = do
+  mUser <- Auth.getCurrentUser
+  mRole <- Auth.getCurrentRole
+  case mUser of
+    Nothing -> return Nothing
+    Just user -> 
+      case mRole of
+        Nothing -> return Nothing
+        Just role ->
+          if (roleName . entityVal) role == "Admin" && ((userRoleId . entityVal) user == entityKey role)
+            then return mUser
+            else return Nothing
+
+isAdmin :: Handler Bool
+isAdmin = do
+  mUser <- Auth.getCurrentUser
+  mRole <- Auth.getCurrentRole
+  case mUser of
+    Nothing -> return False
+    Just user -> 
+      case mRole of
+        Nothing -> return False
+        Just role -> return $ (roleName . entityVal) role == "Admin" && ((userRoleId . entityVal) user == entityKey role)
+
+keepLoggedIn :: Entity User -> Entity Role -> Handler ()
 keepLoggedIn user role = do
   setSession userSessionKey $ (Conversions.cs . Aeson.encode) user
   setSession roleSessionKey $ (Conversions.cs . Aeson.encode) role
