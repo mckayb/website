@@ -45,6 +45,9 @@ getPostsWithTags published = do
     groupFirst :: Ord a => [(a, Maybe b)] -> Map a [b]
     groupFirst = foldr (\tuple acc -> M.insertWith (++) (fst tuple) (maybeToList (snd tuple)) acc) M.empty
 
+getPublishedPosts :: Handler [Entity Post]
+getPublishedPosts = runDB $ selectList [PostPublished ==. True] []
+
 getRoleByUser :: Entity User -> Handler (Maybe (Entity Role))
 getRoleByUser u = runDB $ selectFirst [RoleId ==. (userRoleId . entityVal) u] []
 
