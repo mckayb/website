@@ -22,7 +22,7 @@ postToFeedEntry post =
 getRssR :: Handler RepRss
 getRssR = do
   time <- liftIO getCurrentTime
-  posts <- Database.getPosts
+  posts <- Database.getPublishedPosts
   rssFeed $ Feed
     { feedTitle = "Structured Rants"
     , feedLinkSelf = RssR
