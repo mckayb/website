@@ -20,7 +20,7 @@ jobs:
       - run: stack exec -- hlint src/ test/
       - run:
           name: Test and Install
-          command: stack build --test --copy-bins
+          command: stack build --test --copy-bins --fast -j2
           environment:
             YESOD_PGHOST: localhost
       - save_cache:
