@@ -18,9 +18,10 @@ jobs:
       - run: stack setup
       - run: stack build hlint
       - run: stack exec -- hlint src/ test/
+      - run: stack build mmark
       - run:
           name: Test and Install
-          command: stack build --test --copy-bins --fast -j1
+          command: stack build --test --copy-bins --fast
           environment:
             YESOD_PGHOST: localhost
       - save_cache:
