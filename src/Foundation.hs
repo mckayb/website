@@ -120,6 +120,11 @@ instance Yesod App where
           overflow-x: hidden;
         }
 
+        body {
+          line-height: 1.5;
+          font-size: 16px;
+        }
+
         .coordinates {
           display: flex;
         }

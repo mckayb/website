@@ -11,14 +11,14 @@ import qualified Data.Text as Text
 import qualified Helpers.Theme as Theme
 import qualified Data.Map.Strict as Map
 
-getPostContent :: Entity Post -> Text
-getPostContent = Markdown.parseMarkdown . postContent . entityVal
+getPostContent :: Post -> Text
+getPostContent = Markdown.parseMarkdown . postContent
 
-getTimestamp :: String -> Entity Post -> Text
-getTimestamp fmt = Text.pack . formatTime defaultTimeLocale fmt . postTimestamp . entityVal
+getTimestamp :: String -> Post -> Text
+getTimestamp fmt = Text.pack . formatTime defaultTimeLocale fmt . postTimestamp
 
-getPostTitle :: Entity Post -> Text
-getPostTitle = postTitle . entityVal
+getPostTitle :: Post -> Text
+getPostTitle = postTitle
 
 takeWhileOneMore :: (a -> Bool) -> [a] -> [a]
 takeWhileOneMore p = foldr (\x ys -> if p x then x:ys else [x]) []
@@ -26,11 +26,11 @@ takeWhileOneMore p = foldr (\x ys -> if p x then x:ys else [x]) []
 takeUntilFirstParagraphInc :: [Text] -> [Text]
 takeUntilFirstParagraphInc = takeWhileOneMore (not . Text.isPrefixOf "<p>")
 
-getPostTeaser :: Entity Post -> Text
+getPostTeaser :: Post -> Text
 getPostTeaser = Text.unlines . takeUntilFirstParagraphInc . Text.lines . getPostContent
 
-getPostSlug :: Entity Post -> Slug
-getPostSlug = postSlug . entityVal
+getPostSlug :: Post -> Slug
+getPostSlug = postSlug
 
 getBlogR :: Handler Html
 getBlogR = do
@@ -128,21 +128,21 @@ showPosts noPostsWidget postTagsMap = do
           <article .post.coordinates.coordinates--x>
             <div .post__sidebar.coordinates.coordinates--y>
               <div .post__date>
-                <div .post__date_day>#{getTimestamp "%d" post}
-                <div .post__date_mon_year>#{getTimestamp "%b %Y" post}
+                <div .post__date_day>#{getTimestamp "%d" (entityVal post)}
+                <div .post__date_mon_year>#{getTimestamp "%b %Y" (entityVal post)}
               <div .post__tags.coordinates.coordinates--y>
                 $forall tag <- (tagsForPost post)
                   <div .post__tag.badge>#{(tagName . entityVal) tag}
             <div .post__body.coordinates.coordinates--y>
               <div .post__header.coordinates.coordinates--x>
                 <div .post__title>
-                  <a href="@{BlogPostSlugR (getPostSlug post)}">#{getPostTitle post}
+                  <a href="@{BlogPostSlugR (getPostSlug (entityVal post))}">#{getPostTitle (entityVal post)}
                 $if isAdmin
                   <div .post__actions>
                     <a href="@{EditPostR (entityKey post)}">
                       <i .fa.fa-edit>
               <div .post__content>
-                #{preEscapedToMarkup (getPostTeaser post)}
+                #{preEscapedToMarkup (getPostTeaser (entityVal post))}
     |]
 
 getBlogPostSlugR :: Slug -> Handler Html
@@ -151,26 +151,13 @@ getBlogPostSlugR slug = do
   case mPost of
     Just post' ->
       if (not . postPublished . entityVal) post'
-        then Session.requireAdminUser >>= const (render post')
-        else render post'
+        then Session.requireAdminUser >>= const ((render . entityVal) post')
+        else (render.entityVal) post'
     Nothing -> notFound
   where
     render post' = defaultLayout $ do
       setTitle "Structured Rants"
-      toWidget [lucius|
-        .blog-post .blog-post__header {
-          border-bottom: 1px solid #{Theme.sidebarColor Theme.colorScheme};
-          margin-bottom: 5vh;
-        }
-      |]
-      [whamlet|
-        <article .blog-post>
-          <section .blog-post__header>
-            <h1>#{getPostTitle post'}
-            <div .blog-post__time .text-muted>#{getTimestamp "%d %B %Y" post'}
-          <section .blog-post__body>
-            #{preEscapedToMarkup (getPostContent post')}
-      |]
+      postWidget post'
 
 noDraftsWidget :: Widget
 noDraftsWidget = [whamlet|
@@ -183,3 +170,32 @@ comingSoonWidget = [whamlet|
   <div .row>
     <div .col-md-12>Coming soon!
 |]
+
+postWidget :: Post -> Widget
+postWidget post' = do
+  toWidget [lucius|
+    .blog-post .blog-post__header {
+      border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
+      margin-bottom: 3vh;
+      padding-bottom: 5px;
+    }
+
+    .blog-post .blog-post__body h1,
+    .blog-post .blog-post__body h2,
+    .blog-post .blog-post__body h3,
+    .blog-post .blog-post__body h4,
+    .blog-post .blog-post__body h5,
+    .blog-post .blog-post__body h6 {
+      font-weight: bold;
+      border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
+      padding-bottom: 5px;
+    }
+  |]
+  [whamlet|
+    <article .blog-post>
+      <section .blog-post__header>
+        <h1>#{getPostTitle post'}
+        <div .blog-post__time .text-muted>#{getTimestamp "%d %B %Y" post'}
+      <section .blog-post__body>
+        #{preEscapedToMarkup (getPostContent post')}
+  |]
