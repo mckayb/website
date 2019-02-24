@@ -1,8 +1,5 @@
 # Structured Rants
 
-## Status
-[![Build Status](https://travis-ci.org/mckayb/website.svg?branch=master)](https://travis-ci.org/mckayb/website)
-
 ## Running Kubernetes Cluster Locally
 Install the following:
   * [Docker](https://www.docker.com/get-started)
