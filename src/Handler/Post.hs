@@ -9,9 +9,8 @@ import Helpers.Slug (Slug, slugField)
 import Helpers.Markdown (Markdown, markdownField)
 import qualified Helpers.Forms as Forms
 import qualified Helpers.Session as Session
-import qualified Helpers.Theme as Theme
 import qualified Helpers.Database as Database
-import qualified Helpers.Markdown as Markdown
+import qualified Handler.Blog as Blog
 
 getTagOpts :: Handler [(Text, Key Tag)]
 getTagOpts = fmap (\tag -> ((tagName . entityVal) tag, entityKey tag)) <$> Database.getTags
@@ -30,8 +29,9 @@ postCreatePostR = do
   ((result, formWidget), _) <- runFormPost $ postForm Nothing opts
   action <- lookupPostParam "action"
   case (result, action) of
-    (FormSuccess (title, markdown, _, _), Just "Preview") ->
-      renderPost (createForm formWidget) (Just $ previewWidget title markdown) []
+    (FormSuccess (title, markdown, slug, _), Just "Preview") -> do
+      time <- liftIO getCurrentTime
+      renderPost (createForm formWidget) (Just $ Blog.postWidget $ Post title markdown slug time (entityKey user) False) []
 
     (FormSuccess (title, markdown, slug, tagIds), Just "Save as Draft") -> do
       time <- liftIO getCurrentTime
@@ -88,13 +88,13 @@ postForm pwt opts =
       , fsAttrs = [("class", "form-control"), ("placeholder", "Tags")]
       }
 
-previewWidget :: Text -> Markdown -> Widget
-previewWidget title markdown =
-  let res = Markdown.parseMarkdown markdown
-   in [whamlet|
-        <h1>#{title}
-        #{preEscapedToMarkup res}
-      |]
+-- previewWidget :: Text -> Markdown -> Widget
+-- previewWidget title markdown =
+  -- let res = Markdown.parseMarkdown markdown
+   -- in [whamlet|
+        -- <h1>#{title}
+        -- #{preEscapedToMarkup res}
+      -- |]
 
 renderPost :: Widget -> Maybe Widget -> [FormReaction] -> Handler Html
 renderPost form mPrev reactions =
@@ -102,10 +102,8 @@ renderPost form mPrev reactions =
     setTitle "Structured Rants - New Post"
     Forms.renderPanel "Create Post" $ do
       toWidget [lucius|
-        section.post .post__preview {
-          border-bottom: 1px solid #{Theme.borderColor Theme.colorScheme};
+        .post .post__preview {
           padding: 2rem;
-          border-radius: 5px;
         }
       |]
       [whamlet|
@@ -116,7 +114,7 @@ renderPost form mPrev reactions =
             <br>
 
           $maybe prev <- mPrev
-            <div .post__preview>
+            <div .post__preview >
               ^{prev}
             <br>
 
@@ -166,8 +164,9 @@ postEditPostR postId = do
       ((result, formWidget), _) <- runFormPost $ postForm postWithTags opts
       action <- lookupPostParam "action"
       case (result, action) of
-        (FormSuccess (title, markdown, _, _), Just "Preview") ->
-          renderPost (editForm postId formWidget) (Just $ previewWidget title markdown) []
+        (FormSuccess (title, markdown, slug, _), Just "Preview") -> do
+          time <- liftIO getCurrentTime
+          renderPost (editForm postId formWidget) (Just $ Blog.postWidget $ Post title markdown slug time (entityKey user) False) []
 
         (FormSuccess (title, markdown, slug, tagIds), Just "Save as Draft") -> do
           time <- liftIO getCurrentTime
