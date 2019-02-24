@@ -18,7 +18,7 @@ jobs:
       - run: stack setup
       - run: stack build hlint
       - run: stack exec -- hlint src/ test/
-      - run: stack build mmark
+      - run: stack build mmark --fast -j1
       - run:
           name: Test and Install
           command: stack build --test --copy-bins --fast
