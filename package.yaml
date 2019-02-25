@@ -18,26 +18,26 @@ dependencies:
 - yesod-static >=1.6 && <1.7
 - yesod-form >=1.6 && <1.7
 - yesod-newsfeed >=1.6 && <1.7
-- classy-prelude >=1.4 && <1.5
-- classy-prelude-conduit >=1.4 && <1.5
-- classy-prelude-yesod >=1.4 && <1.5
+- classy-prelude
+- classy-prelude-conduit
+- classy-prelude-yesod
 - bytestring >=0.9 && <0.11
 - text >=0.11 && <2.0
-- persistent >=2.8 && <2.9
-- persistent-postgresql >=2.8 && <2.9
+- persistent
+- persistent-postgresql
 - persistent-template >=2.5 && <2.9
 - template-haskell
 - shakespeare >=2.0 && <2.1
 - hjsmin >=0.1 && <0.3
 - monad-control >=0.3 && <1.1
 - wai-extra >=3.0 && <3.1
-- yaml >=0.8 && <0.9
+- yaml
 - http-client-tls >=0.3 && <0.4
 - http-conduit >=2.3 && <2.4
 - directory >=1.1 && <1.4
 - warp >=3.0 && <3.3
 - data-default
-- aeson >=0.6 && <1.4
+- aeson
 - conduit >=1.0 && <2.0
 - monad-logger >=0.3 && <0.4
 - fast-logger >=2.2 && <2.5
@@ -54,10 +54,11 @@ dependencies:
 - bcrypt
 - string-conversions
 - email-validate
-- esqueleto >= 2.5 && < 2.7
+- esqueleto
 - mmark
 - mmark-ext
 - lucid
+- megaparsec
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.

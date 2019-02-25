@@ -15,7 +15,7 @@ spec = withApp $ do
 
     it "Should let you visit the page if you are an admin" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -27,7 +27,7 @@ spec = withApp $ do
 
     it "Should fail if there's no csrf token" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -42,7 +42,7 @@ spec = withApp $ do
 
     it "Should fail if the params aren't set properly" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -60,7 +60,7 @@ spec = withApp $ do
 
     it "Should let you create a new role" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -80,7 +80,7 @@ spec = withApp $ do
 
     it "Shouldn't let you create a duplicate role" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 

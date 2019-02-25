@@ -16,7 +16,7 @@ spec = withApp $ do
 
     it "Should let you go to the page if you are logged in" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -27,7 +27,7 @@ spec = withApp $ do
 
     it "Shouldn't let you preview a post if you don't have all the required fields set" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -46,7 +46,7 @@ spec = withApp $ do
 
     it "Shouldn't let you save a post as a draft if you don't have the required fields set" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -65,7 +65,7 @@ spec = withApp $ do
 
     it "Shouldn't let you publish a post if you don't have the required fields set" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -84,7 +84,7 @@ spec = withApp $ do
 
     it "Should throw errors if you try to preview the post with invalid markdown" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
       tag <- createTag "Foo"
@@ -107,7 +107,7 @@ spec = withApp $ do
 
     it "Should let you preview the post you're about to publish" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
       tag <- createTag "Foo"
@@ -140,7 +140,7 @@ spec = withApp $ do
 
     it "Should let you publish the post successfully" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
       tag <- createTag "foo"
@@ -170,8 +170,8 @@ spec = withApp $ do
       postTagsAfter <- runDB $ selectList ([] :: [Filter PostTag]) []
       assertEq "added a new post" 1 $ length postsAfter
       assertEq "added a new post tag" 1 $ length postTagsAfter
-      let Just post' = listToMaybe postsAfter
-      let Just postTag' = listToMaybe postTagsAfter
+      let post' = just $ listToMaybe postsAfter
+      let postTag' = just $ listToMaybe postTagsAfter
 
       assertEq "Post title" ((postTitle . entityVal) post') "This is the title"
       assertEq "Post content" ((Markdown.unMarkdown . postContent . entityVal) post') "## This is the content"
@@ -185,7 +185,7 @@ spec = withApp $ do
 
     it "Should let you save the post as a draft successfully" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
       tag <- createTag "foo"
@@ -215,8 +215,8 @@ spec = withApp $ do
       postTagsAfter <- runDB $ selectList ([] :: [Filter PostTag]) []
       assertEq "added a new post" 1 $ length postsAfter
       assertEq "added a new post tag" 1 $ length postTagsAfter
-      let Just post' = listToMaybe postsAfter
-      let Just postTag' = listToMaybe postTagsAfter
+      let post' = just $ listToMaybe postsAfter
+      let postTag' = just $ listToMaybe postTagsAfter
 
       assertEq "Post title" ((postTitle . entityVal) post') "This is the title"
       assertEq "Post content" ((Markdown.unMarkdown . postContent . entityVal) post') "## This is the content"
@@ -231,7 +231,7 @@ spec = withApp $ do
   describe "EditPostR" $ do
     it "Should not let you go to the page without a user that is currently logged in" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       tag <- createTag "foo"
@@ -246,7 +246,7 @@ spec = withApp $ do
 
     it "Should let you go to the page if you are logged in" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPassword user "mypassword"
@@ -261,7 +261,7 @@ spec = withApp $ do
 
     it "Shouldn't let you preview the post if you don't have all the required fields set" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       tag <- createTag "foo"
@@ -286,7 +286,7 @@ spec = withApp $ do
 
     it "Shouldn't let you save a post as a draft if you don't have the required fields set" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       time <- liftIO getCurrentTime
       tag <- createTag "foo"
@@ -311,7 +311,7 @@ spec = withApp $ do
 
     it "Shouldn't let you publish a post if you don't have the required fields set" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       tag <- createTag "foo"
       _ <- createPassword user "mypassword"
@@ -336,7 +336,7 @@ spec = withApp $ do
 
     it "Should throw errors if you try to preview the post with invalid markdown" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
       tag <- createTag "Foo"
@@ -363,7 +363,7 @@ spec = withApp $ do
 
     it "Should let you preview the post you're about to publish" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
       tag <- createTag "foo"
@@ -400,7 +400,7 @@ spec = withApp $ do
 
     it "Should let you publish the post successfully" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
       tag <- createTag "foo"
@@ -434,8 +434,8 @@ spec = withApp $ do
       postTagsAfter <- runDB $ selectList ([] :: [Filter PostTag]) []
       assertEq "kept the same post" 1 $ length postsAfter
       assertEq "kept the same post tag" 1 $ length postTagsAfter
-      let Just postAfter' = listToMaybe postsAfter
-      let Just postTag' = listToMaybe postTagsAfter
+      let postAfter' = just $ listToMaybe postsAfter
+      let postTag' = just $ listToMaybe postTagsAfter
 
       assertEq "Post ids equal before and after" (entityKey post') (entityKey postAfter')
       assertEq "Post title" ((postTitle . entityVal) post') "The Post"
@@ -455,7 +455,7 @@ spec = withApp $ do
 
     it "Should let you save the post as a draft successfully" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
       tag <- createTag "foo"
@@ -489,8 +489,8 @@ spec = withApp $ do
       postTagsAfter <- runDB $ selectList ([] :: [Filter PostTag]) []
       assertEq "kept the same post" 1 $ length postsAfter
       assertEq "kept the same post tag" 1 $ length postTagsAfter
-      let Just postAfter' = listToMaybe postsAfter
-      let Just postTag' = listToMaybe postTagsAfter
+      let postAfter' = just $ listToMaybe postsAfter
+      let postTag' = just $ listToMaybe postTagsAfter
 
       assertEq "Post ids equal before and after" (entityKey post') (entityKey postAfter')
       assertEq "Post title" ((postTitle . entityVal) post') "The Post"
@@ -510,7 +510,7 @@ spec = withApp $ do
 
     it "Should let you delete a post successfully" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
       tag <- createTag "foo"
