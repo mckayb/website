@@ -114,9 +114,7 @@ createPostTag post' tag =
   runDB $ insertEntity $ PostTag (entityKey post') (entityKey tag)
 
 just :: Maybe a -> a
-just m = case m of
-  Just a -> a
-  Nothing -> error "Foo"
+just = fromMaybe (error "Was a Nothing!")
 
 authGet :: ( Yesod site
            , RedirectUrl site url
