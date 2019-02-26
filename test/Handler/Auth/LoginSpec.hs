@@ -72,7 +72,7 @@ spec = withApp $ do
 
     it "Should not let you log in if a password doesn't exist for the user" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . mkEmail . pack <$> Faker.email
       _ <- createUser role em
 
       get LoginR
@@ -91,7 +91,7 @@ spec = withApp $ do
 
     it "Should not let you log in if you have the wrong password" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -111,7 +111,7 @@ spec = withApp $ do
 
     it "Should let you log in successfully" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 

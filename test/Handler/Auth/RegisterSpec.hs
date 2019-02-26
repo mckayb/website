@@ -71,7 +71,7 @@ spec = withApp $ do
       bodyContains "Form failed validation"
 
     it "Should register successfully with valid information" $ do
-      Just em <- liftIO $ mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . mkEmail . pack <$> Faker.email
       _ <- createRole "Admin"
       role2 <- createRole "Commoner"
 
@@ -96,14 +96,14 @@ spec = withApp $ do
 
       usersAfter <- runDB $ selectList ([] :: [Filter User]) []
       assertEq "added a new user" 1 $ length usersAfter
-      let Just user = listToMaybe usersAfter
+      let user = just $ listToMaybe usersAfter
       let entityUserEmail = (userEmail . entityVal) user
       let entityUserRole = (userRoleId . entityVal) user
       assertEq "email matches" entityUserEmail em
       assertEq "role matches" entityUserRole (entityKey role2)
       passwordsAfter <- runDB $ selectList ([] :: [Filter Password]) []
       assertEq "added a new password" 1 $ length passwordsAfter
-      let Just pass = listToMaybe passwordsAfter
+      let pass = just $ listToMaybe passwordsAfter
       let entityPasswordHash = (passwordHash . entityVal) pass
       let entityPasswordUser = (passwordUserId . entityVal) pass
       assertEq "password user matches" entityPasswordUser (entityKey user)
@@ -111,7 +111,7 @@ spec = withApp $ do
 
     it "Shouldn't let you register with a duplicate email" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "my_password"
 

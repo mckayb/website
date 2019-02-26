@@ -18,7 +18,7 @@ spec = withApp $ do
 
     it "Works if there is a single post" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       let Right slug = Slug.mkSlug "the-test"
       let Right markdown = Markdown.mkMarkdown "## Test"
@@ -40,7 +40,7 @@ spec = withApp $ do
 
     it "Works if there are multiple posts" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       let Right slug1 = Slug.mkSlug "first-i-was-afraid"
@@ -63,7 +63,7 @@ spec = withApp $ do
 
     it "Only grabs the first paragraph from the post content" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       let Right slug = Slug.mkSlug "first-second-third"
@@ -78,7 +78,7 @@ spec = withApp $ do
 
     it "Won't render a draft" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       let Right slug = Slug.mkSlug "first-second-third"
@@ -92,7 +92,7 @@ spec = withApp $ do
   describe "BlogPostSlugR" $ do
     it "Renders the post correctly if the post exists" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       let Right slug = Slug.mkSlug "first-second-third"
@@ -112,7 +112,7 @@ spec = withApp $ do
 
     it "Won't let you visit a draft post if you aren't logged in" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPassword user "mypassword"
@@ -127,7 +127,7 @@ spec = withApp $ do
 
     it "Won't let you visit a draft post if you aren't an admin" $ do
       role <- createRole "Foo"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPassword user "mypassword"
@@ -147,7 +147,7 @@ spec = withApp $ do
 
     it "Renders no drafts" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
@@ -157,7 +157,7 @@ spec = withApp $ do
 
     it "Renders a single draft" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPassword user "mypassword"
@@ -172,7 +172,7 @@ spec = withApp $ do
 
     it "Renders multiple drafts" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPassword user "mypassword"
@@ -193,7 +193,7 @@ spec = withApp $ do
 
     it "Lets you edit those drafts" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       user <- createUser role em
       _ <- createPassword user "mypassword"

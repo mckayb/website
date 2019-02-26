@@ -18,7 +18,7 @@ spec = withApp $ do
 
     it "Shows a single published post" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       let Right slug = Slug.mkSlug "the-test"
       let Right markdown = Markdown.mkMarkdown "## Test"
@@ -35,7 +35,7 @@ spec = withApp $ do
 
     it "Does not show a draft post" $ do
       role <- createRole "Admin"
-      Just em <- liftIO $ Email.mkEmail . pack <$> Faker.email
+      em <- liftIO $ just . Email.mkEmail . pack <$> Faker.email
       time <- liftIO getCurrentTime
       let Right slug = Slug.mkSlug "the-test"
       let Right markdown = Markdown.mkMarkdown "## Test"

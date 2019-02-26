@@ -113,6 +113,9 @@ createPostTag :: Entity Post -> Entity Tag -> YesodExample App (Entity PostTag)
 createPostTag post' tag =
   runDB $ insertEntity $ PostTag (entityKey post') (entityKey tag)
 
+just :: Maybe a -> a
+just = fromMaybe (error "Was a Nothing!")
+
 authGet :: ( Yesod site
            , RedirectUrl site url
            , RedirectUrl site (Route App)

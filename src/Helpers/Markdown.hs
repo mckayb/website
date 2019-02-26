@@ -18,6 +18,7 @@ import qualified Yesod.Form as Form
 import qualified Yesod.Form.Functions as FormFunctions
 import qualified Data.Text.Lazy as LazyText
 import qualified Lucid.Base as Lucid
+import qualified Text.Megaparsec as Megaparsec
 
 
 newtype Markdown =
@@ -29,12 +30,12 @@ instance ToJSON Markdown
 
 mkMarkdown :: Textarea -> Either Text Markdown
 mkMarkdown (Textarea str) = case MMark.parse "" str of
-  Left errs -> (Left . Text.pack) $ MMark.parseErrorsPretty str errs
+  Left errs -> (Left . Text.pack) $ Megaparsec.errorBundlePretty errs
   Right _ -> (Right . Markdown) str
 
 parseMarkdown :: Markdown -> Text
 parseMarkdown content = case MMark.parse "" content' of
-  Left errs -> Text.pack (MMark.parseErrorsPretty content' errs)
+  Left errs -> Text.pack (Megaparsec.errorBundlePretty errs)
   Right parsed -> render parsed
   where
     render = LazyText.toStrict . Lucid.renderText . MMark.render . MMark.useExtensions [Ext.ghcSyntaxHighlighter, Ext.skylighting]
