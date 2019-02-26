@@ -7,7 +7,7 @@ jobs:
         environment:
           POSTGRES_USER: homestead
           POSTGRES_PASSWORD: secret
-          POSTGRES_DB: website
+          POSTGRES_DB: website_test
     working_directory: ~/circleci
     steps:
       - checkout
