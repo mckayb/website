@@ -23,36 +23,11 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: YESOD_PGHOST
-              value: "{{ .Release.Name }}-postgresql"
-            - name: YESOD_PGPORT
-              value: {{ .Values.postgresql.service.port | quote }}
-            - name: YESOD_PGUSER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "website.fullname" . }}
-                  key: postgres-username
-            - name: YESOD_PGPASS
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "website.fullname" . }}
-                  key: postgres-password
-            - name: YESOD_PGDATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "website.fullname" . }}
-                  key: postgres-database
-            - name: ADMIN_EMAIL
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "website.fullname" . }}
-                  key: admin-email
-            - name: ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "website.fullname" . }}
-                  key: admin-password
+          envFrom:
+            - configMapRef:
+                name: {{ include "website.fullname" . }}
+            - secretRef:
+                name: {{ include "website.fullname" . }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
