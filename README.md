@@ -1,36 +1,28 @@
 # Structured Rants
 
-## Status
 [![CircleCI](https://circleci.com/gh/mckayb/website.svg?style=svg)](https://circleci.com/gh/mckayb/website)
 
 ## Running Kubernetes Cluster Locally
 Install the following:
-  * [Docker](https://www.docker.com/get-started)
-  * [Virtual Box](https://www.virtualbox.org/)
-  * [Minikube](https://github.com/kubernetes/minikube)
+  * [Docker](https://docs.docker.com/docker-for-mac/install/)
   * [Helm](https://www.helm.sh/)
   * [Haskell Stack](https://docs.haskellstack.org/en/stable/README/)
 
-Once you have those installed, start up minikube.
+Once you've [enabled kubernetes](https://docs.docker.com/docker-for-mac/#kubernetes), initialize helm by running
 ```
-minikube start --disk-size=40g
+helm init
 ```
+Follow the steps defined [here](https://kubernetes.github.io/ingress-nginx/deploy/) to install the ingress controller. (Mandatory steps, as well as the helm steps will work fine.)
 
-Set your docker environment to the one inside minikube.
+Next, pull the base image that you'll use to build the repo with the following:
 ```
-eval $(minikube docker-env)
+docker pull fpco/stack-build:lts-13.9
 ```
-
-Pull the image used to build the image with the following command.
-The tag `lts-12.16` should match the resolver in the `stack.yaml`, so adjust accordingly.
-```
-docker pull fpco/stack-build:lts-12.16
-```
-Be aware, this will take a while... go get a coffee or something.
+The tag `lts-13.9` should match the resolver in the `stack.yaml`, so adjust accordingly. Be aware, this will take a while... go get a coffee or something.
 
 Build the application image with:
 ```
-stack --docker build --copy-bins
+stack --docker clean && stack --docker install
 docker build -t website:v1 .
 ```
 
@@ -50,9 +42,9 @@ credentials you see fit. Specifically the following:
 If you changed the name of the image when you built it, replace that too under `image.repository` and `image.tag`.
 
 Add the following line into your `/etc/hosts` file.
-Replace the ip with the result of running `minikube ip`. Replace the url with whatever you used for the `ingress.hosts` value.
+Replace the url with whatever you used for the `ingress.hosts` value.
 ```
-192.168.99.100 chart-example.local
+127.0.0.1 structuredrants.local
 ```
 
 Build the helm dependencies with:
@@ -65,9 +57,14 @@ Run the application with:
 helm install charts/website
 ```
 
-Then, use the application by visiting the domain you used in the `ingress.hosts` value in your browser.
+Feel free to check the status of the deployment with
 ```
-http://chart-example.local
+kubectl get pods -w
+```
+
+Once all the pods are in a ready state, use the application by visiting the domain you used in the `ingress.hosts` value in your browser.
+```
+http://structuredrants.local
 ```
 
 ## Running Tests
