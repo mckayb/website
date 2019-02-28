@@ -22,9 +22,11 @@ The tag `lts-13.9` should match the resolver in the `stack.yaml`, so adjust acco
 
 Build the application image with:
 ```
-stack --docker clean && stack --docker install
+stack --docker setup
+stack --docker install
 docker build -t website:v1 .
 ```
+The first time running the install will also take a while.
 
 Edit the helm values file with:
 ```
