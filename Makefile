@@ -1,7 +1,7 @@
 deploy:
 	stack --docker clean && stack --docker build --copy-bins && heroku container:push web && heroku container:release web
 
-minikube-build:
+kubernetes-build:
 	stack --docker clean && stack --docker build --copy-bins && docker build -t website:v1 .
 
 local-run:

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "website.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "website.name" . }}
+    helm.sh/chart: {{ include "website.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  YESOD_PGHOST: "{{ .Release.Name }}-postgresql"
+  YESOD_PGPORT: {{ .Values.postgresql.service.port | quote }}
