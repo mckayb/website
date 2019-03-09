@@ -71,7 +71,7 @@ postForm pwt opts =
       , fsId = Nothing
       , fsTooltip = Nothing
       , fsName = Nothing
-      , fsAttrs = [("class", "form-control"), ("placeholder", "Content")]
+      , fsAttrs = [("class", "form-control"), ("placeholder", "Content"), ("rows", "20")]
       }
     slugSettings = FieldSettings
       { fsLabel = "Slug"
@@ -87,14 +87,6 @@ postForm pwt opts =
       , fsName = Nothing
       , fsAttrs = [("class", "form-control"), ("placeholder", "Tags")]
       }
-
--- previewWidget :: Text -> Markdown -> Widget
--- previewWidget title markdown =
-  -- let res = Markdown.parseMarkdown markdown
-   -- in [whamlet|
-        -- <h1>#{title}
-        -- #{preEscapedToMarkup res}
-      -- |]
 
 renderPost :: Widget -> Maybe Widget -> [FormReaction] -> Handler Html
 renderPost form mPrev reactions =
@@ -145,7 +137,6 @@ getEditPostR :: Key Post -> Handler Html
 getEditPostR postId = do
   _ <- Session.requireAdminUser
   postWithTags <- Database.getPostWithTags postId
-
   case postWithTags of
     Just _ -> do
       opts <- getTagOpts
@@ -157,7 +148,6 @@ postEditPostR :: Key Post -> Handler Html
 postEditPostR postId = do
   user <- Session.requireAdminUser
   postWithTags <- Database.getPostWithTags postId
-
   case postWithTags of
     Just _ -> do
       opts <- getTagOpts
@@ -189,5 +179,4 @@ postEditPostR postId = do
           redirect BlogR
 
         _ -> renderPost (editForm postId formWidget) Nothing [(Danger, "Form failed validation")]
-
     Nothing -> notFound

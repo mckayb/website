@@ -19,7 +19,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToRole em "mypassword"
+      authGet em "mypassword" RoleR
 
       htmlCount ".alert.alert-danger" 0
       htmlCount "input[placeholder=Role Name]" 1
@@ -31,7 +31,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToRole em "mypassword"
+      authGet em "mypassword" RoleR
 
       request $ do
         setMethod "POST"
@@ -46,7 +46,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToRole em "mypassword"
+      authGet em "mypassword" RoleR
 
       request $ do
         addToken
@@ -64,7 +64,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToRole em "mypassword"
+      authGet em "mypassword" RoleR
 
       rolesBefore <- runDB $ selectList ([] :: [Filter Role]) []
       assertEq "only 1 role before" 1 $ length rolesBefore
@@ -84,7 +84,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToRole em "mypassword"
+      authGet em "mypassword" RoleR
 
       rolesBefore <- runDB $ selectList ([] :: [Filter Role]) []
       assertEq "only 1 role before" 1 $ length rolesBefore
@@ -101,21 +101,3 @@ spec = withApp $ do
 
       rolesAfter <- runDB $ selectList ([] :: [Filter Role]) []
       assertEq "only 1 role after" 1 $ length rolesAfter
-
-  where
-    goToRole em pass = do
-      get LoginR
-      statusIs 200
-
-      request $ do
-        addToken
-        byLabelExact "Email" $ Email.unEmail em
-        byLabelExact "Password" pass
-        setMethod "POST"
-        setUrl LoginR
-
-      statusIs 303
-      _ <- followRedirect
-      statusIs 200
-      get RoleR
-      statusIs 200
