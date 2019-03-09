@@ -13,6 +13,7 @@
 /post/#PostId        EditPostR     GET POST
 /draft               BlogDraftsR   GET
 /blog/#Slug          BlogPostSlugR GET
+/image               ImageR        GET POST
 
 /login               LoginR        GET POST
 /register            RegisterR     GET POST
@@ -21,5 +22,5 @@
 /tag                 TagR          GET POST
 
 -- Status Checks
-/health/liveness  LivenessR  GET
-/health/readiness ReadinessR GET
+/health/liveness     LivenessR     GET
+/health/readiness    ReadinessR    GET

@@ -19,7 +19,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToTag em "mypassword"
+      authGet em "mypassword" TagR
 
       htmlCount ".alert.alert-danger" 0
       htmlCount "input[placeholder=Tag Name]" 1
@@ -31,7 +31,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToTag em "mypassword"
+      authGet em "mypassword" TagR
 
       request $ do
         setMethod "POST"
@@ -46,7 +46,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToTag em "mypassword"
+      authGet em "mypassword" TagR
 
       request $ do
         addToken
@@ -64,7 +64,7 @@ spec = withApp $ do
       user <- createUser role em
       _ <- createPassword user "mypassword"
 
-      goToTag em "mypassword"
+      authGet em "mypassword" TagR
 
       tagsBefore <- runDB $ selectList ([] :: [Filter Tag]) []
       assertEq "no tags before" 0 $ length tagsBefore
@@ -85,7 +85,7 @@ spec = withApp $ do
       _ <- createPassword user "mypassword"
       _ <- createTag "Math"
 
-      goToTag em "mypassword"
+      authGet em "mypassword" TagR
 
       tagsBefore <- runDB $ selectList ([] :: [Filter Tag]) []
       assertEq "only 1 tag before" 1 $ length tagsBefore
@@ -102,21 +102,3 @@ spec = withApp $ do
 
       tagsAfter <- runDB $ selectList ([] :: [Filter Tag]) []
       assertEq "only 1 tag after" 1 $ length tagsAfter
-
-  where
-    goToTag em pass = do
-      get LoginR
-      statusIs 200
-
-      request $ do
-        addToken
-        byLabelExact "Email" $ Email.unEmail em
-        byLabelExact "Password" pass
-        setMethod "POST"
-        setUrl LoginR
-
-      statusIs 303
-      _ <- followRedirect
-      statusIs 200
-      get TagR
-      statusIs 200
