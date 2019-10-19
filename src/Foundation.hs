@@ -100,6 +100,7 @@ instance Yesod App where
       -- Media queries don't seem to work in lucius
       -- So I had to put them in here instead
       addStylesheet $ StaticR css_app_css
+      addScript $ StaticR js_jquery_min_js
 
       toWidget [julius|
         $("#sidebar-toggle").on("click", function() {
