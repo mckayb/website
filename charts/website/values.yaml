@@ -4,10 +4,8 @@
 
 replicaCount: 1
 
-image:
-  repository: website
-  tag: v1
-  pullPolicy: IfNotPresent
+image: website:v1
+imagePullPolicy: IfNotPresent
 
 nameOverride: ""
 fullnameOverride: ""
@@ -19,8 +17,8 @@ service:
 ingress:
   enabled: true
   annotations: {}
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    # kubernetes.io/ingress.class: "nginx"
+    # nginx.ingress.kubernetes.io/rewrite-target: /
   path: /
   hosts:
     - chart-example.local
