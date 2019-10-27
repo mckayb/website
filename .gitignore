@@ -22,5 +22,5 @@ cabal.sandbox.config
 website.cabal
 
 charts/website/charts/*
-charts/website/values.yaml
+values.yaml
 .env

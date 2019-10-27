@@ -1,0 +1,33 @@
+apiVersion: skaffold/v1beta16
+kind: Config
+build:
+  artifacts:
+    - image: website
+      custom:
+        buildCommand: ./build.sh
+        dependencies:
+          paths:
+            - src
+            - templates
+            - static
+            - config
+            - app
+          ignore:
+            - README*
+            - .gitignore
+            - .ghcid
+            - .stack-work*
+            - yesod-devel
+            - .circleci
+  local:
+    push: false
+deploy:
+  helm:
+    releases:
+    - name: skaffold-website
+      chartPath: ./charts/website
+      values:
+        image: website
+      valuesFiles:
+        - ./values.yaml
+

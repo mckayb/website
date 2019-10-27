@@ -1,1 +1,6 @@
 .git
+yesod-devel
+app
+charts
+.stack-work
+.stack-work-devel
